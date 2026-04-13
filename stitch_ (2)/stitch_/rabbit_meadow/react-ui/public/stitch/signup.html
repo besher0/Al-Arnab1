@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;family=Almarai:wght@300;400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#87CEEB",
+                    "primary-dim": "#5ebae0",
+                    "on-primary": "#FFFFFF",
+                    "background": "#FFFFFF",
+                    "on-background": "#1A365D",
+                    "surface": "#F0F8FF",
+                    "on-surface": "#1A365D",
+                    "surface-container-lowest": "#FFFFFF",
+                    "surface-container-low": "#F0F8FF",
+                    "surface-container-highest": "#E0F2F7",
+                    "on-surface-variant": "#718096",
+                    "outline": "#87CEEB",
+                    "secondary": "#4A90E2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Tajawal", "sans-serif"],
+                    "body": ["Almarai", "sans-serif"],
+                    "label": ["Almarai", "sans-serif"]
+            }
+          },
+        },
+      }</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .organic-shape {
+            border-radius: 3rem 1rem 3rem 1rem;
+        }
+        .bounce-subtle:active {
+            transform: scale(0.97);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body text-on-background min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Transactional Screen: Navigation Shell Suppressed as per the "Destination Rule" -->
+<main class="relative min-h-screen flex flex-col items-center justify-center px-6 py-12 overflow-hidden">
+<!-- Decorative Background Elements (Organic Grove) -->
+<div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-5%] right-[-5%] w-80 h-80 bg-secondary/10 rounded-full blur-3xl"></div>
+<!-- Logo & Header Section -->
+<div class="relative z-10 w-full max-w-md text-center mb-10">
+<div class="inline-flex items-center justify-center p-4 bg-surface-container-highest rounded-xl mb-6"><span class="material-symbols-outlined text-primary text-5xl" data-icon="cruelty_free">cruelty_free</span></div>
+<h1 class="font-headline font-black text-4xl text-on-background tracking-tight mb-2 text-[#1A365D]">انضم إلى الأرنب</h1>
+<p class="text-on-surface-variant font-medium">تسوق أذكى، عش بصحة أفضل</p>
+</div>
+<!-- Form Card -->
+<div class="relative z-10 w-full max-w-md bg-surface-container-lowest/80 backdrop-blur-xl organic-shape p-8 shadow-sm">
+<h2 class="font-headline font-bold text-2xl text-on-surface mb-8 text-right text-[#1A365D]">إنشاء حساب مستخدم</h2>
+<form class="space-y-5">
+<!-- Full Name Field -->
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface-variant px-1">الاسم الكامل</label>
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="person">person</span>
+</div>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="أدخل اسمك بالكامل" type="text"/>
+</div>
+</div>
+<!-- Email Field -->
+<!-- Phone Field -->
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface-variant px-1">رقم الهاتف</label>
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="phone_iphone">phone_iphone</span>
+</div>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all text-left" dir="ltr" placeholder="05XXXXXXXX" type="tel"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface-variant px-1">كلمة المرور</label>
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+</div>
+<input class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
+<div class="absolute inset-y-0 left-4 flex items-center">
+<button class="text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Confirm Password Field -->
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface-variant px-1">تأكيد كلمة المرور</label>
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="verified_user">verified_user</span>
+</div>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-16 mt-6 bg-primary text-white font-headline font-bold text-lg rounded-full shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3" type="submit">
+                    إنشاء الحساب
+                    <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+</form>
+<!-- Secondary Action -->
+<div class="mt-8 text-center">
+<p class="text-on-surface-variant font-medium">
+                    لديك حساب بالفعل؟
+                    <a class="text-secondary font-bold hover:underline underline-offset-4 mr-2" href="#">تسجيل الدخول</a>
+</p>
+</div>
+</div>
+<!-- Visual Elements Footer -->
+<div class="relative z-10 mt-12 flex flex-col items-center gap-4 opacity-40">
+<div class="flex gap-4"><div class="w-2 h-2 rounded-full bg-primary"></div><div class="w-2 h-2 rounded-full bg-secondary"></div><div class="w-2 h-2 rounded-full bg-blue-200"></div></div>
+<p class="text-xs font-bold text-on-surface-variant">جميع المنتجات طازجة وعضوية 100%</p>
+</div>
+<!-- Decorative Floating Image (Asymmetric layout touch) -->
+<div class="absolute top-20 right-[-10%] md:right-20 pointer-events-none opacity-20 transform rotate-12">
+<img class="w-48 h-48 object-cover rounded-xl" data-alt="close-up of fresh organic carrots with green leaves on a bright white background with soft shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBluw7IjWrCc09gjZHrW256z4ghMW-gLHZkqs1kasuI7RQweGcWkZcZMR6a_N1i0-fymZaJdaTiFz1Sc4bVhfyICZ-_PS9hEZ5_XQup6enQ63XcYXjTcxCFJm6PbCoXnX7vwzNFYHylSFa1vdmSoD109yX2VEfyzxh6AyLbEsQPtOdOCoIDv_OACZefJ17ITTVn4j32h6KXnzktzhRBVm7pJEOpEUEpiwuDIP-2du2xIbNdVi8JLi3QIwMz4Xur3HZpAWBsIpz4cL5v"/>
+</div>
+<div class="absolute bottom-20 left-[-10%] md:left-20 pointer-events-none opacity-20 transform -rotate-12">
+<img class="w-40 h-40 object-cover rounded-full" data-alt="bowl of fresh green peas and spring vegetables in a bright sunlight garden setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIb3P4RCya1juNBTbyzL9IkhULBKFqmvxxARxTtKIhB6y99aejG9_hn_5j9HLdSiswiV5_N8BuwslSX5KkU9FnKR8qV9DkhT7mufsTiZB3YJY19MRQ6mCbzyAoafUI_M0O6_24U4fCAMflYucS9cGBN-W5dGdNniYoWKIyUxZ6KfD0fWBXxA1XWh49vb_lOJgjSxKx2eMM0LjMrkmoiBllW_4sx0MYu8XXunz1f5NJy21BXQGlWmfTVIb0hKOFeZunrOqHfX-KSqlf"/>
+</div>
+</main>
+<script>
+  (function () {
+    function send(type, payload) {
+      window.parent.postMessage(
+        Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+        window.location.origin,
+      );
+    }
+
+    var loginLink = Array.from(document.querySelectorAll('a')).find(function (a) {
+      return (a.textContent || '').indexOf('تسجيل الدخول') !== -1;
+    });
+    if (loginLink) {
+      loginLink.href = '/login';
+      loginLink.addEventListener('click', function (event) {
+        event.preventDefault();
+        send('navigate', { to: '/login' });
+      });
+    }
+
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var textInputs = form.querySelectorAll('input[type="text"], input:not([type])');
+      var nameInput = textInputs[0];
+      var phoneInput = form.querySelector('input[type="tel"]');
+
+      send('auth-register', {
+        name: (nameInput && nameInput.value) || 'مستخدم جديد',
+        phone: (phoneInput && phoneInput.value) || '05XXXXXXXX',
+      });
+    });
+  })();
+</script>
+</body></html>

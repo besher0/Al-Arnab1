@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;family=Almarai:wght@300;400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#802b0d",
+                    "on-secondary": "#ffefeb",
+                    "inverse-primary": "#9df197",
+                    "surface-container-highest": "#acecbb",
+                    "on-error": "#ffefec",
+                    "on-background": "#0b361d",
+                    "primary-container": "#87CEEB",
+                    "on-tertiary-fixed": "#3d2500",
+                    "primary-fixed": "#87CEEB",
+                    "outline": "#568061",
+                    "surface-container": "#bef5ca",
+                    "secondary-fixed": "#ffc4b3",
+                    "secondary-container": "#ffc4b3",
+                    "tertiary-fixed-dim": "#eea840",
+                    "on-tertiary-container": "#583700",
+                    "on-primary": "#ffffff",
+                    "on-primary-container": "#003366",
+                    "on-secondary-fixed-variant": "#8d3416",
+                    "surface": "#f0f8ff",
+                    "error": "#b02500",
+                    "inverse-surface": "#001206",
+                    "inverse-on-surface": "#7ba785",
+                    "on-surface": "#0b361d",
+                    "secondary": "#9b3e20",
+                    "surface-container-low": "#ffffff",
+                    "on-secondary-fixed": "#651900",
+                    "background": "#f0f8ff",
+                    "tertiary-dim": "#6f4700",
+                    "primary-dim": "#007bb8",
+                    "surface-variant": "#e0f0ff",
+                    "on-primary-fixed-variant": "#004c8c",
+                    "outline-variant": "#8bb795",
+                    "surface-dim": "#a0e4b1",
+                    "surface-tint": "#87CEEB",
+                    "error-dim": "#b92902",
+                    "secondary-dim": "#8b3315",
+                    "on-surface-variant": "#3b6447",
+                    "on-tertiary": "#fff0e2",
+                    "on-primary-fixed": "#002147",
+                    "primary": "#87CEEB",
+                    "surface-bright": "#f0f8ff",
+                    "secondary-fixed-dim": "#ffb199",
+                    "tertiary": "#7f5200",
+                    "primary-fixed-dim": "#b0e0f2",
+                    "surface-container-high": "#e8f4ff",
+                    "on-tertiary-fixed-variant": "#644000",
+                    "tertiary-container": "#feb64c",
+                    "tertiary-fixed": "#feb64c",
+                    "error-container": "#f95630",
+                    "on-error-container": "#520c00",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Tajawal", "sans-serif"],
+                    "body": ["Almarai", "sans-serif"],
+                    "label": ["Almarai", "sans-serif"]
+            }
+          },
+        },
+      }</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bounce-short { animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#ddffe2]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-3">
+<button class="text-[#176a21] hover:bg-[#bef5ca] transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-lg tracking-tight text-[#176a21]">Al-Arnab Orders</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-surface text-sm" data-icon="rabbit" data-weight="fill" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<button class="text-[#176a21] hover:bg-[#bef5ca] transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+</header>
+<main class="mt-20 px-4 max-w-2xl mx-auto">
+<!-- Search & Filter Area -->
+<div class="mb-8 relative">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-tertiary" data-icon="search">search</span>
+</div>
+<input class="w-full h-14 bg-surface-container-lowest rounded-full pr-12 pl-6 border-none shadow-sm focus:ring-2 focus:ring-primary text-on-surface" placeholder="ابحث في طلباتك..." type="text"/>
+</div>
+<!-- Section: Current Orders -->
+<section class="mb-10">
+<div class="flex items-center justify-between mb-6 px-2">
+<h2 class="font-headline text-2xl font-black text-on-background">الطلبات الحالية</h2>
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold">1 نشط</span>
+</div>
+<!-- Active Order Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+<!-- Asymmetric Leaf Shape Accent -->
+<div class="absolute -top-4 -left-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="w-16 h-16 rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up of fresh organic green vegetables including broccoli and spinach in a wooden crate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAym5CIMXyjYkcRDhKX-a4w4-Kal2v1sN6_x8QqynpoJC4XDTowOx7C_do4cmghlQLv2j3pnR5-LiybMdoaOPjBL_aPYimGsGvwZC9WZytouyev49FJicvnyGaF-ExdUI5P373z6RlQWcVw5wOkmWnmLXSk0-jcF_tft6QsEp2GJocBNuBuRtJuezKlbaV700ISogkXNDsSvOXRSHDmAEx82JeOV3rwghEW43DDSTVggpcXkFQmVZtKi9tJJctrnQJYeEIR7nauLS13"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight">سلة الخضروات العضوية</h3>
+<p class="text-on-surface-variant text-sm mt-1">رقم الطلب: #ARB-9942</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-primary font-black text-xl">85.00 ر.س</p>
+</div>
+</div>
+<!-- Live Status Tracking -->
+<div class="relative pt-4 pb-8">
+<!-- Progress Line Background -->
+<div class="absolute top-[26px] left-0 w-full h-1 bg-surface-container rounded-full"></div>
+<!-- Progress Line Active -->
+<div class="absolute top-[26px] right-0 w-[65%] h-1 bg-primary rounded-full"></div>
+<div class="relative flex justify-between">
+<div class="flex flex-col items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[10px] text-on-primary" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">تم الاستلام</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[10px] text-on-primary" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">تجهيز الطلب</span>
+</div>
+<div class="flex flex-col items-center gap-2 relative">
+<div class="absolute -top-12 animate-bounce">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="pedal_bike" data-weight="fill" style="font-variation-settings: 'FILL' 1;">pedal_bike</span>
+</div>
+<div class="w-5 h-5 rounded-full bg-primary ring-4 ring-surface-container-lowest"></div>
+<span class="text-[10px] font-bold text-primary">في الطريق</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-30">
+<div class="w-5 h-5 rounded-full bg-surface-container ring-4 ring-surface-container-lowest"></div>
+<span class="text-[10px] font-bold text-on-surface-variant">تم التوصيل</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Order History -->
+<section>
+<div class="flex items-center justify-between mb-6 px-2">
+<h2 class="font-headline text-2xl font-black text-on-background">الطلبات السابقة</h2>
+<button class="text-primary font-bold text-sm">عرض الكل</button>
+</div>
+<div class="space-y-4">
+<!-- Order History Item 1 -->
+<div class="bg-surface-container-low rounded-xl p-4 flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex gap-4">
+<div class="w-14 h-14 rounded-full bg-surface-container-lowest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-secondary" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">طلبية يوم الاثنين</h4>
+<p class="text-on-surface-variant text-xs mt-0.5">12 أكتوبر • 14 صنف</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-[10px] text-on-primary-fixed-variant font-bold">تم التوصيل بنجاح</span>
+</div>
+</div>
+</div>
+<div class="text-left">
+<p class="font-black text-on-background">245.50 ر.س</p>
+<button class="mt-1 text-primary text-[10px] font-bold bg-primary-container px-2 py-0.5 rounded-full">إعادة طلب</button>
+</div>
+</div>
+<!-- Order History Item 2 -->
+<div class="bg-surface-container-low rounded-xl p-4 flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex gap-4">
+<div class="w-14 h-14 rounded-full bg-surface-container-lowest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-secondary" data-icon="egg_alt">egg_alt</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">منتجات الألبان</h4>
+<p class="text-on-surface-variant text-xs mt-0.5">5 أكتوبر • 3 أصناف</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-[10px] text-on-primary-fixed-variant font-bold">تم التوصيل بنجاح</span>
+</div>
+</div>
+</div>
+<div class="text-left">
+<p class="font-black text-on-background">62.00 ر.س</p>
+<button class="mt-1 text-primary text-[10px] font-bold bg-primary-container px-2 py-0.5 rounded-full">إعادة طلب</button>
+</div>
+</div>
+<!-- Order History Item 3 (Bento Style Suggestion) -->
+<!-- Order History Item 4 -->
+<div class="bg-surface-container-low rounded-xl p-4 flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex gap-4">
+<div class="w-14 h-14 rounded-full bg-surface-container-lowest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-secondary" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">أغذية معلبة</h4>
+<p class="text-on-surface-variant text-xs mt-0.5">28 سبتمبر • 8 أصناف</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-[10px] text-on-primary-fixed-variant font-bold">تم التوصيل بنجاح</span>
+</div>
+</div>
+</div>
+<div class="text-left">
+<p class="font-black text-on-background">112.00 ر.س</p>
+<button class="mt-1 text-primary text-[10px] font-bold bg-primary-container px-2 py-0.5 rounded-full">إعادة طلب</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
+</a>
+</nav>
+</body></html>

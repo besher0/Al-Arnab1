@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تفاصيل المنتج - الأرنب</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&amp;family=Almarai:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#87CEEB", // Primary Blue from TEXT_6
+                    "on-primary": "#FFFFFF",
+                    "background": "#FFFFFF", // Pure White from TEXT_6
+                    "surface": "#F0F8FF", // Ice Blue from TEXT_6
+                    "on-surface": "#1A365D", // Deep Blue from TEXT_6
+                    "on-surface-variant": "#718096", // Soft Gray from TEXT_6
+                    "secondary": "#F5F5F5",
+                    "outline": "#87CEEB"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Tajawal", "sans-serif"],
+                    "body": ["Almarai", "sans-serif"],
+                    "label": ["Almarai", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Almarai', sans-serif;
+            background-color: #FFFFFF;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 10px 30px -5px rgba(26, 54, 93, 0.1);
+        }
+        .rabbit-logo-font {
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 900;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="text-on-surface bg-background min-h-screen">
+<!-- Top AppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl flex justify-between items-center px-6 h-16">
+<button class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 duration-150">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="text-primary font-['Tajawal'] font-bold text-2xl tracking-tight flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="rabbit-logo-font text-on-surface">الأرنب</span>
+</div>
+<button class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined">shopping_basket</span>
+<span class="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
+</button>
+</header>
+<main class="pt-16 pb-32">
+<!-- Hero Section: Large Product Image -->
+<div class="w-full aspect-square relative">
+<img alt="طماطم كرزية حمراء" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9MJeVFPP9pMzvyD2_1KEauuqKB25Nm9kjENaBe0gJZPdtmkA4uR_Ux4ME62LVKD9T5DxMhicYkmCxgcvCsAJpfcISa6gVzBkUJVdnN6gl6zOO0UcCh90U1pzvF82xfgY6NzMAIjSYXChLOdA-BDw92lnxJz4QSeNZ-TpknjjCL871OSlDEQI4Dpol-H6W9X1C6lUMvT9opoRiCTjeyI-R7tmIaJA24gtrlSBrjVX7WvMbQybSBBm9yb6YE24V3wAWUTIi5s4ECgc"/>
+<button class="absolute top-6 right-6 bg-white/80 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center text-on-surface active:scale-90 transition-transform shadow-sm">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Product Content -->
+<div class="mt-8 px-6 text-center">
+<h1 class="font-headline text-4xl font-black text-on-surface tracking-tight">طماطم كرزية حمراء</h1>
+<p class="font-body text-on-surface-variant mt-2 text-lg">مزارع القصيم المحلية</p>
+<div class="mt-6 inline-block bg-surface px-6 py-3 rounded-2xl">
+<span class="font-headline text-3xl font-bold text-on-surface">١٤.٥٠ ر.س</span>
+</div>
+</div>
+</main>
+<!-- Simplified Bottom Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-white border-t border-secondary p-6 flex flex-col gap-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<!-- Prominent Quantity Selector -->
+<div class="flex items-center justify-between bg-surface rounded-full p-2 h-16 w-full">
+<button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+<span class="font-headline font-bold text-2xl text-on-surface">١</span>
+<button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+</div>
+<!-- Large Add to Cart Button -->
+<button class="w-full bg-primary text-on-primary h-16 rounded-full flex items-center justify-center gap-3 font-headline font-bold text-xl shadow-lg active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">shopping_cart</span>
+            أضف للسلة
+        </button>
+</div>
+<script>
+  (function () {
+    function toArabicNumber(value) {
+      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      return String(value).replace(/[0-9]/g, function (digit) {
+        return map[Number(digit)] || digit;
+      });
+    }
+
+    function setCartCount(count) {
+      var badge = document.querySelector('header button .absolute');
+      if (!badge) return;
+
+      var next = Math.max(0, Number(count) || 0);
+      badge.textContent = toArabicNumber(next);
+      badge.style.display = next > 0 ? 'flex' : 'none';
+    }
+
+    function send(type, payload) {
+      window.parent.postMessage(
+        Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+        window.location.origin,
+      );
+    }
+
+    function parseArabicNumber(value) {
+      var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+      var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
+        return map[digit] || digit;
+      });
+      var parsed = parseInt(normalized, 10);
+      return Number.isNaN(parsed) ? 1 : parsed;
+    }
+
+    function toArabicNumber(value) {
+      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      return String(value).replace(/[0-9]/g, function (digit) {
+        return map[Number(digit)] || digit;
+      });
+    }
+
+    var qtyNode = document.querySelector('.fixed.bottom-0 span.font-headline');
+    var qty = parseArabicNumber(qtyNode ? qtyNode.textContent : '1');
+
+    var bottomButtons = document.querySelectorAll('.fixed.bottom-0 button');
+    var plusButton = null;
+    var minusButton = null;
+    bottomButtons.forEach(function (button) {
+      var icon = button.querySelector('.material-symbols-outlined');
+      if (!icon) return;
+      var text = icon.textContent.trim();
+      if (text === 'add') plusButton = button;
+      if (text === 'remove') minusButton = button;
+    });
+
+    if (plusButton) {
+      plusButton.addEventListener('click', function () {
+        qty += 1;
+        if (qtyNode) qtyNode.textContent = toArabicNumber(qty);
+      });
+    }
+
+    if (minusButton) {
+      minusButton.addEventListener('click', function () {
+        qty = Math.max(1, qty - 1);
+        if (qtyNode) qtyNode.textContent = toArabicNumber(qty);
+      });
+    }
+
+    var addButton = Array.from(document.querySelectorAll('button')).find(function (button) {
+      return (button.textContent || '').indexOf('أضف للسلة') !== -1;
+    });
+    if (addButton) {
+      addButton.addEventListener('click', function () {
+        send('add-item', { id: 'tomato', qty: qty });
+        send('navigate', { to: '/cart' });
+      });
+    }
+
+    var backButton = Array.from(document.querySelectorAll('button')).find(function (button) {
+      var icon = button.querySelector('.material-symbols-outlined');
+      return icon && icon.textContent.trim() === 'arrow_forward';
+    });
+    if (backButton) {
+      backButton.addEventListener('click', function () {
+        send('navigate', { to: '/category-products' });
+      });
+    }
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin) return;
+      var payload = event.data;
+      if (!payload || payload.source !== 'react-shell') return;
+      if (payload.type !== 'cart-state') return;
+
+      setCartCount(payload.itemCount || 0);
+    });
+
+    send('request-state');
+  })();
+</script>
+</body></html>

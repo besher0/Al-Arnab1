@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&amp;family=Almarai:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#87CEEB",
+                    "on-primary": "#FFFFFF",
+                    "background": "#FFFFFF",
+                    "surface": "#FFFFFF",
+                    "on-background": "#1A365D",
+                    "on-surface-variant": "#718096",
+                    "outline-variant": "#87CEEB",
+                    "primary-container": "#E0F2F1",
+                    "secondary-container": "#87CEEB",
+                    "tertiary-container": "#FFFFFF",
+                    "surface-container": "#FFFFFF",
+                    "surface-container-high": "#F0F8FF",
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "tajawal": ["Tajawal", "sans-serif"],
+                    "almarai": ["Almarai", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Almarai', sans-serif;
+            background-color: #FFFFFF;
+        }
+        .organic-shape {
+            border-radius: 3rem 1rem 3rem 1rem;
+        }
+        .signature-glow {
+            background: linear-gradient(135deg, #87CEEB 0%, #1A365D 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-3xl flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#87CEEB] text-2xl">spa</span>
+<span class="text-2xl font-bold text-[#1A365D] font-tajawal">Al-Furqan</span>
+</div>
+<button class="text-[#718096] font-tajawal font-bold text-lg hover:opacity-80 transition-opacity">تخطي</button>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center pt-24 pb-48 px-6">
+<!-- Hero Visual Section -->
+<div class="relative w-full max-w-sm aspect-square mb-10">
+<!-- Organic Background Layers -->
+<div class="absolute inset-0 bg-[#87CEEB]/10 organic-shape rotate-3 opacity-40 scale-105"></div>
+<div class="absolute inset-0 bg-[#F0F8FF] rotate-[-3deg] organic-shape opacity-60"></div>
+<!-- Main Illustration -->
+<div class="relative z-10 w-full h-full organic-shape overflow-hidden shadow-xl shadow-[#1A365D]/5">
+<img alt="Festive shopping" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFu8s5BD-CgakpDGa6xBwK6oXKxb6MaaBpQoBTeQgda82RawnWdvbeHwZgR3Tpj-d8VbsyEBPeh7sZyrUzlglxG-G6z5uuod8IotDkw6Tkd7MPQgy5B2cv02ucmYxVnrHRMStaMA7DsR4u6DGk1drVmJdWeHYJzyZMQTvMdPCI_FIIFe1rc3-3dacz4qZwwz9CWzS8shj9uWD5AUiIMewNVRcG33lWhky-1IXS5MbKZo5akVOvfhiHrxCqdmdWWV0GseN1KUL8AwVT"/>
+<!-- Floating Icon Accents -->
+<div class="absolute top-4 right-4 bg-[#87CEEB] p-3 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">redeem</span>
+</div>
+<div class="absolute bottom-6 left-6 bg-[#1A365D] p-3 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-[#F0F8FF] text-3xl" style="font-variation-settings: 'FILL' 1;">sell</span>
+</div>
+</div>
+</div>
+<!-- Content Section -->
+<div class="text-center space-y-4 max-w-md">
+<h1 class="text-3xl font-extrabold font-tajawal text-[#1A365D] tracking-tight">
+                عروض حصرية بانتظارك
+            </h1>
+<p class="text-base font-almarai text-[#718096] leading-relaxed">
+                انضم إلينا الآن واستفد من خصومات حصرية وعروض يومية لا تفوت على جميع مشترياتك.
+            </p>
+</div>
+</main>
+<!-- Bottom Action Section -->
+<div class="fixed bottom-0 w-full p-6 space-y-6 bg-gradient-to-t from-white via-white to-transparent">
+<!-- Page Indicators -->
+<div class="flex justify-center items-center gap-3 w-full mb-2">
+<span class="w-2 h-2 rounded-full bg-[#87CEEB] opacity-40 transition-all duration-300"></span>
+<span class="w-2 h-2 rounded-full bg-[#87CEEB] opacity-40 transition-all duration-300"></span>
+<span class="w-8 h-2 rounded-full bg-[#87CEEB] transition-all duration-300"></span>
+</div>
+<!-- Primary Actions -->
+<div class="flex flex-col gap-3 w-full max-w-sm mx-auto">
+<button class="signature-glow text-white py-4 px-8 rounded-full text-lg font-bold font-tajawal shadow-lg hover:opacity-90 active:scale-95 transition-all">
+                إنشاء حساب
+            </button>
+<button class="bg-white border-2 border-[#87CEEB] text-[#1A365D] py-4 px-8 rounded-full text-lg font-bold font-tajawal hover:bg-[#F0F8FF] transition-colors">
+                تسجيل الدخول
+            </button>
+<button class="text-[#718096] py-2 px-8 rounded-full text-base font-medium font-tajawal hover:text-[#1A365D] transition-colors">
+                التصفح كزائر
+            </button>
+</div>
+<!-- Spacer for safe area -->
+<div class="h-2"></div>
+</div>
+<script>
+  (function () {
+    function send(type, payload) {
+      window.parent.postMessage(
+        Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+        window.location.origin,
+      );
+    }
+
+    var actionButtons = document.querySelectorAll('div.fixed.bottom-0 button');
+    if (actionButtons[0]) {
+      actionButtons[0].addEventListener('click', function () {
+        send('navigate', { to: '/signup' });
+      });
+    }
+    if (actionButtons[1]) {
+      actionButtons[1].addEventListener('click', function () {
+        send('navigate', { to: '/login' });
+      });
+    }
+    if (actionButtons[2]) {
+      actionButtons[2].addEventListener('click', function () {
+        send('auth-guest');
+      });
+    }
+  })();
+</script>
+</body></html>

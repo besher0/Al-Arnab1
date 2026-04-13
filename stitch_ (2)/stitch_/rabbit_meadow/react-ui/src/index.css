@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700&display=swap');
+
+:root {
+  font-family: 'Almarai', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1a365d;
+  background: radial-gradient(circle at top right, #c8e9ff 0%, #eff8ff 35%, #f8fcff 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  direction: rtl;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Tajawal', sans-serif;
+}

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;family=Almarai:wght@300;400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0096d6", // Adjusted to a professional light blue that works well with white
+                        "on-primary": "#ffffff",
+                        "primary-container": "#e0f2fe",
+                        "on-primary-container": "#0369a1",
+                        "surface": "#ffffff",
+                        "on-surface": "#1e293b",
+                        "surface-variant": "#f1f5f9",
+                        "on-surface-variant": "#475569",
+                        "outline": "#cbd5e1",
+                        "background": "#f0f9ff" // Very light blue tint for background
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "tajawal": ["Tajawal", "sans-serif"],
+                        "almarai": ["Almarai", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Almarai', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .organic-card-shape {
+            border-radius: 1.5rem;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-sky-100">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="text-primary hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-tajawal font-bold text-2xl tracking-tight text-primary">سلة المشتريات</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container shadow-sm">
+<img alt="User Profile Avatar" data-alt="Close-up portrait of a smiling young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoPVIu0_kKZX7dsMf3WdlfHHdIboXP7P9LnNb5_u1oTc217xo5yqO3QgJMghajqcyn-bagCYtVVfg63P-mOcE8JTn4PaZ2lKBaCLjijbA2wOMOFjExcE8jp89npPryU45itC0nyyi9h0KN1tH6VWMJ1jhCw8LWaJqvoDrFXVbKlqO5_MzK3fodh3vSOhMO41hwmJcz13qlZoFc3L8uXluThM5GeaxYk2Z8YfchGCLfY-mJa1FkPhsW4MncNA4bpzmlYhzFNvozdEgz"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 px-4 max-w-2xl mx-auto">
+<!-- Cart Items Section -->
+<section class="space-y-4 mb-8">
+<h2 class="font-tajawal font-extrabold text-xl mb-4 text-on-background px-2">محتويات السلة</h2>
+<!-- Product Card 1 -->
+<div class="bg-white organic-card-shape p-4 flex gap-4 items-start shadow-sm border border-sky-50">
+<div class="w-24 h-24 rounded-2xl bg-sky-50 overflow-hidden flex-shrink-0">
+<img alt="Fresh Carrots" class="w-full h-full object-cover" data-alt="Macro photography of vibrant orange organic carrots" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl5T3kK87fQoa7MN2ctIyBsq5dmjNuav6sgFqWTO7qMYf5H1lcHP9zgq0vlHONncvkpnzS05Dfc1eNatzeB_2l8iKdK5iXswDQT6aWthNVPsdcIqiDkQ7fFHw1EkosDlC5OFc22jQh4cI7hJC9wzbalnVbHkd7FvP9oQrUy2IvSGL_Fi9bo8wqXNtKx_5zFoZo1qqHZby286oMDRHeWSz0uVmD5WsPD56xjnUqYxgbhUHG-qlY0je76ROPTdGhoClcAZdZdX8XPRti"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-tajawal font-bold text-lg text-on-background leading-tight">جزر عضوي طازج</h3>
+<span class="font-bold text-primary whitespace-nowrap">12.50 ر.س</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-3">الكمية: 1 كيلوجرام</p>
+<div class="flex justify-end items-center">
+<div class="flex items-center gap-4 bg-sky-50 rounded-full px-4 py-1.5 border border-sky-100">
+<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity">-</button>
+<span class="font-bold w-6 text-center text-on-background">2</span>
+<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity">+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-white organic-card-shape p-4 flex gap-4 items-start shadow-sm border border-sky-50">
+<div class="w-24 h-24 rounded-2xl bg-sky-50 overflow-hidden flex-shrink-0">
+<img alt="Green Lettuce" class="w-full h-full object-cover" data-alt="Close-up of crispy fresh green romaine lettuce" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsxzfaAUIhl01rwElJcklOMjGPOYEyeesYZhO28EtIxfAUO0qdHITJUiVfdlgUqUoIFyMbRfrcGzTG3-Fz_Hu9XRQIExsL1y8tp_gVaCyiAQoqs3XDbfS5uHQmSI3ufDB8caPAqM_rm8lQnj9Mxf6-f0VLb9Hc5R3DAZfxIHG_SLVf3nBMbyJJKJK6SrCAMlb0DRuK61oI3vnWmWAqRIMXZVSCGQDTzRp-hTokGTXDD5GY0OK7t8O42GGxdnubOnLalFyizM70LkmY"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-tajawal font-bold text-lg text-on-background leading-tight">خس روماني طازج</h3>
+<span class="font-bold text-primary whitespace-nowrap">4.00 ر.س</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-3">الكمية: ربطة واحدة</p>
+<div class="flex justify-end items-center">
+<div class="flex items-center gap-4 bg-sky-50 rounded-full px-4 py-1.5 border border-sky-100">
+<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity">-</button>
+<span class="font-bold w-6 text-center text-on-background">1</span>
+<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity">+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Invoice / Order Summary Section -->
+<div class="bg-white rounded-2xl p-6 mt-6 border border-sky-100 shadow-sm">
+<h3 class="font-tajawal font-bold text-lg mb-4 text-on-background border-b border-sky-50 pb-2">ملخص الطلب</h3>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">المجموع الفرعي (3 منتجات)</span>
+<span class="font-bold">29.00 ر.س</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">رسوم التوصيل</span>
+<span class="font-bold text-emerald-600">مجاني</span>
+</div>
+<div class="h-px bg-sky-100 my-4"></div>
+<div class="flex justify-between text-xl">
+<span class="font-tajawal font-bold">الإجمالي الكلي</span>
+<span class="font-tajawal font-extrabold text-primary">29.00 ر.س</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Order Details Section -->
+<section class="space-y-6">
+<h2 class="font-tajawal font-extrabold text-xl mb-4 text-on-background px-2">تفاصيل الطلب</h2>
+<!-- Map Component -->
+<div class="relative h-48 rounded-2xl overflow-hidden shadow-sm border border-sky-100">
+<img alt="Delivery Location" class="w-full h-full object-cover" data-alt="A stylized minimalist map view showing a blue pinpoint marker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRyYUrTxs-VCQFqdz-QOqVRmg9AsHveVAlmV4kcim7HTc1gHAf_ZrzHqddP46IkVsWVZ1S7detSdhi8cssuf0qI6gEe2ZjpcPjQVFBx5waYPyfyqEIc52RmjGMK3B-2nIg7PTATm1vVd6IkP_Go89Pc9zmkduFVEMxr5ch4jNXYKQ3eLLdzCi-39nFrJn4VAUSDRHkbkNcJokbFhdsTx9kp5IvVm1ufNr2mIrKsaGF8SIcMHoXY6-vxf93NZw1j3fpnpblhshsfKlR"/>
+<div class="absolute inset-0 bg-sky-500/5 flex items-center justify-center pointer-events-none">
+<div class="bg-white p-3 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+<div class="absolute bottom-3 right-3 left-3 bg-white/95 glass-effect p-3 rounded-xl text-sm font-bold flex items-center gap-3 shadow-md border border-sky-50">
+<span class="material-symbols-outlined text-primary text-xl">home</span>
+<span class="text-on-surface">توصيل إلى: حي الصحافة، الرياض</span>
+</div>
+</div>
+<!-- Alternative Phone Number Input -->
+<div class="space-y-2">
+<label class="block text-on-surface-variant font-bold mr-2 text-sm">رقم هاتف بديل (اختياري)</label>
+<div class="relative">
+<input class="w-full h-14 rounded-full border border-sky-100 bg-white px-6 text-on-background focus:ring-2 focus:ring-primary shadow-sm" placeholder="+966 5X XXX XXXX" type="tel"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-on-surface-variant">phone_iphone</span>
+</div>
+</div>
+<!-- Confirm Order Button -->
+<button class="w-full py-5 rounded-full bg-primary text-on-primary font-tajawal font-bold text-xl shadow-lg shadow-sky-200 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                تأكيد الطلب
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-3 bg-white/90 backdrop-blur-xl rounded-t-[2.5rem] z-50 shadow-[0_-8px_30px_rgba(0,150,214,0.08)] border-t border-sky-50">
+<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-almarai text-[10px] font-bold">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-almarai text-[10px] font-bold">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-almarai text-[10px] font-bold">بحث</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-sky-50 text-primary rounded-2xl px-6 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-almarai text-[10px] font-bold">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-almarai text-[10px] font-bold">الملف</span>
+</a>
+</nav>
+<script>
+    (function () {
+        function send(type, payload) {
+            window.parent.postMessage(
+                Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+                window.location.origin,
+            );
+        }
+
+        function parseArabicNumber(value) {
+            var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+            var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
+                return map[digit] || digit;
+            });
+            var parsed = parseInt(normalized, 10);
+            return Number.isNaN(parsed) ? 0 : parsed;
+        }
+
+        function toArabicNumber(value) {
+            var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return String(value).replace(/[0-9]/g, function (digit) {
+                return map[Number(digit)] || digit;
+            });
+        }
+
+        function bindLink(link, to) {
+            if (!link) return;
+            link.href = to;
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                send('navigate', { to: to });
+            });
+        }
+
+        var navLinks = document.querySelectorAll('nav a');
+        var navRoutes = ['/home', '/categories', '/home', '/cart', '/orders'];
+        navLinks.forEach(function (link, index) {
+            if (navRoutes[index]) {
+                bindLink(link, navRoutes[index]);
+            }
+        });
+
+        var qtyGroups = document.querySelectorAll('.bg-sky-50.rounded-full');
+        var ids = ['carrot', 'lettuce'];
+        var qtyState = {};
+
+        function applyCartState(cart) {
+            qtyGroups.forEach(function (group, index) {
+                if (!ids[index]) return;
+                var qtyNode = group.querySelector('span');
+                var next = Math.max(0, Number((cart || {})[ids[index]] || 0));
+                qtyState[ids[index]] = next;
+                if (qtyNode) {
+                    qtyNode.textContent = toArabicNumber(next);
+                }
+            });
+        }
+
+        qtyGroups.forEach(function (group, index) {
+            if (!ids[index]) return;
+
+            var buttons = group.querySelectorAll('button');
+            if (buttons.length < 2) return;
+            var minusButton = buttons[0];
+            var plusButton = buttons[1];
+            var qtyNode = group.querySelector('span');
+
+            var qty = parseArabicNumber(qtyNode ? qtyNode.textContent : '0');
+            qtyState[ids[index]] = qty;
+
+            plusButton.addEventListener('click', function () {
+                qtyState[ids[index]] = (qtyState[ids[index]] || 0) + 1;
+                if (qtyNode) qtyNode.textContent = toArabicNumber(qtyState[ids[index]]);
+                send('set-qty', { id: ids[index], qty: qtyState[ids[index]] });
+            });
+
+            minusButton.addEventListener('click', function () {
+                qtyState[ids[index]] = Math.max(0, (qtyState[ids[index]] || 0) - 1);
+                if (qtyNode) qtyNode.textContent = toArabicNumber(qtyState[ids[index]]);
+                send('set-qty', { id: ids[index], qty: qtyState[ids[index]] });
+            });
+        });
+
+        var confirmButton = Array.from(document.querySelectorAll('button')).find(function (button) {
+            return (button.textContent || '').indexOf('تأكيد الطلب') !== -1;
+        });
+        if (confirmButton) {
+            confirmButton.addEventListener('click', function () {
+                send('navigate', { to: '/orders' });
+            });
+        }
+
+        window.addEventListener('message', function (event) {
+            if (event.origin !== window.location.origin) return;
+            var payload = event.data;
+            if (!payload || payload.source !== 'react-shell') return;
+            if (payload.type !== 'cart-state') return;
+
+            applyCartState(payload.cart || {});
+        });
+
+        send('request-state');
+    })();
+</script>
+</body></html>
