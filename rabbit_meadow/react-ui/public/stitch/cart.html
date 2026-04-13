@@ -234,8 +234,115 @@
         var qtyGroups = document.querySelectorAll('.bg-sky-50.rounded-full');
         var ids = ['carrot', 'lettuce'];
         var qtyState = {};
+        var staticProductIds = { carrot: true, lettuce: true };
+        var productMeta = {
+            carrot: { name: 'جزر عضوي طازج', price: 12.5, note: 'الكمية: 1 كيلوجرام' },
+            lettuce: { name: 'خس روماني طازج', price: 4, note: 'الكمية: ربطة واحدة' },
+            tomato: { name: 'طماطم كرزية حمراء', price: 14.5, note: 'منتج مضاف للسلة' },
+            milk: { name: 'حليب كامل الدسم عضوي', price: 12.5, note: 'منتج مضاف للسلة' },
+            feta: { name: 'جبنة فيتا يونانية', price: 24, note: 'منتج مضاف للسلة' },
+            yogurt: { name: 'زبادي يوناني', price: 5.75, note: 'منتج مضاف للسلة' },
+            butter: { name: 'زبدة طبيعية', price: 18.5, note: 'منتج مضاف للسلة' },
+            labneh: { name: 'لبنة بلدية', price: 15, note: 'منتج مضاف للسلة' },
+            grapes: { name: 'عنب أخضر طازج', price: 12.5, note: 'عرض خاص' },
+            bread: { name: 'خبز ريفي', price: 5.5, note: 'عرض خاص' },
+        };
 
-        function applyCartState(cart) {
+        function formatSar(value) {
+            return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
+        }
+
+        var summaryCard = document.querySelector('.bg-white.rounded-2xl.p-6.mt-6.border.border-sky-100.shadow-sm');
+        var subtotalRow = summaryCard ? summaryCard.querySelector('.flex.justify-between.text-sm') : null;
+        var subtotalLabel = subtotalRow ? subtotalRow.querySelector('span.text-on-surface-variant') : null;
+        var subtotalValue = subtotalRow ? subtotalRow.querySelector('span.font-bold') : null;
+        var totalValue = summaryCard ? summaryCard.querySelector('.flex.justify-between.text-xl span.font-tajawal.font-extrabold.text-primary') : null;
+
+        var dynamicContainer = document.getElementById('dynamic-cart-items');
+        if (!dynamicContainer && summaryCard && summaryCard.parentNode) {
+            dynamicContainer = document.createElement('div');
+            dynamicContainer.id = 'dynamic-cart-items';
+            dynamicContainer.className = 'space-y-4';
+            summaryCard.parentNode.insertBefore(dynamicContainer, summaryCard);
+        }
+
+        function renderDynamicItems(payload) {
+            if (!dynamicContainer) return;
+
+            var cart = payload && payload.cart ? payload.cart : {};
+            var items = Array.isArray(payload && payload.items)
+                ? payload.items
+                : Object.keys(cart).map(function (id) {
+                    var meta = productMeta[id] || { name: id, price: 0, note: 'منتج مضاف للسلة' };
+                    var qty = Math.max(0, Number(cart[id]) || 0);
+                    return { id: id, name: meta.name, price: meta.price, qty: qty, total: qty * meta.price };
+                });
+
+            var extraItems = items.filter(function (item) {
+                return !staticProductIds[item.id] && Number(item.qty) > 0;
+            });
+
+            dynamicContainer.innerHTML = '';
+
+            extraItems.forEach(function (item) {
+                var card = document.createElement('div');
+                card.className = 'bg-white organic-card-shape p-4 flex gap-4 items-start shadow-sm border border-sky-50';
+                card.innerHTML = '' +
+                    '<div class="w-12 h-12 rounded-full bg-sky-50 flex items-center justify-center flex-shrink-0">' +
+                    '<span class="material-symbols-outlined text-primary text-lg">shopping_bag</span>' +
+                    '</div>' +
+                    '<div class="flex-grow">' +
+                    '<div class="flex justify-between items-start mb-1">' +
+                    '<h3 class="font-tajawal font-bold text-base text-on-background leading-tight item-name"></h3>' +
+                    '<span class="font-bold text-primary whitespace-nowrap item-price"></span>' +
+                    '</div>' +
+                    '<p class="text-on-surface-variant text-sm mb-3 item-note"></p>' +
+                    '<div class="flex justify-end items-center">' +
+                    '<div class="flex items-center gap-4 bg-sky-50 rounded-full px-4 py-1.5 border border-sky-100">' +
+                    '<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity qty-minus">-</button>' +
+                    '<span class="font-bold w-6 text-center text-on-background qty-value"></span>' +
+                    '<button class="text-primary font-bold text-xl leading-none hover:opacity-60 transition-opacity qty-plus">+</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                var meta = productMeta[item.id] || { name: item.name || item.id, price: item.price || 0, note: 'منتج مضاف للسلة' };
+                var nameNode = card.querySelector('.item-name');
+                var priceNode = card.querySelector('.item-price');
+                var noteNode = card.querySelector('.item-note');
+                var qtyNode = card.querySelector('.qty-value');
+                var plusButton = card.querySelector('.qty-plus');
+                var minusButton = card.querySelector('.qty-minus');
+
+                qtyState[item.id] = Math.max(0, Number(item.qty) || 0);
+
+                if (nameNode) nameNode.textContent = meta.name;
+                if (priceNode) priceNode.textContent = formatSar(meta.price);
+                if (noteNode) noteNode.textContent = meta.note;
+                if (qtyNode) qtyNode.textContent = toArabicNumber(qtyState[item.id]);
+
+                if (plusButton) {
+                    plusButton.addEventListener('click', function () {
+                        qtyState[item.id] = (qtyState[item.id] || 0) + 1;
+                        if (qtyNode) qtyNode.textContent = toArabicNumber(qtyState[item.id]);
+                        send('set-qty', { id: item.id, qty: qtyState[item.id] });
+                    });
+                }
+
+                if (minusButton) {
+                    minusButton.addEventListener('click', function () {
+                        qtyState[item.id] = Math.max(0, (qtyState[item.id] || 0) - 1);
+                        if (qtyNode) qtyNode.textContent = toArabicNumber(qtyState[item.id]);
+                        send('set-qty', { id: item.id, qty: qtyState[item.id] });
+                    });
+                }
+
+                dynamicContainer.appendChild(card);
+            });
+        }
+
+        function applyCartState(payload) {
+            var cart = payload && payload.cart ? payload.cart : {};
             qtyGroups.forEach(function (group, index) {
                 if (!ids[index]) return;
                 var qtyNode = group.querySelector('span');
@@ -245,6 +352,18 @@
                     qtyNode.textContent = toArabicNumber(next);
                 }
             });
+
+            renderDynamicItems(payload || {});
+
+            if (subtotalLabel) {
+                subtotalLabel.textContent = 'المجموع الفرعي (' + toArabicNumber(payload && payload.itemCount ? payload.itemCount : 0) + ' منتجات)';
+            }
+            if (subtotalValue) {
+                subtotalValue.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
+            }
+            if (totalValue) {
+                totalValue.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
+            }
         }
 
         qtyGroups.forEach(function (group, index) {
@@ -287,7 +406,7 @@
             if (!payload || payload.source !== 'react-shell') return;
             if (payload.type !== 'cart-state') return;
 
-            applyCartState(payload.cart || {});
+            applyCartState(payload);
         });
 
         send('request-state');
