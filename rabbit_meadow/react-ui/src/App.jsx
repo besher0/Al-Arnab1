@@ -152,12 +152,27 @@ function BridgeListener() {
     }
 
     window.addEventListener('message', onMessage)
+
+    const frame = document.querySelector('.screen-frame')
+    function onFrameLoad() {
+      syncCurrentFrame()
+    }
+
+    if (frame) {
+      frame.addEventListener('load', onFrameLoad)
+    }
+
     syncCurrentFrame()
     const delayedSync = window.setTimeout(syncCurrentFrame, 120)
+    const lateSync = window.setTimeout(syncCurrentFrame, 420)
 
     return () => {
       window.removeEventListener('message', onMessage)
+      if (frame) {
+        frame.removeEventListener('load', onFrameLoad)
+      }
       window.clearTimeout(delayedSync)
+      window.clearTimeout(lateSync)
     }
   }, [
     addItem,

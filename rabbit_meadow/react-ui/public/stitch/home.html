@@ -52,6 +52,19 @@
         .squash-and-stretch:active { transform: scale(0.95); transition: transform 0.1s; }
         .rabbit-card-shape { border-radius: 1.5rem; }
     </style>
+<style>
+        html,
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+    </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen pb-32">
 <!-- TopAppBar -->
@@ -219,25 +232,26 @@
 </section>
 </main>
 <!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/95 backdrop-blur-xl z-50 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(135,206,235,0.15)] border-t border-primary/5">
-<a class="flex flex-col items-center justify-center text-primary px-5 py-2" href="#">
-<span class="material-symbols-outlined material-symbols-filled">home</span>
-<span class="font-['Almarai'] text-[11px] font-bold mt-1">الرئيسية</span>
+<nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
 </a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined">category</span>
-<span class="font-['Almarai'] text-[11px] font-bold mt-1">الأصناف</span>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
 </a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:text-primary transition-colors" href="#">
-<div class="relative">
-<span class="material-symbols-outlined">shopping_cart</span>
-<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] px-1.5 rounded-full border-2 border-white">3</span>
-</div>
-<span class="font-['Almarai'] text-[11px] font-bold mt-1">السلة</span>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined">receipt_long</span>
-<span class="font-['Almarai'] text-[11px] font-bold mt-1">الطلبات</span>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
 </a>
 </nav>
 <!-- Floating Action Button for Support -->
@@ -246,22 +260,6 @@
 </button>
 <script>
     (function () {
-        function toArabicNumber(value) {
-            var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-            return String(value).replace(/[0-9]/g, function (digit) {
-                return map[Number(digit)] || digit;
-            });
-        }
-
-        function setCartCount(count) {
-            var badge = document.querySelector('nav a:nth-child(3) .absolute');
-            if (!badge) return;
-
-            var next = Math.max(0, Number(count) || 0);
-            badge.textContent = toArabicNumber(next);
-            badge.style.display = next > 0 ? 'inline-block' : 'none';
-        }
-
         function send(type, payload) {
             window.parent.postMessage(
                 Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
@@ -279,7 +277,7 @@
         }
 
         var navLinks = document.querySelectorAll('nav a');
-        var navRoutes = ['/home', '/categories', '/cart', '/orders'];
+        var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
         navLinks.forEach(function (link, index) {
             if (navRoutes[index]) {
                 bindLink(link, navRoutes[index]);
@@ -306,17 +304,6 @@
                 send('add-item', { id: quickIds[index] || 'carrot', qty: 1 });
             });
         });
-
-        window.addEventListener('message', function (event) {
-            if (event.origin !== window.location.origin) return;
-            var payload = event.data;
-            if (!payload || payload.source !== 'react-shell') return;
-            if (payload.type !== 'cart-state') return;
-
-            setCartCount(payload.itemCount || 0);
-        });
-
-        send('request-state');
     })();
 </script>
 </body></html>

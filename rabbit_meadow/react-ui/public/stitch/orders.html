@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
@@ -14,15 +14,15 @@
             "colors": {
                     "on-secondary-container": "#802b0d",
                     "on-secondary": "#ffefeb",
-                    "inverse-primary": "#9df197",
-                    "surface-container-highest": "#acecbb",
+                    "inverse-primary": "#87CEEB",
+                    "surface-container-highest": "#D9EEFF",
                     "on-error": "#ffefec",
-                    "on-background": "#0b361d",
+                    "on-background": "#1A365D",
                     "primary-container": "#87CEEB",
                     "on-tertiary-fixed": "#3d2500",
                     "primary-fixed": "#87CEEB",
-                    "outline": "#568061",
-                    "surface-container": "#bef5ca",
+                    "outline": "#9EC7E8",
+                    "surface-container": "#E0F2FF",
                     "secondary-fixed": "#ffc4b3",
                     "secondary-container": "#ffc4b3",
                     "tertiary-fixed-dim": "#eea840",
@@ -30,33 +30,33 @@
                     "on-primary": "#ffffff",
                     "on-primary-container": "#003366",
                     "on-secondary-fixed-variant": "#8d3416",
-                    "surface": "#f0f8ff",
+                    "surface": "#F0F8FF",
                     "error": "#b02500",
-                    "inverse-surface": "#001206",
-                    "inverse-on-surface": "#7ba785",
-                    "on-surface": "#0b361d",
+                    "inverse-surface": "#0F2540",
+                    "inverse-on-surface": "#8AA9C7",
+                    "on-surface": "#1A365D",
                     "secondary": "#9b3e20",
                     "surface-container-low": "#ffffff",
                     "on-secondary-fixed": "#651900",
-                    "background": "#f0f8ff",
+                    "background": "#F0F8FF",
                     "tertiary-dim": "#6f4700",
                     "primary-dim": "#007bb8",
-                    "surface-variant": "#e0f0ff",
+                    "surface-variant": "#EAF5FF",
                     "on-primary-fixed-variant": "#004c8c",
-                    "outline-variant": "#8bb795",
-                    "surface-dim": "#a0e4b1",
+                    "outline-variant": "#C6DFF2",
+                    "surface-dim": "#C8E9FF",
                     "surface-tint": "#87CEEB",
                     "error-dim": "#b92902",
                     "secondary-dim": "#8b3315",
-                    "on-surface-variant": "#3b6447",
+                    "on-surface-variant": "#718096",
                     "on-tertiary": "#fff0e2",
                     "on-primary-fixed": "#002147",
                     "primary": "#87CEEB",
-                    "surface-bright": "#f0f8ff",
+                    "surface-bright": "#F0F8FF",
                     "secondary-fixed-dim": "#ffb199",
                     "tertiary": "#7f5200",
-                    "primary-fixed-dim": "#b0e0f2",
-                    "surface-container-high": "#e8f4ff",
+                    "primary-fixed-dim": "#C8E9FF",
+                    "surface-container-high": "#EAF5FF",
                     "on-tertiary-fixed-variant": "#644000",
                     "tertiary-container": "#feb64c",
                     "tertiary-fixed": "#feb64c",
@@ -90,21 +90,34 @@
       min-height: max(884px, 100dvh);
     }
   </style>
+<style>
+    html,
+    body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  </style>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
 <!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-[#ddffe2]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4">
+<header class="fixed top-0 w-full z-50 bg-[#F0F8FF]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4">
 <div class="flex items-center gap-3">
-<button class="text-[#176a21] hover:bg-[#bef5ca] transition-colors p-2 rounded-full">
+<button class="text-[#1A365D] hover:bg-[#E0F2FF] transition-colors p-2 rounded-full">
 <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
 </button>
-<h1 class="font-headline font-bold text-lg tracking-tight text-[#176a21]">Al-Arnab Orders</h1>
+<h1 class="font-headline font-bold text-lg tracking-tight text-[#1A365D]">Al-Arnab Orders</h1>
 </div>
 <div class="flex items-center gap-3">
 <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
 <span class="material-symbols-outlined text-surface text-sm" data-icon="rabbit" data-weight="fill" style="font-variation-settings: 'FILL' 1;">pets</span>
 </div>
-<button class="text-[#176a21] hover:bg-[#bef5ca] transition-colors p-2 rounded-full">
+<button class="text-[#1A365D] hover:bg-[#E0F2FF] transition-colors p-2 rounded-full">
 <span class="material-symbols-outlined" data-icon="help">help</span>
 </button>
 </div>
@@ -308,3 +321,5 @@
   })();
 </script>
 </body></html>
+
+

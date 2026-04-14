@@ -54,6 +54,19 @@
             font-style: italic;
         }
     </style>
+    <style>
+        html,
+        body {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+      </style>
 </head>
 <body class="text-on-surface bg-background min-h-screen">
 <!-- Top AppBar -->
@@ -70,7 +83,7 @@
 <span class="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
 </button>
 </header>
-<main class="pt-16 pb-32">
+<main class="pt-16 pb-64">
 <!-- Hero Section: Large Product Image -->
 <div class="w-full aspect-square relative">
 <img alt="طماطم كرزية حمراء" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9MJeVFPP9pMzvyD2_1KEauuqKB25Nm9kjENaBe0gJZPdtmkA4uR_Ux4ME62LVKD9T5DxMhicYkmCxgcvCsAJpfcISa6gVzBkUJVdnN6gl6zOO0UcCh90U1pzvF82xfgY6NzMAIjSYXChLOdA-BDw92lnxJz4QSeNZ-TpknjjCL871OSlDEQI4Dpol-H6W9X1C6lUMvT9opoRiCTjeyI-R7tmIaJA24gtrlSBrjVX7WvMbQybSBBm9yb6YE24V3wAWUTIi5s4ECgc"/>
@@ -88,7 +101,7 @@
 </div>
 </main>
 <!-- Simplified Bottom Bar -->
-<div class="fixed bottom-0 left-0 w-full bg-white border-t border-secondary p-6 flex flex-col gap-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<div class="product-action-bar fixed bottom-24 left-0 w-full bg-white border-t border-secondary p-6 flex flex-col gap-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
 <!-- Prominent Quantity Selector -->
 <div class="flex items-center justify-between bg-surface rounded-full p-2 h-16 w-full">
 <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
@@ -105,6 +118,29 @@
             أضف للسلة
         </button>
 </div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
+</a>
+</nav>
 <script>
   (function () {
     function toArabicNumber(value) {
@@ -130,6 +166,15 @@
       );
     }
 
+    function bindLink(link, to) {
+      if (!link) return;
+      link.href = to;
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        send('navigate', { to: to });
+      });
+    }
+
     function parseArabicNumber(value) {
       var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
       var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
@@ -146,10 +191,18 @@
       });
     }
 
-    var qtyNode = document.querySelector('.fixed.bottom-0 span.font-headline');
+    var navLinks = document.querySelectorAll('nav a');
+    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
+    navLinks.forEach(function (link, index) {
+      if (navRoutes[index]) {
+        bindLink(link, navRoutes[index]);
+      }
+    });
+
+    var qtyNode = document.querySelector('.product-action-bar span.font-headline');
     var qty = parseArabicNumber(qtyNode ? qtyNode.textContent : '1');
 
-    var bottomButtons = document.querySelectorAll('.fixed.bottom-0 button');
+    var bottomButtons = document.querySelectorAll('.product-action-bar button');
     var plusButton = null;
     var minusButton = null;
     bottomButtons.forEach(function (button) {

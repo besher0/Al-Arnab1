@@ -56,6 +56,19 @@
       min-height: max(884px, 100dvh);
     }
   </style>
+<style>
+    html,
+    body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  </style>
 </head>
 <body class="bg-background font-body text-on-background min-h-screen selection:bg-primary-container selection:text-on-primary-container">
 <!-- Transactional Screen: Navigation Shell Suppressed as per the "Destination Rule" -->

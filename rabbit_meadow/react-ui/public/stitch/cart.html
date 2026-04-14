@@ -53,6 +53,19 @@
             -webkit-backdrop-filter: blur(12px);
         }
     </style>
+<style>
+        html,
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+    </style>
 </head>
 <body class="text-on-surface min-h-screen pb-32">
 <!-- TopAppBar -->
@@ -167,26 +180,26 @@
 </section>
 </main>
 <!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-3 bg-white/90 backdrop-blur-xl rounded-t-[2.5rem] z-50 shadow-[0_-8px_30px_rgba(0,150,214,0.08)] border-t border-sky-50">
-<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-almarai text-[10px] font-bold">الرئيسية</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
 </a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
-<span class="font-almarai text-[10px] font-bold">الأقسام</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
 </a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
-<span class="material-symbols-outlined" data-icon="search">search</span>
-<span class="font-almarai text-[10px] font-bold">بحث</span>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
-<a class="flex flex-col items-center justify-center bg-sky-50 text-primary rounded-2xl px-6 py-2" href="#">
-<span class="material-symbols-outlined" data-icon="shopping_cart" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
-<span class="font-almarai text-[10px] font-bold">السلة</span>
+<a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
 </a>
-<a class="flex flex-col items-center justify-center text-slate-400 p-2" href="#">
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-almarai text-[10px] font-bold">الملف</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
 </a>
 </nav>
 <script>
@@ -224,7 +237,7 @@
         }
 
         var navLinks = document.querySelectorAll('nav a');
-        var navRoutes = ['/home', '/categories', '/home', '/cart', '/orders'];
+        var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
         navLinks.forEach(function (link, index) {
             if (navRoutes[index]) {
                 bindLink(link, navRoutes[index]);
