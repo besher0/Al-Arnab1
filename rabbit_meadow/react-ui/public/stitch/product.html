@@ -57,14 +57,22 @@
     <style>
         html,
         body {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: #87CEEB #EAF5FF;
         }
 
-        html::-webkit-scrollbar,
         body::-webkit-scrollbar {
-          width: 0;
-          height: 0;
+          width: 8px;
+        }
+
+        body::-webkit-scrollbar-track {
+          background: #EAF5FF;
+        }
+
+        body::-webkit-scrollbar-thumb {
+          background: #87CEEB;
+          border-radius: 9999px;
         }
       </style>
 </head>
@@ -83,7 +91,7 @@
 <span class="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
 </button>
 </header>
-<main class="pt-16 pb-64">
+<main class="pt-16 pb-80">
 <!-- Hero Section: Large Product Image -->
 <div class="w-full aspect-square relative">
 <img alt="طماطم كرزية حمراء" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9MJeVFPP9pMzvyD2_1KEauuqKB25Nm9kjENaBe0gJZPdtmkA4uR_Ux4ME62LVKD9T5DxMhicYkmCxgcvCsAJpfcISa6gVzBkUJVdnN6gl6zOO0UcCh90U1pzvF82xfgY6NzMAIjSYXChLOdA-BDw92lnxJz4QSeNZ-TpknjjCL871OSlDEQI4Dpol-H6W9X1C6lUMvT9opoRiCTjeyI-R7tmIaJA24gtrlSBrjVX7WvMbQybSBBm9yb6YE24V3wAWUTIi5s4ECgc"/>
