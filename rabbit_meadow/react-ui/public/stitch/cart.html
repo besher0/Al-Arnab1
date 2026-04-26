@@ -195,7 +195,10 @@
 <span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
 <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+<div class="relative">
 <span class="material-symbols-outlined" data-icon="shopping_cart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+</div>
 <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
@@ -225,6 +228,15 @@
             var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             return String(value).replace(/[0-9]/g, function (digit) {
                 return map[Number(digit)] || digit;
+            });
+        }
+
+        function setFooterCartCount(count) {
+            var next = Math.max(0, Number(count) || 0);
+            var badges = document.querySelectorAll('.cart-badge');
+            badges.forEach(function (badge) {
+                badge.textContent = toArabicNumber(next);
+                badge.style.display = next > 0 ? 'flex' : 'none';
             });
         }
 
@@ -378,6 +390,8 @@
             if (totalValue) {
                 totalValue.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
             }
+
+            setFooterCartCount(payload && payload.itemCount ? payload.itemCount : 0);
         }
 
         qtyGroups.forEach(function (group, index) {

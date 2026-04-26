@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>طلباتي الجارية</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 50px">طلباتي الجارية</h1>
+            <p class="page-subtitle">Al-Arnab</p>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container stack">
+        <section class="row" data-toggle-group>
+          <button class="pill active" data-toggle-item>الكل (3)</button>
+          <button class="pill" data-toggle-item>جاري التجهيز</button>
+          <button class="pill" data-toggle-item>في الطريق</button>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <div class="price-sm">١٤٢.٥٠ ريال</div>
+            <div>
+              <strong style="font-size: 34px">طلب #RN-9021</strong>
+              <div class="muted">تم الطلب في 10:45 صباحاً</div>
+            </div>
+          </div>
+
+          <img
+            class="map-preview"
+            src="https://images.unsplash.com/photo-1581262177006-4b6c5d4f6f95?auto=format&fit=crop&w=1200&q=80"
+            alt="خريطة"
+          />
+
+          <article class="soft-card">
+            <div class="row">
+              <span class="material-symbols-outlined" style="color: #66bbdf">location_on</span>
+              <strong style="font-size: 32px">عنوان التوصيل</strong>
+            </div>
+            <p class="muted" style="margin: 8px 0 0">حي الياسمين، شارع العليا مبنى 42، شقة 5</p>
+          </article>
+
+          <article class="soft-card">
+            <div class="row">
+              <span class="material-symbols-outlined" style="color: #66bbdf">info</span>
+              <strong style="font-size: 32px">تعليمات التوصيل</strong>
+            </div>
+            <p class="muted" style="margin: 8px 0 0">يرجى ترك الطلب عند الباب والاتصال قبل الوصول.</p>
+          </article>
+
+          <article class="soft-card">
+            <div class="row mb-12">
+              <span class="material-symbols-outlined" style="color: #66bbdf">shopping_basket</span>
+              <strong style="font-size: 32px">ملخص المنتجات (4 أصناف)</strong>
+            </div>
+            <div class="order-products">
+              <span class="badge-soft">حليب طازج ×2</span>
+              <span class="badge-soft">خضروات عضوية ×2</span>
+              <span class="badge-soft">طماطم كرزية ×1</span>
+            </div>
+          </article>
+
+          <div class="action-row">
+            <button class="icon-btn" style="width: 56px; height: 56px">
+              <span class="material-symbols-outlined">call</span>
+            </button>
+            <button class="cta" data-route="/admin/orders/detail">تحديث الحالة</button>
+          </div>
+        </section>
+
+        <article class="timeline-item row">
+          <button class="pill" data-route="/admin/orders/detail">التفاصيل</button>
+          <div>
+            <strong style="font-size: 32px">طلب #RN-8842</strong>
+            <div class="muted">جاري التجهيز · 12 منتج</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size: 28px; color: #67bbdf">local_shipping</span>
+        </article>
+
+        <article class="timeline-item row">
+          <button class="pill" data-route="/admin/orders/detail">التفاصيل</button>
+          <div>
+            <strong style="font-size: 32px">طلب #RN-7521</strong>
+            <div class="muted">بانتظار الاستلام · 3 منتجات</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size: 28px; color: #8a9ab0">inventory_2</span>
+        </article>
+      </main>
+
+      <nav class="bottom-nav five">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">settings</span>
+          Settings
+        </button>
+        <button class="nav-item" data-route="/admin/orders/completed">
+          <span class="material-symbols-outlined nav-icon">history</span>
+          History
+        </button>
+        <button class="nav-item" data-route="/admin/reports/sales">
+          <span class="material-symbols-outlined nav-icon">place</span>
+          Map
+        </button>
+        <button class="nav-item active" data-route="/admin/orders/current">
+          <span class="material-symbols-outlined nav-icon">shopping_bag</span>
+          Orders
+        </button>
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">home</span>
+          Home
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

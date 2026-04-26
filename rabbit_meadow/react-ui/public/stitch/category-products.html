@@ -308,7 +308,10 @@
 <span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+<div class="relative">
 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+</div>
 <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
@@ -332,6 +335,15 @@
       var next = Math.max(0, Number(count) || 0);
       badge.textContent = toArabicNumber(next);
       badge.style.display = next > 0 ? 'flex' : 'none';
+    }
+
+    function setFooterCartCount(count) {
+      var next = Math.max(0, Number(count) || 0);
+      var badges = document.querySelectorAll('.cart-badge');
+      badges.forEach(function (badge) {
+        badge.textContent = toArabicNumber(next);
+        badge.style.display = next > 0 ? 'flex' : 'none';
+      });
     }
 
     function send(type, payload) {
@@ -394,6 +406,7 @@
       if (payload.type !== 'cart-state') return;
 
       setCartCount(payload.itemCount || 0);
+      setFooterCartCount(payload.itemCount || 0);
     });
 
     send('request-state');

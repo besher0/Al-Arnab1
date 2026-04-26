@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة تحكم الأدمن</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/orders/current" title="الطلبات">
+          <span class="material-symbols-outlined">storefront</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title">Al-Arnab<br />Admin</h1>
+          </div>
+        </div>
+        <div class="status-switch" data-shop-state-wrap>
+          <button class="active" data-shop-toggle="open" type="button">مفتوح</button>
+          <button data-shop-toggle="closed" type="button">مغلق</button>
+        </div>
+      </header>
+
+      <main class="container stack">
+        <section class="hero">
+          <h2>لوحة التحكم</h2>
+          <p>مرحباً مدير المتجر، تابع حالة الطلبات والمخزون والمبيعات من مكان واحد.</p>
+          <div class="shop-state-note" data-shop-state-wrap>
+            <span class="shop-state-dot"></span>
+            <span data-shop-state-label>المحل مفتوح</span>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <div>
+              <div class="muted small">سعر الصرف الحالي</div>
+              <strong style="font-size: 25px">USD = 3.75 SAR</strong>
+            </div>
+            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bce3">currency_exchange</span>
+          </div>
+          <button class="pill" style="width: 120px">تعديل ✎</button>
+        </section>
+
+        <section class="card row">
+          <div>
+            <div class="muted">إجمالي مبيعات اليوم</div>
+            <div class="price">٤,٥٢٠ ر.س</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size: 34px; color: #69bde4">payments</span>
+        </section>
+
+        <section class="grid-2">
+          <article class="metric-card">
+            <span class="tag danger">تنبيه</span>
+            <div class="metric-value">١٢</div>
+            <div class="muted">أصناف نفدت</div>
+          </article>
+          <article class="metric-card">
+            <span class="tag success">نشط</span>
+            <div class="metric-value">٢٤</div>
+            <div class="muted">طلبات نشطة</div>
+          </article>
+        </section>
+
+        <section>
+          <h3 class="section-title" style="font-size: 40px">إجراءات سريعة</h3>
+          <div class="quick-grid mt-12">
+            <button class="quick-item" data-route="/admin/reports/sales">
+              <div class="icon"><span class="material-symbols-outlined">query_stats</span></div>
+              عرض التقارير
+            </button>
+            <button class="quick-item" data-route="/admin/categories/new">
+              <div class="icon"><span class="material-symbols-outlined">category</span></div>
+              إدارة الأصناف
+            </button>
+            <button class="quick-item" data-route="/admin/products/new">
+              <div class="icon"><span class="material-symbols-outlined">add_box</span></div>
+              إضافة منتج
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <div class="row mb-12">
+            <h3 class="section-title" style="font-size: 41px; margin: 0">آخر الطلبات</h3>
+            <button class="ghost" style="width: auto; min-height: auto; padding: 0" data-route="/admin/orders/current">
+              عرض الكل
+            </button>
+          </div>
+
+          <article class="order-row mb-12" data-route="/admin/orders/detail">
+            <div class="row">
+              <span class="tiny muted">منذ ٥ دقائق</span>
+              <img
+                class="avatar"
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
+                alt="عميل"
+              />
+            </div>
+            <div class="mt-12">
+              <strong style="font-size: 32px">أحمد العمري</strong>
+              <div class="muted">AR-1092# رقم الطلب</div>
+              <div class="row mt-12">
+                <span class="badge-soft">جاري التجهيز</span>
+                <span class="price-sm">١٨٥ ر.س</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="order-row" data-route="/admin/orders/detail">
+            <div class="row">
+              <span class="tiny muted">منذ ١٢ دقيقة</span>
+              <img
+                class="avatar"
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80"
+                alt="عميل"
+              />
+            </div>
+            <div class="mt-12">
+              <strong style="font-size: 32px">سارة خالد</strong>
+              <div class="muted">AR-1091# رقم الطلب</div>
+              <div class="row mt-12">
+                <span class="badge-soft">جديد</span>
+                <span class="price-sm">٩٢ ر.س</span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">home</span>
+          Home
+        </button>
+        <button class="nav-item" data-route="/admin/reports/sales">
+          <span class="material-symbols-outlined nav-icon">bar_chart</span>
+          Sales
+        </button>
+        <button class="nav-item" data-route="/admin/products/new">
+          <span class="material-symbols-outlined nav-icon">inventory_2</span>
+          Stock
+        </button>
+        <button class="nav-item" data-route="/admin/orders/current">
+          <span class="material-symbols-outlined nav-icon">notifications</span>
+          Alerts
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

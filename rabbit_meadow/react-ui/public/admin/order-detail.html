@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل الطلب</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/orders/current" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 44px">الطلب الجديد #1085</h1>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
+          alt="صورة عميل"
+        />
+      </header>
+
+      <main class="container stack">
+        <section class="card stack">
+          <div class="row">
+            <div>
+              <div class="muted tiny">اسم العميل</div>
+              <strong style="font-size: 36px">أحمد العلي</strong>
+            </div>
+            <div class="text-left">
+              <div class="muted tiny">إجمالي الطلب</div>
+              <div class="price-sm">١٨٥.٠٠ ر.س</div>
+            </div>
+          </div>
+
+          <article class="soft-card row">
+            <span class="badge-soft">3x</span>
+            <strong style="font-size: 29px">موز عضوي</strong>
+            <span class="muted">٤٥.٠٠ ر.س</span>
+          </article>
+          <article class="soft-card row">
+            <span class="badge-soft">1x</span>
+            <strong style="font-size: 29px">حليب طازج</strong>
+            <span class="muted">١٤٠.٠٠ ر.س</span>
+          </article>
+        </section>
+
+        <section>
+          <h3 class="section-title" style="font-size: 36px; margin-bottom: 10px">عنوان التوصيل</h3>
+          <article class="card" style="padding: 0; overflow: hidden">
+            <img
+              class="map-preview"
+              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+              alt="خريطة"
+              style="border-radius: 30px 30px 0 0; min-height: 210px"
+            />
+            <div style="padding: 14px 18px" class="row">
+              <span class="material-symbols-outlined" style="color: #67bbde">home</span>
+              <strong style="font-size: 26px">الياسمين، شارع العليا فيلا 42</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="soft-card stack">
+          <h3 style="font-size: 38px">قبول الطلب وتحديد وقت التجهيز</h3>
+          <div class="row" data-toggle-group>
+            <button class="pill" data-toggle-item>15 دقيقة</button>
+            <button class="pill active" data-toggle-item>20 دقيقة</button>
+            <button class="pill" data-toggle-item>30 دقيقة</button>
+          </div>
+          <button class="cta" data-route="/admin/orders/current">
+            <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
+            قبول الطلب
+          </button>
+        </section>
+
+        <section class="card stack" style="border-style: dashed">
+          <h3 style="font-size: 38px; color: var(--admin-danger)">رفض الطلب</h3>
+          <div class="row" data-toggle-group>
+            <button class="chip active" data-toggle-item style="background: rgba(239, 78, 79, 0.12); color: #d64040">المادة غير متوفرة</button>
+            <button class="chip" data-toggle-item>ضغط كبير</button>
+            <button class="chip" data-toggle-item>خارج نطاق التغطية</button>
+          </div>
+          <button class="outline-danger" data-route="/admin/orders/current">
+            <span class="material-symbols-outlined" style="vertical-align: middle">cancel</span>
+            رفض الطلب
+          </button>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">settings</span>
+          Settings
+        </button>
+        <button class="nav-item" data-route="/admin/orders/completed">
+          <span class="material-symbols-outlined nav-icon">inventory_2</span>
+          Inventory
+        </button>
+        <button class="nav-item" data-route="/admin/reports/sales">
+          <span class="material-symbols-outlined nav-icon">history</span>
+          History
+        </button>
+        <button class="nav-item active" data-route="/admin/orders/current">
+          <span class="material-symbols-outlined nav-icon">shopping_basket</span>
+          Orders
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

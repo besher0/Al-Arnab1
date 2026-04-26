@@ -282,6 +282,43 @@ function AppRoutes() {
         />
         <Route path="/profile" element={<Navigate to="/orders" replace />} />
 
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/admin/dashboard"
+          element={<FramePage src="/admin/dashboard.html" title="admin-dashboard" />}
+        />
+        <Route path="/admin/orders" element={<Navigate to="/admin/orders/current" replace />} />
+        <Route
+          path="/admin/orders/current"
+          element={<FramePage src="/admin/current-orders.html" title="admin-current-orders" />}
+        />
+        <Route
+          path="/admin/orders/completed"
+          element={<FramePage src="/admin/completed-orders.html" title="admin-completed-orders" />}
+        />
+        <Route
+          path="/admin/orders/detail"
+          element={<FramePage src="/admin/order-detail.html" title="admin-order-detail" />}
+        />
+        <Route path="/admin/products" element={<Navigate to="/admin/products/new" replace />} />
+        <Route
+          path="/admin/products/new"
+          element={<FramePage src="/admin/add-product.html" title="admin-add-product" />}
+        />
+        <Route
+          path="/admin/categories/new"
+          element={<FramePage src="/admin/add-category.html" title="admin-add-category" />}
+        />
+        <Route
+          path="/admin/discounts/new"
+          element={<FramePage src="/admin/new-discount.html" title="admin-new-discount" />}
+        />
+        <Route
+          path="/admin/reports/sales"
+          element={<FramePage src="/admin/sales-report.html" title="admin-sales-report" />}
+        />
+        <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+
         <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>
     </>

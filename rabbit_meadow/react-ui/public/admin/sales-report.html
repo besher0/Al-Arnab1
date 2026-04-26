@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تقرير المبيعات</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="القائمة">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 48px">تقرير المبيعات</h1>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container stack">
+        <section class="soft-card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #65bbdf">calendar_month</span>
+            <h3 style="font-size: 38px">تحديد الفترة الزمنية</h3>
+          </div>
+          <div class="grid-2">
+            <label>
+              <div class="label">من تاريخ</div>
+              <input class="input-field" value="10/01/2023" />
+            </label>
+            <label>
+              <div class="label">إلى تاريخ</div>
+              <input class="input-field" value="10/31/2023" />
+            </label>
+          </div>
+          <button class="cta">
+            <span class="material-symbols-outlined" style="vertical-align: middle">refresh</span>
+            تحديث البيانات
+          </button>
+        </section>
+
+        <section class="card row" style="align-items: stretch">
+          <div style="width: 4px; border-radius: 999px; background: #7ec8e8"></div>
+          <div style="flex: 1">
+            <div class="muted">إجمالي المبيعات</div>
+            <div class="stat-large">١٤,٥٨٠ ر.س</div>
+            <div class="muted small">↑ 12% زيادة عن الشهر الماضي</div>
+          </div>
+        </section>
+
+        <section class="grid-2">
+          <article class="metric-card text-center">
+            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bee4">shopping_basket</span>
+            <div class="metric-value">١٨٤</div>
+            <div class="muted">عدد الطلبات</div>
+            <div class="tiny muted">طلب مكتمل</div>
+          </article>
+          <article class="metric-card text-center">
+            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bee4">savings</span>
+            <div class="metric-value">٤,٣٣٠</div>
+            <div class="muted">صافي الربح</div>
+            <div class="tiny muted">ر.س بعد الخصومات</div>
+          </article>
+        </section>
+
+        <section>
+          <div class="row mb-12">
+            <h3 class="section-title" style="font-size: 42px; margin: 0">تفاصيل العمليات</h3>
+            <button class="ghost" style="width: auto; min-height: auto; color: #67bbde">عرض الكل ←</button>
+          </div>
+
+          <article class="order-row mb-12 row">
+            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
+            <div>
+              <strong style="font-size: 32px">طلب #8943</strong>
+              <div class="muted tiny">4 أكتوبر 2023 · 8:30 م</div>
+            </div>
+            <div class="text-left">
+              <div class="price-sm">٤٥٠ ر.س</div>
+              <span class="tag success">مكتمل</span>
+            </div>
+          </article>
+
+          <article class="order-row mb-12 row">
+            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
+            <div>
+              <strong style="font-size: 32px">طلب #8941</strong>
+              <div class="muted tiny">3 أكتوبر 2023 · 10:15 م</div>
+            </div>
+            <div class="text-left">
+              <div class="price-sm">١,٢٠٠ ر.س</div>
+              <span class="tag success">مكتمل</span>
+            </div>
+          </article>
+
+          <article class="order-row row">
+            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
+            <div>
+              <strong style="font-size: 32px">طلب #8940</strong>
+              <div class="muted tiny">3 أكتوبر 2023 · 11:00 ص</div>
+            </div>
+            <div class="text-left">
+              <div class="price-sm">٨٥ ر.س</div>
+              <span class="tag warning">مسترجع</span>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">person</span>
+          PROFILE
+        </button>
+        <button class="nav-item" data-route="/admin/orders/current">
+          <span class="material-symbols-outlined nav-icon">notifications</span>
+          ALERTS
+        </button>
+        <button class="nav-item active" data-route="/admin/reports/sales">
+          <span class="material-symbols-outlined nav-icon">query_stats</span>
+          REPORTS
+        </button>
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">home</span>
+          HOME
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

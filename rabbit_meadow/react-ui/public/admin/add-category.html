@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إضافة صنف جديد</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 44px">إضافة صنف جديد</h1>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container stack">
+        <section class="hero" style="background: linear-gradient(135deg, #295786, #1e3f67 75%)">
+          <h2>توسيع متجرك العضوي</h2>
+          <p>أضف أصنافاً جديدة بلمسة جمالية تعكس جودة منتجات الأرنب والصور الواضحة.</p>
+        </section>
+
+        <section class="card stack">
+          <label>
+            <div class="label">اسم الصنف (بالعربية)</div>
+            <input class="input-field" type="text" placeholder="مثال: خضروات ورقية" />
+          </label>
+
+          <label>
+            <div class="label">Category Name (English)</div>
+            <input class="input-field" type="text" placeholder="e.g. Leafy Greens" />
+          </label>
+
+          <label>
+            <div class="label">صورة الصنف</div>
+            <div class="media-box" style="min-height: 170px; background-image: url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center">
+              <div style="background: rgba(245, 250, 255, 0.8); padding: 16px; border-radius: 18px">
+                <div class="media-icon">
+                  <span class="material-symbols-outlined">add_photo_alternate</span>
+                </div>
+                <strong style="font-size: 33px">اضغط هنا لرفع الصورة</strong>
+                <p class="muted small">PNG أو JPG بنسبة 16:9</p>
+              </div>
+            </div>
+          </label>
+
+          <label>
+            <div class="label">وصف الصنف (اختياري)</div>
+            <textarea class="textarea-field" placeholder="أضف وصفاً مختصراً يظهر للعملاء..."></textarea>
+          </label>
+
+          <div class="action-row">
+            <button class="cta" data-route="/admin/dashboard">حفظ الصنف</button>
+            <button class="ghost" data-route="/admin/dashboard" style="background: #edf1f6; border-radius: 999px">إلغاء</button>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <h3 style="font-size: 34px">الأصناف المضافة مؤخراً</h3>
+          <article class="row soft-card">
+            <span class="badge-soft">منذ 10 دقائق</span>
+            <div>
+              <strong style="font-size: 31px">جزر بلدي</strong>
+            </div>
+            <span class="material-symbols-outlined" style="color: #22b56d">nutrition</span>
+          </article>
+          <article class="row soft-card">
+            <span class="badge-soft">الآن</span>
+            <div>
+              <strong style="font-size: 31px">أعشاب طازجة</strong>
+            </div>
+            <span class="material-symbols-outlined" style="color: #67bbde">grass</span>
+          </article>
+        </section>
+      </main>
+
+      <nav class="bottom-nav five">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">settings</span>
+          Settings
+        </button>
+        <button class="nav-item" data-route="/admin/orders/current">
+          <span class="material-symbols-outlined nav-icon">shopping_cart</span>
+          Orders
+        </button>
+        <button class="nav-item active" data-route="/admin/categories/new" style="border-radius: 50%; min-height: 58px; margin-top: -22px">
+          <span class="material-symbols-outlined nav-icon">add</span>
+        </button>
+        <button class="nav-item" data-route="/admin/categories/new">
+          <span class="material-symbols-outlined nav-icon">category</span>
+          Categories
+        </button>
+        <button class="nav-item" data-route="/admin/products/new">
+          <span class="material-symbols-outlined nav-icon">inventory_2</span>
+          Inventory
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

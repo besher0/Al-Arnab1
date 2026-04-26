@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Discount</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+    <style>
+      body {
+        direction: ltr;
+      }
+      .admin-shell {
+        direction: ltr;
+      }
+      .label,
+      .page-title,
+      .section-title,
+      strong,
+      .muted {
+        font-family: 'Almarai', sans-serif;
+      }
+      .section-title {
+        font-size: 34px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header" style="direction: ltr">
+        <button class="icon-btn" data-route="/admin/dashboard" title="Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 42px">New Discount</h1>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container stack" style="direction: ltr">
+        <section class="card" style="border-style: dashed">
+          <div class="media-box" style="min-height: 220px; border: 0; background: transparent">
+            <div>
+              <div class="media-icon"><span class="material-symbols-outlined">add_photo_alternate</span></div>
+              <strong style="font-size: 34px; display: block">Upload Discount Banner</strong>
+              <p class="muted">PNG, JPG or WEBP (Max. 5MB)</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <label>
+            <div class="label">Offer Title</div>
+            <input class="input-field" type="text" placeholder="e.g. Weekend Fresh Sale" />
+          </label>
+
+          <label>
+            <div class="label">Discount Description</div>
+            <textarea class="textarea-field" placeholder="Briefly describe the offer details..."></textarea>
+          </label>
+        </section>
+
+        <section class="card stack">
+          <div class="row" style="justify-content: flex-start; gap: 8px">
+            <span class="material-symbols-outlined" style="color: #66bcdf">shopping_basket</span>
+            <h3 style="font-size: 35px">Target Product</h3>
+          </div>
+
+          <div class="row soft-card" style="border-radius: 999px">
+            <span class="material-symbols-outlined" style="color: #66bcdf">search</span>
+            <input class="input-field" style="background: transparent; padding: 0; border: 0" placeholder="Search product name..." />
+          </div>
+
+          <div class="badge-soft" style="display: inline-flex; align-items: center; gap: 10px; font-size: 18px; width: fit-content">
+            <img
+              class="thumb"
+              src="https://images.unsplash.com/photo-1447175008436-054170c2e979?auto=format&fit=crop&w=120&q=80"
+              alt="Organic Carrots"
+            />
+            Organic Carrots
+            <span style="font-weight: 900">×</span>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <label>
+            <div class="label">Deduction Amount (SAR)</div>
+            <div class="row soft-card" style="border-radius: 999px; padding: 14px 18px">
+              <strong style="font-size: 38px">0.00</strong>
+              <strong style="font-size: 32px">SAR</strong>
+            </div>
+          </label>
+
+          <article class="soft-card">
+            <p class="muted small" style="margin: 0">
+              If the product is sold by <strong>piece</strong>, the amount is deducted per piece.
+              If sold by <strong>KG</strong>, the amount is deducted per KG.
+            </p>
+          </article>
+        </section>
+
+        <section class="card stack">
+          <div class="row" style="justify-content: flex-start; gap: 8px">
+            <span class="material-symbols-outlined" style="color: #66bcdf">calendar_month</span>
+            <h3 style="font-size: 35px">Validity Dates</h3>
+          </div>
+
+          <div class="grid-2">
+            <label>
+              <div class="label">STARTS</div>
+              <input class="input-field" type="text" placeholder="mm/dd/yyyy" />
+            </label>
+            <label>
+              <div class="label">ENDS</div>
+              <input class="input-field" type="text" placeholder="mm/dd/yyyy" />
+            </label>
+          </div>
+        </section>
+
+        <button class="cta" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
+          Save Discount
+        </button>
+        <button class="ghost" data-route="/admin/dashboard">Discard Draft</button>
+      </main>
+
+      <nav class="bottom-nav" style="direction: ltr">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">home</span>
+          Home
+        </button>
+        <button class="nav-item active" data-route="/admin/discounts/new">
+          <span class="material-symbols-outlined nav-icon">sell</span>
+          Discounts
+        </button>
+        <button class="nav-item" data-route="/admin/products/new">
+          <span class="material-symbols-outlined nav-icon">inventory_2</span>
+          Inventory
+        </button>
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">settings</span>
+          Settings
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

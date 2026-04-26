@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إضافة منتج جديد</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 44px">إضافة منتج جديد</h1>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container stack">
+        <section class="hero">
+          <h2>إضافة محصول جديد</h2>
+          <p>قم بتوسيع سلة الأرنب بمنتجات عضوية طازجة من مزارعنا المحلية.</p>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">info</span>
+            <h3 style="font-size: 38px">المعلومات الأساسية</h3>
+          </div>
+
+          <label>
+            <div class="label">اسم المنتج</div>
+            <input class="input-field" type="text" placeholder="مثال: جزر عضوي طازج" />
+          </label>
+
+          <label>
+            <div class="label">وصف المنتج</div>
+            <textarea class="textarea-field" placeholder="اكتب تفاصيل المنتج، المصدر، والفوائد..."></textarea>
+          </label>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">payments</span>
+            <h3 style="font-size: 38px">السعر والكمية</h3>
+          </div>
+
+          <label>
+            <div class="label">سعر رأس المال (SAR)</div>
+            <input class="input-field" type="number" placeholder="0.00" />
+          </label>
+
+          <label>
+            <div class="label">السعر (SAR)</div>
+            <input class="input-field" type="number" placeholder="0.00" />
+          </label>
+
+          <div class="grid-2">
+            <label>
+              <div class="label">الوحدة</div>
+              <select class="select-field">
+                <option>كيلوجرام (kg)</option>
+                <option>حبة (piece)</option>
+                <option>ربطة</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">التصنيف</div>
+              <select class="select-field">
+                <option>اختر التصنيف...</option>
+                <option>الخضروات</option>
+                <option>الفواكه</option>
+                <option>الألبان</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">image</span>
+            <h3 style="font-size: 38px">صورة المنتج</h3>
+          </div>
+
+          <div class="media-box">
+            <div>
+              <div class="media-icon">
+                <span class="material-symbols-outlined">cloud_upload</span>
+              </div>
+              <strong style="font-size: 30px">اسحب الصورة هنا أو اضغط للرفع</strong>
+              <p class="muted small">PNG أو JPG، حجم أقصى 5 ميجابايت</p>
+            </div>
+          </div>
+        </section>
+
+        <button class="ghost" data-route="/admin/dashboard">إلغاء التغييرات</button>
+        <button class="cta" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
+          حفظ المنتج
+        </button>
+      </main>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>

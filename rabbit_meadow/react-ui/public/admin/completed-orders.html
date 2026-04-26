@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الطلبات المكتملة</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <section class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="القائمة">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 46px">الطلبات</h1>
+            <p class="page-subtitle">Al-Arnab</p>
+          </div>
+        </div>
+        <img
+          class="avatar"
+          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
+          alt="admin"
+        />
+      </header>
+
+      <main class="container">
+        <h2 class="section-title">الطلبات المكتملة</h2>
+        <p class="section-caption">تاريخ طلباتك مع طازجة الأرنب، كل طلب تم تسليمه بنجاح.</p>
+
+        <section class="card mb-20 stack">
+          <div class="row">
+            <span class="tag success">✓ تم التوصيل</span>
+            <div>
+              <div class="muted tiny">رقم الطلب</div>
+              <strong style="font-size: 35px">#RB-8291</strong>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <article class="soft-card text-center">
+              <div class="muted tiny">إجمالي المبلغ</div>
+              <div class="price-sm">١٤٥.٥٠ ر.س</div>
+            </article>
+            <article class="soft-card text-center">
+              <div class="muted tiny">تاريخ التسليم</div>
+              <strong style="font-size: 29px">14 أكتوبر 2023</strong>
+            </article>
+          </div>
+
+          <div class="order-products" style="justify-content: flex-end">
+            <img class="thumb" src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=120&q=80" alt="منتج" />
+            <img class="thumb" src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=120&q=80" alt="منتج" />
+            <img class="thumb" src="https://images.unsplash.com/photo-1445282768818-728615cc910a?auto=format&fit=crop&w=120&q=80" alt="منتج" />
+            <span class="badge-soft">+4</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button class="cta" style="max-width: 145px; min-height: 44px; font-size: 23px">إعادة الطلب</button>
+            <button class="ghost" style="width: auto; min-height: auto; font-size: 20px; color: #67bbde">عرض الفاتورة</button>
+          </div>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <span class="tag success">✓ تم التوصيل</span>
+            <div>
+              <div class="muted tiny">رقم الطلب</div>
+              <strong style="font-size: 35px">#RB-87540</strong>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <article class="soft-card text-center">
+              <div class="muted tiny">إجمالي المبلغ</div>
+              <div class="price-sm">٨٩.٠٠ ر.س</div>
+            </article>
+            <article class="soft-card text-center">
+              <div class="muted tiny">تاريخ التسليم</div>
+              <strong style="font-size: 29px">02 أكتوبر 2023</strong>
+            </article>
+          </div>
+
+          <div class="order-products" style="justify-content: flex-end">
+            <img class="thumb" src="https://images.unsplash.com/photo-1447175008436-054170c2e979?auto=format&fit=crop&w=120&q=80" alt="منتج" />
+            <img class="thumb" src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=120&q=80" alt="منتج" />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button class="cta" style="max-width: 145px; min-height: 44px; font-size: 23px">إعادة الطلب</button>
+            <button class="ghost" style="width: auto; min-height: auto; font-size: 20px; color: #67bbde">عرض الفاتورة</button>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">home</span>
+          Home
+        </button>
+        <button class="nav-item" data-route="/admin/categories/new">
+          <span class="material-symbols-outlined nav-icon">category</span>
+          Categories
+        </button>
+        <button class="nav-item active" data-route="/admin/orders/completed">
+          <span class="material-symbols-outlined nav-icon">receipt_long</span>
+          Orders
+        </button>
+        <button class="nav-item" data-route="/admin/dashboard">
+          <span class="material-symbols-outlined nav-icon">person</span>
+          Profile
+        </button>
+      </nav>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+  </body>
+</html>
