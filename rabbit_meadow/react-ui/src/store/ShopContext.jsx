@@ -1,172 +1,320 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
+﻿/* eslint-disable react-refresh/only-export-components */
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { api } from '../lib/api'
 
-const products = {
-  carrot: { id: 'carrot', name: 'جزر عضوي', price: 12.5, category: 'الخضروات' },
-  lettuce: { id: 'lettuce', name: 'خس روماني', price: 4, category: 'الخضروات' },
-  tomato: { id: 'tomato', name: 'طماطم كرزية حمراء', price: 14.5, category: 'الخضروات' },
-  milk: { id: 'milk', name: 'حليب كامل الدسم عضوي', price: 12.5, category: 'الألبان والأجبان' },
-  feta: { id: 'feta', name: 'جبنة فيتا يونانية', price: 24, category: 'الألبان والأجبان' },
-  yogurt: { id: 'yogurt', name: 'زبادي يوناني', price: 5.75, category: 'الألبان والأجبان' },
-  butter: { id: 'butter', name: 'زبدة طبيعية', price: 18.5, category: 'الألبان والأجبان' },
-  labneh: { id: 'labneh', name: 'لبنة بلدية', price: 15, category: 'الألبان والأجبان' },
-  grapes: { id: 'grapes', name: 'عنب أخضر طازج', price: 12.5, category: 'العروض' },
-  bread: { id: 'bread', name: 'خبز ريفي', price: 5.5, category: 'العروض' },
-}
-
-const initialState = {
-  isAuthenticated: false,
-  user: null,
-  cart: {
-    carrot: 2,
-    lettuce: 1,
-  },
-}
-
-function getInitialState() {
-  if (typeof window === 'undefined') {
-    return initialState
-  }
-
-  const stored = window.localStorage.getItem('al-arnab-store')
-  if (!stored) {
-    return initialState
-  }
-
-  try {
-    const parsed = JSON.parse(stored)
-    return {
-      ...initialState,
-      ...parsed,
-      cart: {
-        ...initialState.cart,
-        ...(parsed.cart ?? {}),
-      },
-    }
-  } catch {
-    return initialState
-  }
-}
-
-function shopReducer(state, action) {
-  const nextCart = { ...state.cart }
-
-  if (action.type === 'LOGIN') {
-    return {
-      ...state,
-      isAuthenticated: true,
-      user: action.payload.user,
-    }
-  }
-
-  if (action.type === 'REGISTER') {
-    return {
-      ...state,
-      isAuthenticated: true,
-      user: action.payload.user,
-    }
-  }
-
-  if (action.type === 'LOGOUT') {
-    return {
-      ...state,
-      isAuthenticated: false,
-      user: null,
-    }
-  }
-
-  if (action.type === 'ADD_ITEM') {
-    const qty = Math.max(1, action.payload.qty ?? 1)
-    nextCart[action.payload.id] = (nextCart[action.payload.id] ?? 0) + qty
-    return { ...state, cart: nextCart }
-  }
-
-  if (action.type === 'SET_QTY') {
-    const qty = Math.max(0, action.payload.qty)
-    if (qty === 0) {
-      delete nextCart[action.payload.id]
-    } else {
-      nextCart[action.payload.id] = qty
-    }
-    return { ...state, cart: nextCart }
-  }
-
-  if (action.type === 'CLEAR_CART') {
-    return { ...state, cart: {} }
-  }
-
-  return state
-}
+const TOKEN_STORAGE_KEY = 'al-arnab-token'
 
 const ShopContext = createContext(null)
 
-export function ShopProvider({ children }) {
-  const [state, dispatch] = useReducer(shopReducer, initialState, getInitialState)
+function numberValue(value, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
+function normalizeCartResponse(cartResponse) {
+  const rawItems = Array.isArray(cartResponse?.items) ? cartResponse.items : []
+
+  const items = rawItems
+    .map((item) => {
+      const qty = numberValue(item?.qty, 0)
+      const price = numberValue(item?.price, 0)
+      const total = numberValue(item?.total, price * qty)
+
+      return {
+        id: String(item?.id || ''),
+        name: String(item?.name || ''),
+        nameEn: item?.nameEn ? String(item.nameEn) : '',
+        imageUrl: item?.imageUrl ? String(item.imageUrl) : '',
+        price,
+        qty,
+        total,
+      }
+    })
+    .filter((item) => item.id && item.qty > 0)
+
+  const fallbackCount = items.reduce((sum, item) => sum + item.qty, 0)
+  const fallbackSubtotal = items.reduce((sum, item) => sum + item.total, 0)
+
+  return {
+    items,
+    itemCount: numberValue(cartResponse?.itemCount, fallbackCount),
+    subtotal: numberValue(cartResponse?.subtotal, fallbackSubtotal),
+  }
+}
+
+function productsMapFromList(productsList) {
+  const items = Array.isArray(productsList) ? productsList : []
+
+  return Object.fromEntries(
+    items
+      .map((product) => {
+        const id = String(product?.id || '')
+        if (!id) {
+          return null
+        }
+
+        return [
+          id,
+          {
+            id,
+            name: String(product?.name || ''),
+            nameEn: product?.nameEn ? String(product.nameEn) : '',
+            description: product?.description ? String(product.description) : '',
+            price: numberValue(product?.price, 0),
+            categoryId: product?.categoryId ? String(product.categoryId) : '',
+            categoryName: product?.categoryName ? String(product.categoryName) : '',
+            imageUrl: product?.imageUrl ? String(product.imageUrl) : '',
+            stockQty: numberValue(product?.stockQty, 0),
+            unit: product?.unit ? String(product.unit) : '',
+          },
+        ]
+      })
+      .filter(Boolean),
+  )
+}
+
+export function ShopProvider({ children }) {
+  const [isBootstrapping, setBootstrapping] = useState(true)
+  const [isAuthenticated, setAuthenticated] = useState(false)
+  const [user, setUser] = useState(null)
+  const [token, setToken] = useState(null)
+  const [products, setProducts] = useState({})
+  const [cart, setCart] = useState({
+    items: [],
+    itemCount: 0,
+    subtotal: 0,
+  })
+
+  const refreshCatalog = useCallback(async () => {
+    const bootstrap = await api.catalog.bootstrap()
+    const nextProducts = productsMapFromList(bootstrap?.products)
+    setProducts(nextProducts)
+    return nextProducts
+  }, [])
+
+  const applyAuthState = useCallback(async (authPayload) => {
+    const nextToken = String(authPayload?.accessToken || '')
+    if (!nextToken) {
+      throw new Error('لم يتم استلام صلاحية الدخول من الخادم.')
+    }
+
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken)
+    setToken(nextToken)
+    setAuthenticated(true)
+    setUser(authPayload.user || null)
+
+    const cartResponse = await api.cart.get(nextToken)
+    setCart(normalizeCartResponse(cartResponse))
+  }, [])
+
+  const bootstrapSession = useCallback(async () => {
+    setBootstrapping(true)
+
+    try {
+      await refreshCatalog()
+    } catch {
+      setProducts({})
+    }
+
+    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+    if (!storedToken) {
+      setAuthenticated(false)
+      setUser(null)
+      setToken(null)
+      setCart({ items: [], itemCount: 0, subtotal: 0 })
+      setBootstrapping(false)
       return
     }
 
-    window.localStorage.setItem(
-      'al-arnab-store',
-      JSON.stringify({
-        isAuthenticated: state.isAuthenticated,
-        user: state.user,
-        cart: state.cart,
-      }),
-    )
-  }, [state])
+    try {
+      const [sessionUser, cartResponse] = await Promise.all([
+        api.auth.session(storedToken),
+        api.cart.get(storedToken),
+      ])
 
-  const value = useMemo(() => {
-    const cartItems = Object.entries(state.cart)
-      .map(([id, qty]) => {
-        const product = products[id]
-        if (!product) return null
-        return {
-          ...product,
-          qty,
-          total: qty * product.price,
-        }
-      })
-      .filter(Boolean)
-
-    const itemCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
-    const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0)
-
-    return {
-      products,
-      isAuthenticated: state.isAuthenticated,
-      user: state.user,
-      cartItems,
-      itemCount,
-      subtotal,
-      login: (phone) =>
-        dispatch({
-          type: 'LOGIN',
-          payload: {
-            user: {
-              name: 'مستخدم الأرنب',
-              phone,
-            },
-          },
-        }),
-      register: ({ name, phone }) =>
-        dispatch({
-          type: 'REGISTER',
-          payload: {
-            user: {
-              name: name || 'مستخدم جديد',
-              phone,
-            },
-          },
-        }),
-      logout: () => dispatch({ type: 'LOGOUT' }),
-      addItem: (id, qty = 1) => dispatch({ type: 'ADD_ITEM', payload: { id, qty } }),
-      setQty: (id, qty) => dispatch({ type: 'SET_QTY', payload: { id, qty } }),
-      clearCart: () => dispatch({ type: 'CLEAR_CART' }),
+      setAuthenticated(true)
+      setUser(sessionUser)
+      setToken(storedToken)
+      setCart(normalizeCartResponse(cartResponse))
+    } catch {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+      setAuthenticated(false)
+      setUser(null)
+      setToken(null)
+      setCart({ items: [], itemCount: 0, subtotal: 0 })
+    } finally {
+      setBootstrapping(false)
     }
-  }, [state])
+  }, [refreshCatalog])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setBootstrapping(false)
+      return
+    }
+
+    bootstrapSession()
+  }, [bootstrapSession])
+
+  const login = useCallback(
+    async (phone) => {
+      const cleanPhone = String(phone || '').trim()
+      if (!cleanPhone) {
+        throw new Error('رقم الهاتف مطلوب.')
+      }
+
+      const authPayload = await api.auth.login({ phone: cleanPhone })
+      await applyAuthState(authPayload)
+    },
+    [applyAuthState],
+  )
+
+  const register = useCallback(
+    async ({ name, phone }) => {
+      const cleanName = String(name || '').trim()
+      const cleanPhone = String(phone || '').trim()
+
+      if (!cleanName) {
+        throw new Error('الاسم مطلوب.')
+      }
+
+      if (!cleanPhone) {
+        throw new Error('رقم الهاتف مطلوب.')
+      }
+
+      const authPayload = await api.auth.register({
+        name: cleanName,
+        phone: cleanPhone,
+      })
+      await applyAuthState(authPayload)
+    },
+    [applyAuthState],
+  )
+
+  const loginGuest = useCallback(
+    async (name) => {
+      const authPayload = await api.auth.guest({
+        name: name ? String(name).trim() : undefined,
+      })
+      await applyAuthState(authPayload)
+    },
+    [applyAuthState],
+  )
+
+  const logout = useCallback(async () => {
+    if (token) {
+      try {
+        await api.auth.logout(token)
+      } catch {
+        // Ignore logout API failures and clear local state anyway.
+      }
+    }
+
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+    setAuthenticated(false)
+    setUser(null)
+    setToken(null)
+    setCart({ items: [], itemCount: 0, subtotal: 0 })
+  }, [token])
+
+  const addItem = useCallback(
+    async (id, qty = 1) => {
+      if (!token) {
+        throw new Error('يجب تسجيل الدخول أولاً.')
+      }
+
+      const cleanId = String(id || '').trim()
+      const cleanQty = Math.max(0.01, numberValue(qty, 1))
+
+      if (!cleanId) {
+        throw new Error('معرف المنتج غير صالح.')
+      }
+
+      const cartResponse = await api.cart.addItem(token, {
+        productId: cleanId,
+        qty: cleanQty,
+      })
+
+      setCart(normalizeCartResponse(cartResponse))
+    },
+    [token],
+  )
+
+  const setQty = useCallback(
+    async (id, qty) => {
+      if (!token) {
+        throw new Error('يجب تسجيل الدخول أولاً.')
+      }
+
+      const cleanId = String(id || '').trim()
+      const cleanQty = Math.max(0, numberValue(qty, 0))
+
+      if (!cleanId) {
+        throw new Error('معرف المنتج غير صالح.')
+      }
+
+      const cartResponse = await api.cart.setQty(token, cleanId, cleanQty)
+      setCart(normalizeCartResponse(cartResponse))
+    },
+    [token],
+  )
+
+  const clearCart = useCallback(async () => {
+    if (!token) {
+      return
+    }
+
+    const cartResponse = await api.cart.clear(token)
+    setCart(normalizeCartResponse(cartResponse))
+  }, [token])
+
+  const value = useMemo(
+    () => ({
+      isBootstrapping,
+      products,
+      isAuthenticated,
+      user,
+      cartItems: cart.items,
+      itemCount: cart.itemCount,
+      subtotal: cart.subtotal,
+      refreshCatalog,
+      bootstrapSession,
+      login,
+      register,
+      loginGuest,
+      logout,
+      addItem,
+      setQty,
+      clearCart,
+      token,
+    }),
+    [
+      addItem,
+      bootstrapSession,
+      cart.itemCount,
+      cart.items,
+      cart.subtotal,
+      clearCart,
+      isAuthenticated,
+      isBootstrapping,
+      login,
+      loginGuest,
+      logout,
+      products,
+      refreshCatalog,
+      register,
+      setQty,
+      token,
+      user,
+    ],
+  )
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>
 }
@@ -180,5 +328,5 @@ export function useShop() {
 }
 
 export function formatSar(value) {
-  return `${value.toFixed(2)} ر.س`
+  return `${numberValue(value, 0).toFixed(2)} ر.س`
 }

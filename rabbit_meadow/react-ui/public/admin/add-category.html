@@ -41,12 +41,12 @@
         <section class="card stack">
           <label>
             <div class="label">اسم الصنف (بالعربية)</div>
-            <input class="input-field" type="text" placeholder="مثال: خضروات ورقية" />
+            <input id="category-name-ar" class="input-field" type="text" placeholder="مثال: خضروات ورقية" />
           </label>
 
           <label>
             <div class="label">Category Name (English)</div>
-            <input class="input-field" type="text" placeholder="e.g. Leafy Greens" />
+            <input id="category-name-en" class="input-field" type="text" placeholder="e.g. Leafy Greens" />
           </label>
 
           <label>
@@ -64,11 +64,11 @@
 
           <label>
             <div class="label">وصف الصنف (اختياري)</div>
-            <textarea class="textarea-field" placeholder="أضف وصفاً مختصراً يظهر للعملاء..."></textarea>
+            <textarea id="category-description" class="textarea-field" placeholder="أضف وصفاً مختصراً يظهر للعملاء..."></textarea>
           </label>
 
           <div class="action-row">
-            <button class="cta" data-route="/admin/dashboard">حفظ الصنف</button>
+            <button id="save-category-btn" class="cta" type="button">حفظ الصنف</button>
             <button class="ghost" data-route="/admin/dashboard" style="background: #edf1f6; border-radius: 999px">إلغاء</button>
           </div>
         </section>
@@ -116,5 +116,54 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        var saveButton = document.getElementById('save-category-btn');
+        if (!saveButton || !window.AdminBridge) return;
+
+        function slugify(value) {
+          return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        }
+
+        saveButton.addEventListener('click', async function () {
+          var nameAr = (document.getElementById('category-name-ar') || {}).value || '';
+          var nameEn = (document.getElementById('category-name-en') || {}).value || '';
+          var description = (document.getElementById('category-description') || {}).value || '';
+
+          if (!nameAr.trim()) {
+            alert('اسم الصنف بالعربية مطلوب.');
+            return;
+          }
+
+          saveButton.disabled = true;
+          var originalLabel = saveButton.textContent;
+          saveButton.textContent = 'جاري الحفظ...';
+
+          try {
+            await window.AdminBridge.apiRequest('/admin/categories', {
+              method: 'POST',
+              body: {
+                nameAr: nameAr.trim(),
+                nameEn: nameEn.trim() || undefined,
+                description: description.trim() || undefined,
+                slug: slugify(nameEn || nameAr) || 'category-' + Date.now(),
+              },
+            });
+
+            window.AdminBridge.go('/admin/dashboard');
+          } catch (error) {
+            alert('تعذر حفظ الصنف. تأكد من تسجيل الدخول كأدمن.');
+            saveButton.disabled = false;
+            saveButton.textContent = originalLabel;
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+﻿import { useEffect, useMemo } from 'react'
 import {
   Navigate,
   Route,
@@ -9,9 +9,21 @@ import {
 import { ShopProvider, useShop } from './store/ShopContext'
 import './App.css'
 
+function LoadingShell() {
+  return (
+    <section className="single-view">
+      <div className="frame-wrap loading-shell">جاري تحميل البيانات...</div>
+    </section>
+  )
+}
+
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useShop()
+  const { isAuthenticated, isBootstrapping } = useShop()
   const location = useLocation()
+
+  if (isBootstrapping) {
+    return <LoadingShell />
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
@@ -21,9 +33,31 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicOnlyRoute({ children }) {
-  const { isAuthenticated } = useShop()
+  const { isAuthenticated, isBootstrapping } = useShop()
+
+  if (isBootstrapping) {
+    return <LoadingShell />
+  }
 
   if (isAuthenticated) {
+    return <Navigate to="/home" replace />
+  }
+
+  return children
+}
+
+function AdminRoute({ children }) {
+  const { isAuthenticated, isBootstrapping, user } = useShop()
+
+  if (isBootstrapping) {
+    return <LoadingShell />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.role !== 'ADMIN') {
     return <Navigate to="/home" replace />
   }
 
@@ -46,6 +80,7 @@ function BridgeListener() {
   const {
     login,
     register,
+    loginGuest,
     addItem,
     setQty,
     logout,
@@ -53,6 +88,7 @@ function BridgeListener() {
     itemCount,
     subtotal,
     isAuthenticated,
+    isBootstrapping,
   } = useShop()
 
   const cartMap = useMemo(() => {
@@ -79,6 +115,8 @@ function BridgeListener() {
             price: item.price,
             qty: item.qty,
             total: item.total,
+            imageUrl: item.imageUrl,
+            nameEn: item.nameEn,
           })),
         },
         window.location.origin,
@@ -92,7 +130,22 @@ function BridgeListener() {
       }
     }
 
-    function onMessage(event) {
+    function sendAuthError(targetWindow, message) {
+      if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
+        return
+      }
+
+      targetWindow.postMessage(
+        {
+          source: 'react-shell',
+          type: 'auth-error',
+          message: message || 'تعذر إتمام العملية.',
+        },
+        window.location.origin,
+      )
+    }
+
+    async function onMessage(event) {
       if (event.origin !== window.location.origin) {
         return
       }
@@ -113,40 +166,60 @@ function BridgeListener() {
       }
 
       if (payload.type === 'auth-login') {
-        login(payload.phone || '05XXXXXXXX')
-        navigate('/home', { replace: true })
+        try {
+          await login(payload.phone || '')
+          navigate('/home', { replace: true })
+        } catch (error) {
+          sendAuthError(event.source, error?.message)
+        }
         return
       }
 
       if (payload.type === 'auth-register') {
-        register({
-          name: payload.name || 'مستخدم جديد',
-          phone: payload.phone || '05XXXXXXXX',
-        })
-        navigate('/home', { replace: true })
+        try {
+          await register({
+            name: payload.name || '',
+            phone: payload.phone || '',
+          })
+          navigate('/home', { replace: true })
+        } catch (error) {
+          sendAuthError(event.source, error?.message)
+        }
         return
       }
 
       if (payload.type === 'auth-guest') {
-        register({ name: 'ضيف الأرنب', phone: 'guest' })
-        navigate('/home', { replace: true })
+        try {
+          await loginGuest(payload.name || 'ضيف الأرنب')
+          navigate('/home', { replace: true })
+        } catch (error) {
+          sendAuthError(event.source, error?.message)
+        }
         return
       }
 
       if (payload.type === 'add-item' && typeof payload.id === 'string') {
-        const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 1
-        addItem(payload.id, Math.max(1, qty))
+        try {
+          const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 1
+          await addItem(payload.id, Math.max(1, qty))
+        } catch (error) {
+          sendAuthError(event.source, error?.message)
+        }
         return
       }
 
       if (payload.type === 'set-qty' && typeof payload.id === 'string') {
-        const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 0
-        setQty(payload.id, Math.max(0, qty))
+        try {
+          const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 0
+          await setQty(payload.id, Math.max(0, qty))
+        } catch (error) {
+          sendAuthError(event.source, error?.message)
+        }
         return
       }
 
       if (payload.type === 'logout') {
-        logout()
+        await logout()
         navigate('/welcome', { replace: true })
       }
     }
@@ -162,7 +235,9 @@ function BridgeListener() {
       frame.addEventListener('load', onFrameLoad)
     }
 
-    syncCurrentFrame()
+    if (!isBootstrapping) {
+      syncCurrentFrame()
+    }
     const delayedSync = window.setTimeout(syncCurrentFrame, 120)
     const lateSync = window.setTimeout(syncCurrentFrame, 420)
 
@@ -179,9 +254,11 @@ function BridgeListener() {
     cartMap,
     cartItems,
     isAuthenticated,
+    isBootstrapping,
     itemCount,
     location.pathname,
     login,
+    loginGuest,
     logout,
     navigate,
     register,
@@ -282,42 +359,102 @@ function AppRoutes() {
         />
         <Route path="/profile" element={<Navigate to="/orders" replace />} />
 
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/dashboard" replace />
+            </AdminRoute>
+          }
+        />
         <Route
           path="/admin/dashboard"
-          element={<FramePage src="/admin/dashboard.html" title="admin-dashboard" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/dashboard.html" title="admin-dashboard" />
+            </AdminRoute>
+          }
         />
-        <Route path="/admin/orders" element={<Navigate to="/admin/orders/current" replace />} />
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/orders/current" replace />
+            </AdminRoute>
+          }
+        />
         <Route
           path="/admin/orders/current"
-          element={<FramePage src="/admin/current-orders.html" title="admin-current-orders" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/current-orders.html" title="admin-current-orders" />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/orders/completed"
-          element={<FramePage src="/admin/completed-orders.html" title="admin-completed-orders" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/completed-orders.html" title="admin-completed-orders" />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/orders/detail"
-          element={<FramePage src="/admin/order-detail.html" title="admin-order-detail" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/order-detail.html" title="admin-order-detail" />
+            </AdminRoute>
+          }
         />
-        <Route path="/admin/products" element={<Navigate to="/admin/products/new" replace />} />
+        <Route
+          path="/admin/products"
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/products/new" replace />
+            </AdminRoute>
+          }
+        />
         <Route
           path="/admin/products/new"
-          element={<FramePage src="/admin/add-product.html" title="admin-add-product" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/add-product.html" title="admin-add-product" />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/categories/new"
-          element={<FramePage src="/admin/add-category.html" title="admin-add-category" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/add-category.html" title="admin-add-category" />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/discounts/new"
-          element={<FramePage src="/admin/new-discount.html" title="admin-new-discount" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/new-discount.html" title="admin-new-discount" />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/reports/sales"
-          element={<FramePage src="/admin/sales-report.html" title="admin-sales-report" />}
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/sales-report.html" title="admin-sales-report" />
+            </AdminRoute>
+          }
         />
-        <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/dashboard" replace />
+            </AdminRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>

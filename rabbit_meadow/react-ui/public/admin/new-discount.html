@@ -64,12 +64,12 @@
         <section class="card stack">
           <label>
             <div class="label">Offer Title</div>
-            <input class="input-field" type="text" placeholder="e.g. Weekend Fresh Sale" />
+            <input id="discount-title" class="input-field" type="text" placeholder="e.g. Weekend Fresh Sale" />
           </label>
 
           <label>
             <div class="label">Discount Description</div>
-            <textarea class="textarea-field" placeholder="Briefly describe the offer details..."></textarea>
+            <textarea id="discount-description" class="textarea-field" placeholder="Briefly describe the offer details..."></textarea>
           </label>
         </section>
 
@@ -81,7 +81,7 @@
 
           <div class="row soft-card" style="border-radius: 999px">
             <span class="material-symbols-outlined" style="color: #66bcdf">search</span>
-            <input class="input-field" style="background: transparent; padding: 0; border: 0" placeholder="Search product name..." />
+            <input id="discount-target-id" class="input-field" style="background: transparent; padding: 0; border: 0" placeholder="Target product id (e.g. carrot)" value="carrot" />
           </div>
 
           <div class="badge-soft" style="display: inline-flex; align-items: center; gap: 10px; font-size: 18px; width: fit-content">
@@ -99,7 +99,7 @@
           <label>
             <div class="label">Deduction Amount (SAR)</div>
             <div class="row soft-card" style="border-radius: 999px; padding: 14px 18px">
-              <strong style="font-size: 38px">0.00</strong>
+              <input id="discount-value" class="input-field" type="number" min="0" step="0.01" value="0.00" style="padding: 0; border: 0; background: transparent; font-size: 32px; font-weight: 800" />
               <strong style="font-size: 32px">SAR</strong>
             </div>
           </label>
@@ -121,16 +121,16 @@
           <div class="grid-2">
             <label>
               <div class="label">STARTS</div>
-              <input class="input-field" type="text" placeholder="mm/dd/yyyy" />
+              <input id="discount-start-date" class="input-field" type="date" />
             </label>
             <label>
               <div class="label">ENDS</div>
-              <input class="input-field" type="text" placeholder="mm/dd/yyyy" />
+              <input id="discount-end-date" class="input-field" type="date" />
             </label>
           </div>
         </section>
 
-        <button class="cta" data-route="/admin/dashboard">
+        <button id="save-discount-btn" class="cta" type="button">
           <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
           Save Discount
         </button>
@@ -158,5 +158,67 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        var saveButton = document.getElementById('save-discount-btn');
+        if (!saveButton || !window.AdminBridge) return;
+
+        function toIso(dateValue, atEnd) {
+          if (!dateValue) return null;
+          var suffix = atEnd ? 'T23:59:59.000Z' : 'T00:00:00.000Z';
+          return String(dateValue) + suffix;
+        }
+
+        saveButton.addEventListener('click', async function () {
+          var title = (document.getElementById('discount-title') || {}).value || '';
+          var description = (document.getElementById('discount-description') || {}).value || '';
+          var targetId = (document.getElementById('discount-target-id') || {}).value || '';
+          var value = Number((document.getElementById('discount-value') || {}).value || 0);
+          var startDate = (document.getElementById('discount-start-date') || {}).value || '';
+          var endDate = (document.getElementById('discount-end-date') || {}).value || '';
+
+          if (!title.trim()) {
+            alert('Offer title is required.');
+            return;
+          }
+
+          if (!targetId.trim()) {
+            alert('Target product id is required.');
+            return;
+          }
+
+          if (!startDate || !endDate) {
+            alert('Start and end dates are required.');
+            return;
+          }
+
+          saveButton.disabled = true;
+          var originalLabel = saveButton.textContent;
+          saveButton.textContent = 'Saving...';
+
+          try {
+            await window.AdminBridge.apiRequest('/admin/discounts', {
+              method: 'POST',
+              body: {
+                title: title.trim(),
+                description: description.trim() || undefined,
+                type: 'FIXED',
+                value: Number.isFinite(value) ? Math.max(0, value) : 0,
+                startAt: toIso(startDate, false),
+                endAt: toIso(endDate, true),
+                targetType: 'PRODUCT',
+                targetIds: [targetId.trim()],
+              },
+            });
+
+            window.AdminBridge.go('/admin/dashboard');
+          } catch (error) {
+            alert('Failed to save discount. Make sure you are logged in as admin.');
+            saveButton.disabled = false;
+            saveButton.textContent = originalLabel;
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

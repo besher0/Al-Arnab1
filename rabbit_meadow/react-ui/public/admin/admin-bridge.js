@@ -1,11 +1,50 @@
 ﻿(function () {
   var SHOP_STATE_KEY = 'al-arnab-admin-shop-state';
+  var USER_TOKEN_KEY = 'al-arnab-token';
+  var API_BASE_URL = window.__AL_ARNAB_API_BASE__ || 'http://localhost:3000/api';
 
   function send(type, payload) {
     window.parent.postMessage(
       Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
       window.location.origin,
     );
+  }
+
+  function getToken() {
+    try {
+      return window.localStorage.getItem(USER_TOKEN_KEY) || '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  async function apiRequest(path, options) {
+    var token = getToken();
+    if (!token) {
+      throw new Error('missing-token');
+    }
+
+    var response = await fetch(API_BASE_URL + path, {
+      method: (options && options.method) || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+      body: options && options.body ? JSON.stringify(options.body) : undefined,
+    });
+
+    var data = null;
+    try {
+      data = await response.json();
+    } catch (error) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      throw new Error((data && data.message) || 'request-failed');
+    }
+
+    return data;
   }
 
   function handleRouteClick(event) {
@@ -61,6 +100,14 @@
     return 'open';
   }
 
+  function saveShopState(state) {
+    try {
+      window.localStorage.setItem(SHOP_STATE_KEY, state);
+    } catch (error) {
+      // Ignore storage failures.
+    }
+  }
+
   function applyShopState(state, root) {
     var scope = root || document;
     var nextState = state === 'closed' ? 'closed' : 'open';
@@ -83,18 +130,48 @@
       wrap.classList.toggle('is-open', isOpen);
       wrap.classList.toggle('is-closed', !isOpen);
     });
+
+    saveShopState(nextState);
   }
 
-  function setShopState(state) {
-    var nextState = state === 'closed' ? 'closed' : 'open';
-
+  async function syncStoreStateFromBackend() {
     try {
-      window.localStorage.setItem(SHOP_STATE_KEY, nextState);
+      var settings = await apiRequest('/admin/settings/store');
+      var state = settings && settings.isOpen ? 'open' : 'closed';
+      applyShopState(state);
+      return state;
     } catch (error) {
-      // Ignore storage failures.
+      return getShopState();
+    }
+  }
+
+  async function syncStoreStateToBackend(state) {
+    try {
+      await apiRequest('/admin/settings/store', {
+        method: 'PATCH',
+        body: {
+          isOpen: state === 'open',
+        },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async function setShopState(state, options) {
+    var nextState = state === 'closed' ? 'closed' : 'open';
+    applyShopState(nextState);
+
+    if (!options || !options.persistBackend) {
+      return;
     }
 
-    applyShopState(nextState);
+    var saved = await syncStoreStateToBackend(nextState);
+    if (!saved) {
+      // Fallback to local-only state if backend request fails.
+      saveShopState(nextState);
+    }
   }
 
   function bindShopSwitch(root) {
@@ -107,11 +184,14 @@
 
       button.addEventListener('click', function () {
         var state = button.getAttribute('data-shop-toggle');
-        setShopState(state);
+        setShopState(state, { persistBackend: true });
       });
     });
 
     applyShopState(getShopState(), scope);
+
+    // Try syncing from backend after local render, so UI doesn't wait.
+    syncStoreStateFromBackend();
   }
 
   function getAdminPageKey() {
@@ -195,6 +275,7 @@
     bindShopSwitch: bindShopSwitch,
     setShopState: setShopState,
     getShopState: getShopState,
+    apiRequest: apiRequest,
   };
 
   if (document.readyState === 'loading') {

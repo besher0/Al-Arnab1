@@ -1,0 +1,9 @@
+**/node_modules/
+
+rabbit_meadow/backend/dist/
+rabbit_meadow/backend/.env
+rabbit_meadow/backend/backend-dev.log
+
+rabbit_meadow/react-ui/.env
+
+*.log

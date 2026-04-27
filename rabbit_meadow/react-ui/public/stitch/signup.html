@@ -193,6 +193,14 @@
         phone: (phoneInput && phoneInput.value) || '05XXXXXXXX',
       });
     });
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin) return;
+      var payload = event.data;
+      if (!payload || payload.source !== 'react-shell') return;
+      if (payload.type !== 'auth-error') return;
+      alert(payload.message || 'تعذر إنشاء الحساب.');
+    });
   })();
 </script>
 </body></html>
