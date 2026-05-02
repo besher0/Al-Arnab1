@@ -20,7 +20,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = Number(process.env.PORT || 3001);
+  const port = Number(process.env.PORT || 3000);
   await app.listen(port);
   console.log(`API running on http://localhost:${port}/api`);
 }

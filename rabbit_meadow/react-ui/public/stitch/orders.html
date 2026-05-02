@@ -52,6 +52,7 @@
       height: 0;
     }
   </style>
+    <link href="/shared/fonts.css" rel="stylesheet" />
 </head>
 <body class="bg-background font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -131,6 +132,7 @@
       var state = {
         cartCount: 0,
         orders: [],
+        exchangeRate: 15000,
       };
 
       function send(type, payload) {
@@ -147,8 +149,18 @@
         });
       }
 
-      function formatSar(value) {
-        return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
+      function formatPrice(value) {
+        var usdValue = Math.max(0, Number(value) || 0);
+        var localValue = usdValue * Math.max(1, Number(state.exchangeRate) || 1);
+        return localValue.toLocaleString('ar-SY', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }) + ' ?.?';
+      }
+      function applyStoreSettings(store) {
+        var rate = Number(store && store.usdSarRate);
+        if (!Number.isFinite(rate) || rate < 100) return;
+        state.exchangeRate = rate;
       }
 
       function formatDate(value) {
@@ -270,7 +282,7 @@
           '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(formatDate(order.createdAt)) + '</p>' +
           '</div>' +
           '<div class="text-left">' +
-          '<p class="text-primary font-black text-xl">' + escapeHtml(formatSar(total)) + '</p>' +
+          '<p class="text-primary font-black text-xl">' + escapeHtml(formatPrice(total)) + '</p>' +
           '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(itemCount)) + ' صنف</p>' +
           '</div>' +
           '</div>' +
@@ -305,7 +317,7 @@
               '<p class="text-[11px] font-bold mt-1 ' + statusColor(order.status) + '">' + escapeHtml(statusLabel(order.status)) + '</p>' +
               '</div>' +
               '<div class="text-left flex-shrink-0">' +
-              '<p class="font-black text-on-background">' + escapeHtml(formatSar(total)) + '</p>' +
+              '<p class="font-black text-on-background">' + escapeHtml(formatPrice(total)) + '</p>' +
               '<p class="text-[10px] text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(itemCount)) + ' صنف</p>' +
               '</div>' +
               '</div>'
@@ -382,6 +394,7 @@
         if (!payload || payload.source !== 'react-shell') return;
 
         if (payload.type === 'cart-state') {
+          applyStoreSettings(payload.store || {});
           state.cartCount = Math.max(0, Number(payload.itemCount) || 0);
           setFooterCartCount(state.cartCount);
           return;
@@ -406,3 +419,5 @@
   </script>
 </body>
 </html>
+
+

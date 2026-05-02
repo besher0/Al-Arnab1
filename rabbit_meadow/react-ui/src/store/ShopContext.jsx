@@ -10,12 +10,27 @@ import {
 import { api } from '../lib/api'
 
 const TOKEN_STORAGE_KEY = 'al-arnab-token'
+const DEFAULT_EXCHANGE_RATE = 15000
+const DEFAULT_STORE = {
+  currency: 'SYP',
+  usdSarRate: DEFAULT_EXCHANGE_RATE,
+  isOpen: true,
+}
 
 const ShopContext = createContext(null)
 
 function numberValue(value, fallback = 0) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function normalizeStore(storePayload) {
+  const rate = numberValue(storePayload?.usdSarRate, DEFAULT_EXCHANGE_RATE)
+  return {
+    currency: String(storePayload?.currency || DEFAULT_STORE.currency),
+    usdSarRate: rate >= 100 ? rate : DEFAULT_EXCHANGE_RATE,
+    isOpen: Boolean(storePayload?.isOpen ?? true),
+  }
 }
 
 function normalizeCartResponse(cartResponse) {
@@ -86,6 +101,7 @@ export function ShopProvider({ children }) {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [products, setProducts] = useState({})
+  const [store, setStore] = useState(DEFAULT_STORE)
   const [cart, setCart] = useState({
     items: [],
     itemCount: 0,
@@ -95,7 +111,9 @@ export function ShopProvider({ children }) {
   const refreshCatalog = useCallback(async () => {
     const bootstrap = await api.catalog.bootstrap()
     const nextProducts = productsMapFromList(bootstrap?.products)
+    const nextStore = normalizeStore(bootstrap?.store)
     setProducts(nextProducts)
+    setStore(nextStore)
     return nextProducts
   }, [])
 
@@ -121,6 +139,7 @@ export function ShopProvider({ children }) {
       await refreshCatalog()
     } catch {
       setProducts({})
+      setStore(DEFAULT_STORE)
     }
 
     const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY)
@@ -326,6 +345,7 @@ export function ShopProvider({ children }) {
     () => ({
       isBootstrapping,
       products,
+      store,
       isAuthenticated,
       user,
       cartItems: cart.items,
@@ -359,6 +379,7 @@ export function ShopProvider({ children }) {
       loginGuest,
       logout,
       products,
+      store,
       refreshCatalog,
       register,
       setQty,

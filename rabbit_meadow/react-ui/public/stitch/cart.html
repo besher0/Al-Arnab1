@@ -59,6 +59,7 @@
       height: 0;
     }
   </style>
+    <link href="/shared/fonts.css" rel="stylesheet" />
 </head>
 <body class="text-on-surface min-h-screen pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -184,6 +185,7 @@
         itemCount: 0,
         location: null,
         isCheckoutLoading: false,
+        exchangeRate: 15000,
       };
 
       function send(type, payload) {
@@ -209,8 +211,18 @@
         });
       }
 
-      function formatSar(value) {
-        return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
+      function formatPrice(value) {
+        var usdValue = Math.max(0, Number(value) || 0);
+        var localValue = usdValue * Math.max(1, Number(state.exchangeRate) || 1);
+        return localValue.toLocaleString('ar-SY', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }) + ' ?.?';
+      }
+      function applyStoreSettings(store) {
+        var rate = Number(store && store.usdSarRate);
+        if (!Number.isFinite(rate) || rate < 100) return;
+        state.exchangeRate = rate;
       }
 
       function escapeHtml(value) {
@@ -337,11 +349,11 @@
               escapeHtml(item.name || 'منتج') +
               '</h3>' +
               '<span class="font-bold text-primary whitespace-nowrap">' +
-              formatSar(total) +
+              formatPrice(total) +
               '</span>' +
               '</div>' +
               '<p class="text-on-surface-variant text-sm mb-3">سعر القطعة: ' +
-              formatSar(price) +
+              formatPrice(price) +
               '</p>' +
               '<div class="flex justify-end items-center">' +
               '<div class="flex items-center gap-4 bg-sky-50 rounded-full px-4 py-1.5 border border-sky-100">' +
@@ -366,6 +378,7 @@
       }
 
       function applyCartState(payload) {
+        applyStoreSettings(payload.store || {});
         var items = Array.isArray(payload && payload.items) ? payload.items : [];
         state.qtyById = {};
         state.isAuthenticated = Boolean(payload && payload.isAuthenticated);
@@ -376,10 +389,10 @@
           summaryItemCount.textContent = toArabicNumber(state.itemCount);
         }
         if (summarySubtotal) {
-          summarySubtotal.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
+          summarySubtotal.textContent = formatPrice(payload && payload.subtotal ? payload.subtotal : 0);
         }
         if (summaryTotal) {
-          summaryTotal.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
+          summaryTotal.textContent = formatPrice(payload && payload.subtotal ? payload.subtotal : 0);
         }
 
         setFooterCartCount(state.itemCount);
@@ -501,3 +514,5 @@
   </script>
 </body>
 </html>
+
+

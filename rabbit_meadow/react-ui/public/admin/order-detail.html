@@ -13,7 +13,8 @@
       rel="stylesheet"
     />
     <link href="/admin/admin.css" rel="stylesheet" />
-  </head>
+      <link href="/shared/fonts.css" rel="stylesheet" />
+</head>
   <body>
     <section class="admin-shell admin-compact">
       <header class="admin-header">
@@ -60,7 +61,7 @@
           </article>
         </section>
 
-        <section class="soft-card stack">
+        <section id="prepare-section" class="soft-card stack">
           <h3>قبول الطلب وتحديد وقت التجهيز</h3>
           <div class="row orders-filter-row" id="prep-options">
             <button class="pill" data-prep-minutes="15" type="button">15 دقيقة</button>
@@ -73,7 +74,25 @@
           </button>
         </section>
 
-        <section class="card stack" style="border-style: dashed">
+        <section id="delivery-section" class="soft-card stack" style="display: none;">
+          <h3>الطلب قيد التحضير</h3>
+          <p class="muted tiny">بعد تجهيز الطلب اضغط الزر لتحويل الحالة إلى "في الطريق".</p>
+          <button id="move-to-delivery" class="cta" type="button">
+            <span class="material-symbols-outlined" style="vertical-align: middle">local_shipping</span>
+            صار بالتوصيل
+          </button>
+        </section>
+
+        <section id="delivered-section" class="soft-card stack" style="display: none;">
+          <h3>الطلب في الطريق</h3>
+          <p class="muted tiny">عند استلام العميل للطلب اضغط الزر التالي.</p>
+          <button id="mark-delivered" class="cta" type="button">
+            <span class="material-symbols-outlined" style="vertical-align: middle">task_alt</span>
+            تم تسليم الطلب
+          </button>
+        </section>
+
+        <section id="reject-section" class="card stack" style="border-style: dashed">
           <h3 style="color: var(--admin-danger)">رفض الطلب</h3>
           <div class="row orders-filter-row" id="reject-options">
             <button class="chip active" data-reject-reason="المادة غير متوفرة" type="button" style="background: rgba(239, 78, 79, 0.12); color: #d64040">
@@ -125,7 +144,14 @@
         var addressNode = document.getElementById('order-address');
         var feedbackNode = document.getElementById('order-feedback');
 
+        var prepareSection = document.getElementById('prepare-section');
+        var deliverySection = document.getElementById('delivery-section');
+        var deliveredSection = document.getElementById('delivered-section');
+        var rejectSection = document.getElementById('reject-section');
+
         var acceptButton = document.getElementById('accept-order');
+        var moveToDeliveryButton = document.getElementById('move-to-delivery');
+        var markDeliveredButton = document.getElementById('mark-delivered');
         var rejectButton = document.getElementById('reject-order');
 
         var prepButtons = Array.prototype.slice.call(document.querySelectorAll('[data-prep-minutes]'));
@@ -136,6 +162,20 @@
         var selectedPrepMinutes = 20;
         var selectedRejectReason = 'المادة غير متوفرة';
         var isStatusLocked = false;
+
+        function extractMessage(error, fallback) {
+          if (!error) return fallback;
+          var message = String(error.message || '').trim();
+          return message || fallback;
+        }
+
+        function parseOrderIdFromSearch(searchValue) {
+          var raw = String(searchValue || '').trim();
+          if (!raw) return '';
+          var search = raw.charAt(0) === '?' ? raw.slice(1) : raw;
+          var searchParams = new URLSearchParams(search);
+          return (searchParams.get('id') || '').trim();
+        }
 
         function escapeHtml(value) {
           return String(value || '')
@@ -192,8 +232,22 @@
         }
 
         function setActionsDisabled(isDisabled) {
-          acceptButton.disabled = isDisabled;
-          rejectButton.disabled = isDisabled;
+          if (acceptButton) acceptButton.disabled = Boolean(isDisabled);
+          if (moveToDeliveryButton) moveToDeliveryButton.disabled = Boolean(isDisabled);
+          if (markDeliveredButton) markDeliveredButton.disabled = Boolean(isDisabled);
+          if (rejectButton) rejectButton.disabled = Boolean(isDisabled);
+        }
+
+        function setSectionVisible(section, isVisible) {
+          if (!section) return;
+          section.style.display = isVisible ? '' : 'none';
+        }
+
+        function renderStatusActions(status) {
+          setSectionVisible(prepareSection, status === 'NEW');
+          setSectionVisible(rejectSection, status === 'NEW');
+          setSectionVisible(deliverySection, status === 'PREPARING');
+          setSectionVisible(deliveredSection, status === 'ON_THE_WAY');
         }
 
         async function loadOrder() {
@@ -214,6 +268,7 @@
             totalNode.textContent = formatMoney(order.totals && order.totals.total ? order.totals.total : 0);
             addressNode.textContent = formatAddress(order.address);
             renderItems(order.items || []);
+            renderStatusActions(order.status);
 
             if (isStatusLocked) {
               setFeedback('هذا الطلب مغلق ولا يمكن تعديل حالته.', true);
@@ -221,7 +276,7 @@
               setFeedback('', false);
             }
           } catch (error) {
-            setFeedback('تعذر تحميل تفاصيل الطلب.', true);
+            setFeedback(extractMessage(error, 'تعذر تحميل تفاصيل الطلب.'), true);
             renderItems([]);
           } finally {
             setActionsDisabled(isStatusLocked);
@@ -242,9 +297,9 @@
             setFeedback(successMessage, false);
             await loadOrder();
           } catch (error) {
-            setFeedback('تعذر تحديث حالة الطلب. حاول مرة ثانية.', true);
+            setFeedback(extractMessage(error, 'تعذر تحديث حالة الطلب. حاول مرة ثانية.'), true);
           } finally {
-            setActionsDisabled(false);
+            setActionsDisabled(isStatusLocked);
           }
         }
 
@@ -285,6 +340,30 @@
           );
         });
 
+        if (moveToDeliveryButton) {
+          moveToDeliveryButton.addEventListener('click', function () {
+            updateStatus(
+              {
+                status: 'ON_THE_WAY',
+                note: 'الطلب خرج مع مندوب التوصيل',
+              },
+              'تم تحويل الطلب إلى قيد التوصيل.',
+            );
+          });
+        }
+
+        if (markDeliveredButton) {
+          markDeliveredButton.addEventListener('click', function () {
+            updateStatus(
+              {
+                status: 'DELIVERED',
+                note: 'تم تسليم الطلب للعميل',
+              },
+              'تم تسليم الطلب بنجاح.',
+            );
+          });
+        }
+
         rejectButton.addEventListener('click', function () {
           updateStatus(
             {
@@ -294,6 +373,20 @@
             },
             'تم رفض الطلب بنجاح.',
           );
+        });
+
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return;
+          var payload = event.data;
+          if (!payload || payload.source !== 'react-shell') return;
+          if (payload.type !== 'cart-state') return;
+          if (orderId) return;
+
+          var nextOrderId = parseOrderIdFromSearch(payload.route && payload.route.search);
+          if (!nextOrderId) return;
+
+          orderId = nextOrderId;
+          loadOrder();
         });
 
         loadOrder();

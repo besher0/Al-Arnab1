@@ -70,11 +70,14 @@ function AdminRoute({ children }) {
   return children
 }
 
-function FramePage({ src, title }) {
+function FramePage({ src, title, forwardSearch = false }) {
+  const location = useLocation()
+  const frameSrc = forwardSearch ? `${src}${location.search || ''}` : src
+
   return (
     <section className="single-view">
       <div className="frame-wrap">
-        <iframe className="screen-frame" src={src} title={title} />
+        <iframe className="screen-frame" src={frameSrc} title={title} />
       </div>
     </section>
   )
@@ -92,6 +95,7 @@ function BridgeListener() {
     logout,
     checkoutOrder,
     listOrders,
+    store,
     user,
     cartItems,
     itemCount,
@@ -131,6 +135,10 @@ function BridgeListener() {
             imageUrl: item.imageUrl,
             nameEn: item.nameEn,
           })),
+          store: {
+            currency: store?.currency || 'SYP',
+            usdSarRate: Number(store?.usdSarRate) >= 100 ? Number(store.usdSarRate) : 15000,
+          },
           user: user
             ? {
                 id: user.id || '',
@@ -333,6 +341,7 @@ function BridgeListener() {
     navigate,
     register,
     setQty,
+    store,
     subtotal,
     user,
   ])
@@ -392,7 +401,11 @@ function AppRoutes() {
           path="/category-products"
           element={
             <ProtectedRoute>
-              <FramePage src="/stitch/category-products.html" title="category-products" />
+              <FramePage
+                src="/stitch/category-products.html"
+                title="category-products"
+                forwardSearch
+              />
             </ProtectedRoute>
           }
         />
@@ -481,7 +494,11 @@ function AppRoutes() {
           path="/admin/orders/detail"
           element={
             <AdminRoute>
-              <FramePage src="/admin/order-detail.html" title="admin-order-detail" />
+              <FramePage
+                src="/admin/order-detail.html"
+                title="admin-order-detail"
+                forwardSearch
+              />
             </AdminRoute>
           }
         />

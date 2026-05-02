@@ -1,41 +1,62 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;family=Almarai:wght@300;400;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "primary": "#87CEEB",
-                      "on-primary": "#FFFFFF",
-                      "background": "#F0F8FF",
-                      "surface": "#FFFFFF",
-                      "on-background": "#1A365D",
-                      "on-surface": "#1A365D",
-                      "on-surface-variant": "#718096",
-                      "secondary": "#FF6B6B",
-                      "outline-variant": "#E2E8F0"
-              },
-              "borderRadius": {
-                      "DEFAULT": "1rem",
-                      "lg": "2rem",
-                      "xl": "3rem",
-                      "full": "9999px"
-              },
-              "fontFamily": {
-                      "headline": ["Tajawal", "sans-serif"],
-                      "body": ["Almarai", "sans-serif"],
-                      "label": ["Almarai", "sans-serif"]
-              }
-            },
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#87CEEB',
+            'on-primary': '#FFFFFF',
+            background: '#F0F8FF',
+            surface: '#FFFFFF',
+            'on-surface': '#1A365D',
+            'on-surface-variant': '#718096',
+            border: '#D8E9F6',
           },
+          fontFamily: {
+            headline: ['Tajawal', 'sans-serif'],
+            body: ['Almarai', 'sans-serif'],
+          },
+<<<<<<< ours
+        },
+      },
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    html,
+    body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .login-shell {
+      transform-origin: top center;
+    }
+
+    @media (max-height: 760px) {
+      .login-shell {
+        transform: scale(0.92);
+      }
+    }
+  </style>
+=======
         }
     </script>
 <style>
@@ -97,136 +118,126 @@
             }
         }
     </style>
+    <link href="/shared/fonts.css" rel="stylesheet" />
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
 </head>
-<body class="text-on-background h-screen overflow-hidden flex flex-col items-center justify-center p-4 bg-background">
-<!-- Top decorative element representing "The Organic Grove" -->
-<div class="fixed -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-<div class="fixed -bottom-20 -left-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl"></div>
-<div class="login-fit w-full max-w-md relative z-10">
-<!-- Logo Section -->
-<div class="flex flex-col items-center mb-10">
-<div class="w-24 h-24 bg-surface-container-lowest rounded-xl shadow-sm flex items-center justify-center mb-4 overflow-hidden transform rotate-3">
-<div class="bg-primary-container w-16 h-16 rounded-full flex items-center justify-center"><span class="material-symbols-outlined text-primary text-4xl" data-icon="cruelty_free">cruelty_free</span></div>
-</div>
-<h1 class="text-4xl font-black italic tracking-tight text-primary">Al-Arnab</h1>
-<p class="text-on-surface-variant font-medium mt-2">ط¹ط§ظ„ظ… ط·ط§ط²ط¬ ط¨ظٹظ† ظٹط¯ظٹظƒ</p>
-</div>
-<!-- Login Card -->
-<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_4px_32px_rgba(11,54,29,0.06)] relative overflow-hidden">
-<!-- Decorative Carrot Accent -->
-<div class="absolute -top-4 -left-4 opacity-10">
-<span class="material-symbols-outlined text-secondary text-8xl" data-icon="nutrition">nutrition</span>
-</div>
-<div class="relative z-10">
-<h2 class="text-2xl font-bold text-on-background mb-1">طھط³ط¬ظٹظ„ ط¯ط®ظˆظ„ ط§ظ„ظ…ط³طھط®ط¯ظ…</h2>
-<p class="text-on-surface-variant text-sm mb-8">ط£ظ‡ظ„ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ط¹ط§ط¦ظ„ط© ط§ظ„ط£ط±ظ†ط¨</p>
-<form class="space-y-5">
-<!-- Email/Phone Field -->
-<div class="space-y-1.5">
-<label class="text-sm font-bold text-on-surface-variant pr-1">ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-tertiary text-lg" data-icon="call">call</span>
-<input class="w-full bg-surface-container-low border-none rounded-full py-4 pr-12 pl-4 focus:ring-2 focus:ring-primary/20 text-on-background placeholder:text-on-surface-variant/50 transition-all" placeholder="05xxxxxxxx" type="text"/>
-</div>
-</div>
-<!-- Password Field -->
-<div class="space-y-1.5">
-<label class="text-sm font-bold text-on-surface-variant pr-1">ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary text-lg" data-icon="lock">lock</span>
-<input class="w-full bg-surface-container-low border-none rounded-full py-4 pr-12 pl-4 focus:ring-2 focus:ring-primary/20 text-on-background placeholder:text-on-surface-variant/50 transition-all" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" id="login-password-input" type="password"/>
-<button class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/60" data-password-toggle="login-password-input" type="button">
-<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
-<!-- Forgot Password Link -->
-<div class="flex justify-end">
-<a class="text-sm font-bold text-primary hover:text-blue-700 transition-colors" href="#">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
-</div>
-<!-- Login Button -->
-<button class="w-full text-on-primary font-bold py-4 rounded-full shadow-lg shadow-primary/10 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 blue-gradient" type="submit">
-<span>طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</span>
-<span class="material-symbols-outlined" data-icon="login">login</span>
-</button>
-</form>
-<!-- Social Login Divider -->
-<!-- Social Login Buttons -->
-</div>
-</div>
-<!-- Sign Up Link -->
-<div class="mt-8 text-center">
-<p class="text-on-surface-variant">
-                ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں 
-                <a class="text-primary font-extrabold hover:underline" href="#">ط³ط¬ظ„ ط§ظ„ط¢ظ† ظ…ط¬ط§ظ†ط§ظ‹</a>
-</p>
-</div>
-</div>
-<!-- Background Illustrative Imagery (Non-functional, purely aesthetic) -->
-<script>
+<body class="bg-background text-on-surface font-body h-screen overflow-hidden flex items-center justify-center p-4">
+  <div class="fixed -top-24 -right-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl"></div>
+  <div class="fixed -bottom-24 -left-16 w-80 h-80 bg-primary/20 rounded-full blur-3xl"></div>
+
+  <section class="login-shell w-full max-w-md relative z-10">
+    <header class="text-center mb-7">
+      <div class="inline-flex w-20 h-20 rounded-3xl bg-white items-center justify-center shadow-sm border border-border mb-4">
+        <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">pets</span>
+      </div>
+      <h1 class="font-headline font-black text-4xl text-on-surface">Al-Arnab</h1>
+      <p class="text-on-surface-variant mt-2">تسجيل الدخول إلى حسابك</p>
+    </header>
+
+    <div class="bg-surface border border-border rounded-[28px] p-6 shadow-[0_14px_40px_rgba(26,54,93,0.09)]">
+      <h2 class="font-headline font-extrabold text-2xl mb-6">أهلًا بعودتك</h2>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="login-phone" class="block text-sm font-bold text-on-surface-variant mb-2">رقم الهاتف</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">call</span>
+            <input id="login-phone" type="tel" placeholder="05xxxxxxxx" class="w-full h-12 rounded-full border border-border bg-white pr-12 pl-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          </div>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-sm font-bold text-on-surface-variant mb-2">كلمة المرور</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
+            <input id="login-password" type="password" placeholder="••••••••" class="w-full h-12 rounded-full border border-border bg-white pr-12 pl-12 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            <button type="button" data-password-toggle="login-password" class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full h-12 rounded-full bg-primary text-on-primary font-headline font-bold text-lg shadow-md shadow-sky-200 hover:opacity-90 transition-all">
+          تسجيل الدخول
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-on-surface-variant mt-6">
+        ليس لديك حساب؟
+        <a id="go-signup" href="/signup" class="font-extrabold text-on-surface hover:underline">إنشاء حساب</a>
+      </p>
+    </div>
+  </section>
+
+  <script>
     (function () {
-        function send(type, payload) {
-            window.parent.postMessage(
-                Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
-                window.location.origin,
-            );
-        }
+      function send(type, payload) {
+        window.parent.postMessage(
+          Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+          window.location.origin,
+        );
+      }
 
-        var signupLink = document.querySelector('.mt-8 a');
-        if (signupLink) {
-            signupLink.href = '/signup';
-            signupLink.addEventListener('click', function (event) {
-                event.preventDefault();
-                send('navigate', { to: '/signup' });
-            });
-        }
-
-        var form = document.querySelector('form');
-        if (!form) return;
-
-        var toggleButtons = document.querySelectorAll('[data-password-toggle]');
-        toggleButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
-                var inputId = button.getAttribute('data-password-toggle');
-                if (!inputId) return;
-
-                var targetInput = document.getElementById(inputId);
-                if (!targetInput) return;
-
-                var isPassword = targetInput.type === 'password';
-                targetInput.type = isPassword ? 'text' : 'password';
-
-                var icon = button.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    icon.textContent = isPassword ? 'visibility_off' : 'visibility';
-                }
-            });
+      var signupLink = document.getElementById('go-signup');
+      if (signupLink) {
+        signupLink.addEventListener('click', function (event) {
+          event.preventDefault();
+          send('navigate', { to: '/signup' });
         });
+      }
 
+      var form = document.getElementById('login-form');
+      var phoneInput = document.getElementById('login-phone');
+
+      var toggles = document.querySelectorAll('[data-password-toggle]');
+      toggles.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var inputId = button.getAttribute('data-password-toggle');
+          if (!inputId) return;
+
+          var input = document.getElementById(inputId);
+          if (!input) return;
+
+          var hidden = input.type === 'password';
+          input.type = hidden ? 'text' : 'password';
+
+          var icon = button.querySelector('.material-symbols-outlined');
+          if (icon) {
+            icon.textContent = hidden ? 'visibility_off' : 'visibility';
+          }
+        });
+      });
+
+      if (form) {
         form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            var phoneInput = form.querySelector('input[type="text"]') || form.querySelector('input');
-            var phone = (phoneInput && phoneInput.value ? phoneInput.value : '').trim();
+          event.preventDefault();
 
-            if (!phone) {
-                alert('ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ ظ…ط·ظ„ظˆط¨.');
-                return;
-            }
+          var phone = String(phoneInput && phoneInput.value ? phoneInput.value : '').trim();
+          if (!phone) {
+            alert('رقم الهاتف مطلوب.');
+            return;
+          }
 
-            send('auth-login', {
-                phone: phone,
-            });
+          send('auth-login', { phone: phone });
         });
+      }
 
-        window.addEventListener('message', function (event) {
-            if (event.origin !== window.location.origin) return;
-            var payload = event.data;
-            if (!payload || payload.source !== 'react-shell') return;
-            if (payload.type !== 'auth-error') return;
-            alert(payload.message || 'طھط¹ط°ط± طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„.');
-        });
+      window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin) return;
+
+        var payload = event.data;
+        if (!payload || payload.source !== 'react-shell') return;
+        if (payload.type !== 'auth-error') return;
+
+        alert(payload.message || 'تعذر تسجيل الدخول.');
+      });
     })();
-</script>
-</body></html>
-
-
+  </script>
+</body>
+</html>

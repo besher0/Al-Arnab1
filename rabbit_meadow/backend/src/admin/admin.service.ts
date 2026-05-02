@@ -188,6 +188,22 @@ export class AdminService {
       throw new BadRequestException('يجب إرسال سبب الرفض.');
     }
 
+    const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.NEW]: [OrderStatus.PREPARING, OrderStatus.REJECTED],
+      [OrderStatus.PREPARING]: [OrderStatus.ON_THE_WAY, OrderStatus.REJECTED],
+      [OrderStatus.ON_THE_WAY]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.REJECTED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+
+    if (existing.status !== payload.status) {
+      const nextAllowed = allowedTransitions[existing.status] || [];
+      if (!nextAllowed.includes(payload.status)) {
+        throw new BadRequestException('لا يمكن تحديث الطلب لهذه الحالة من وضعه الحالي.');
+      }
+    }
+
     await this.prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: orderId },
@@ -535,8 +551,8 @@ export class AdminService {
       create: {
         id: 1,
         isOpen: true,
-        currency: 'SAR',
-        usdSarRate: 3.75,
+        currency: 'SYP',
+        usdSarRate: 15000,
       },
     });
   }

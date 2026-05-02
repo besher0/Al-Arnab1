@@ -164,7 +164,13 @@ export class CartService {
   }
 
   async confirmOrder(userId: string, orderId: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        address: true,
+        items: { include: { product: true }, orderBy: { createdAt: 'asc' } },
+      },
+    });
     if (!order || order.userId !== userId) {
       throw new NotFoundException('الطلب غير موجود.');
     }
@@ -219,7 +225,12 @@ export class CartService {
         if (!item.productId) continue;
 
         const product = await tx.product.findUnique({ where: { id: item.productId } });
-        const beforeQty = product ? Number(product.stockQty) : 0;
+        if (!product) {
+          // Product may have been deleted after the order was created.
+          continue;
+        }
+
+        const beforeQty = Number(product.stockQty);
         const qty = Number(item.qty);
         const afterQty = beforeQty + qty;
 

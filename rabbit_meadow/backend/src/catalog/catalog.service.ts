@@ -65,8 +65,8 @@ export class CatalogService {
     return {
       store: {
         isOpen: settings?.isOpen ?? true,
-        currency: settings?.currency ?? 'SAR',
-        usdSarRate: decimalToNumber(settings?.usdSarRate),
+        currency: settings?.currency ?? 'SYP',
+        usdSarRate: decimalToNumber(settings?.usdSarRate) || 15000,
       },
       categories,
       products,
