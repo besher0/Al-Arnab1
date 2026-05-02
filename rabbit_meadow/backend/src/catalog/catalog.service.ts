@@ -47,8 +47,6 @@ export class CatalogService {
       unit: product.unit,
       price: decimalToNumber(product.sellPrice),
       costPrice: decimalToNumber(product.costPrice),
-      stockQty: decimalToNumber(product.stockQty),
-      minStock: decimalToNumber(product.minStock),
       imageUrl: product.imageUrl,
       isActive: product.isActive,
       isNew: product.isNew,

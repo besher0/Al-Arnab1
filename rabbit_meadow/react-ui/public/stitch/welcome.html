@@ -72,14 +72,14 @@
       height: 0;
     }
   </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-background text-on-background h-screen flex flex-col overflow-hidden">
 <!-- Top App Bar -->
 <header class="w-full bg-white/80 backdrop-blur-3xl flex justify-between items-center px-6 py-4">
 <div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[#87CEEB] text-2xl">spa</span>
-<span class="text-2xl font-bold text-[#1A365D] font-tajawal">Al-Furqan</span>
+<span class="material-symbols-outlined text-[#87CEEB] text-2xl">pets</span>
+<span class="text-2xl font-bold text-[#1A365D] font-tajawal">الأرنب</span>
 </div>
 <button id="skip-guest-button" class="text-[#718096] font-tajawal font-bold text-lg hover:opacity-80 transition-opacity">تخطي</button>
 </header>
@@ -128,10 +128,32 @@
       );
     }
 
+    var guestButtons = [];
+    var isGuestPending = false;
+
+    function setGuestPending(nextPending) {
+      isGuestPending = Boolean(nextPending);
+      guestButtons.forEach(function (button) {
+        button.disabled = isGuestPending;
+        button.style.opacity = isGuestPending ? '0.6' : '';
+        button.style.pointerEvents = isGuestPending ? 'none' : '';
+      });
+    }
+
+    function loginAsGuest() {
+      if (isGuestPending) {
+        return;
+      }
+
+      setGuestPending(true);
+      send('auth-guest', { name: 'ضيف الأرنب' });
+    }
+
     var skipGuestButton = document.getElementById('skip-guest-button');
     if (skipGuestButton) {
+      guestButtons.push(skipGuestButton);
       skipGuestButton.addEventListener('click', function () {
-        send('auth-guest');
+        loginAsGuest();
       });
     }
 
@@ -147,10 +169,24 @@
       });
     }
     if (actionButtons[2]) {
+      guestButtons.push(actionButtons[2]);
       actionButtons[2].addEventListener('click', function () {
-        send('auth-guest');
+        loginAsGuest();
       });
     }
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin) return;
+
+      var payload = event.data;
+      if (!payload || payload.source !== 'react-shell') return;
+      if (payload.type !== 'auth-error') return;
+
+      setGuestPending(false);
+      alert(payload.message || 'تعذر تسجيل الدخول كزائر.');
+    });
   })();
 </script>
 </body></html>
+
+

@@ -67,7 +67,7 @@
           height: 0;
         }
       </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="text-on-surface bg-background min-h-screen">
 <!-- Top AppBar -->
@@ -164,7 +164,6 @@
       selectedProductId: '',
       qty: 1,
       cartById: {},
-      exchangeRate: 15000,
     };
 
     function toArabicNumber(value) {
@@ -183,18 +182,8 @@
       return Number.isNaN(parsed) ? 1 : parsed;
     }
 
-    function formatPrice(value) {
-      var usdValue = Math.max(0, Number(value) || 0);
-      var localValue = usdValue * Math.max(1, Number(state.exchangeRate) || 1);
-      return localValue.toLocaleString('ar-SY', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }) + ' ?.?';
-    }
-    function applyStoreSettings(store) {
-      var rate = Number(store && store.usdSarRate);
-      if (!Number.isFinite(rate) || rate < 100) return;
-      state.exchangeRate = rate;
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ط±.ط³';
     }
 
     function setFooterCartCount(count) {
@@ -243,7 +232,7 @@
       if (!product) {
         if (titleNode) titleNode.textContent = 'ظ…ظ†طھط¬ ط؛ظٹط± ظ…طھظˆظپط±';
         if (subtitleNode) subtitleNode.textContent = 'طھط¹ط°ط± طھط­ظ…ظٹظ„ طھظپط§طµظٹظ„ ط§ظ„ظ…ظ†طھط¬';
-        if (priceNode) priceNode.textContent = formatPrice(0);
+        if (priceNode) priceNode.textContent = formatSar(0);
         return;
       }
 
@@ -259,7 +248,7 @@
         subtitleNode.textContent = product.categoryName || product.description || 'ظ…ظ†طھط¬ ط·ط§ط²ط¬ ظ…ظ† ط§ظ„ط£ط±ظ†ط¨';
       }
       if (priceNode) {
-        priceNode.textContent = formatPrice(product.price);
+        priceNode.textContent = formatSar(product.price);
       }
 
       window.localStorage.setItem(STORAGE_PRODUCT, product.id);
@@ -269,7 +258,6 @@
     }
 
     function applyCartState(payload) {
-      applyStoreSettings(payload.store || {});
       var items = Array.isArray(payload && payload.items) ? payload.items : [];
       state.cartById = {};
       items.forEach(function (item) {
@@ -363,20 +351,17 @@
       if (payload.type !== 'cart-state') return;
 
       applyCartState(payload);
-      renderProductDetails();
     });
 
-    fetch(API_BASE + '/catalog/bootstrap')
+    fetch(API_BASE + '/catalog/products')
       .then(function (response) {
         if (!response.ok) {
           throw new Error('catalog');
         }
         return response.json();
       })
-      .then(function (payload) {
-        applyStoreSettings(payload && payload.store ? payload.store : {});
-        var products = Array.isArray(payload && payload.products) ? payload.products : [];
-        state.products = products;
+      .then(function (products) {
+        state.products = Array.isArray(products) ? products : [];
         state.selectedProductId = getSelectedProductId();
 
         var hasSelected = state.products.some(function (product) {

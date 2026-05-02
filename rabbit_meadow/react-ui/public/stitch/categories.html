@@ -115,7 +115,7 @@
             height: 0;
         }
     </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-surface text-on-surface antialiased min-h-screen">
 <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -136,12 +136,12 @@
 </header>
 <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
 <div class="mb-8">
-<h2 class="font-tajawal font-black text-4xl text-on-background mb-6">التصنيفات</h2>
+<h2 class="font-tajawal font-black text-4xl text-on-background mb-6">الأقسام</h2>
 <div class="relative group">
 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
 <span class="material-symbols-outlined text-tertiary">search</span>
 </div>
-<input class="w-full bg-surface-container-lowest border-none rounded-full py-4 pr-12 pl-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary shadow-sm text-lg" placeholder="ابحث عن خضروات، فواكه، أو مخبوزات..." type="text"/>
+<input class="w-full bg-surface-container-lowest border-none rounded-full py-4 pr-12 pl-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary shadow-sm text-lg" placeholder="ابحث عن قسم أو منتج..." type="text"/>
 </div>
 </div>
 <div class="grid grid-cols-2 gap-4">
@@ -152,7 +152,7 @@
 <p class="text-white/80 text-sm">طازجة من المزرعة يومياً</p>
 </div>
 <div class="absolute top-4 left-4 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold">
-                    الأكثر طلباً
+                    الأكثر طلبًا
                 </div>
 </div>
 <div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
@@ -402,5 +402,7 @@
     })();
 </script>
 </body></html>
+
+
 
 

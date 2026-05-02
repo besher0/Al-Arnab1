@@ -105,7 +105,7 @@
       height: 0;
     }
   </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-background text-on-background font-almarai selection:bg-primary-container selection:text-on-primary-container">
 <!-- Top Navigation Bar -->
@@ -335,7 +335,6 @@
       products: [],
       selectedCategoryId: '',
       qtyByProduct: {},
-      exchangeRate: 15000,
     };
     var routeSelectedCategoryId = '';
 
@@ -384,18 +383,8 @@
       }
     }
 
-    function formatPrice(value) {
-      var usdValue = Math.max(0, Number(value) || 0);
-      var localValue = usdValue * Math.max(1, Number(state.exchangeRate) || 1);
-      return localValue.toLocaleString('ar-SY', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }) + ' ?.?';
-    }
-    function applyStoreSettings(store) {
-      var rate = Number(store && store.usdSarRate);
-      if (!Number.isFinite(rate) || rate < 100) return;
-      state.exchangeRate = rate;
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ط±.ط³';
     }
 
     function setCartCount(count) {
@@ -480,7 +469,7 @@
             escapeHtml(product.unit || '') +
             '</span>' +
             '<div class="mt-2 mb-3"><span class="text-lg font-black text-primary block">' +
-            formatPrice(product.price) +
+            formatSar(product.price) +
             '</span></div>' +
             '<div class="mt-auto space-y-2">' +
             '<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">' +
@@ -580,7 +569,6 @@
     });
 
     function applyBootstrap(payload) {
-      applyStoreSettings(payload && payload.store ? payload.store : {});
       state.categories = Array.isArray(payload && payload.categories) ? payload.categories : [];
       state.products = Array.isArray(payload && payload.products) ? payload.products : [];
 
@@ -607,8 +595,6 @@
       var payload = event.data;
       if (!payload || payload.source !== 'react-shell') return;
       if (payload.type !== 'cart-state') return;
-      applyStoreSettings(payload.store || {});
-      renderProducts();
 
       if (payload.route && payload.route.pathname === '/category-products') {
         applyRouteCategorySelection(payload.route.search || '');

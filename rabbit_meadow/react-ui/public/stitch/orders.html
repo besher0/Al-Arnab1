@@ -52,7 +52,7 @@
       height: 0;
     }
   </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-background font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -96,6 +96,21 @@
     </section>
   </main>
 
+  <div id="order-details-modal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" data-close-order-modal="true"></div>
+    <div class="relative h-full w-full flex items-end justify-center p-3 sm:p-5">
+      <section class="w-full max-w-2xl bg-white rounded-3xl shadow-[0_20px_50px_rgba(26,54,93,0.24)] max-h-[86vh] overflow-hidden">
+        <header class="flex items-center justify-between px-5 py-4 border-b border-primary/10">
+          <h3 id="order-details-title" class="font-headline font-extrabold text-lg text-on-surface">تفاصيل الطلب</h3>
+          <button type="button" class="w-9 h-9 rounded-full bg-surface-container text-on-surface flex items-center justify-center" data-close-order-modal="true">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </header>
+        <div id="order-details-body" class="p-5 overflow-y-auto max-h-[calc(86vh-74px)]"></div>
+      </section>
+    </div>
+  </div>
+
   <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
     <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
       <span class="material-symbols-outlined" data-icon="home">home</span>
@@ -128,11 +143,13 @@
       var currentCard = document.getElementById('current-order-card');
       var historyList = document.getElementById('orders-history-list');
       var searchInput = document.getElementById('orders-search-input');
+      var orderDetailsModal = document.getElementById('order-details-modal');
+      var orderDetailsBody = document.getElementById('order-details-body');
+      var orderDetailsTitle = document.getElementById('order-details-title');
 
       var state = {
         cartCount: 0,
         orders: [],
-        exchangeRate: 15000,
       };
 
       function send(type, payload) {
@@ -149,18 +166,8 @@
         });
       }
 
-      function formatPrice(value) {
-        var usdValue = Math.max(0, Number(value) || 0);
-        var localValue = usdValue * Math.max(1, Number(state.exchangeRate) || 1);
-        return localValue.toLocaleString('ar-SY', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }) + ' ?.?';
-      }
-      function applyStoreSettings(store) {
-        var rate = Number(store && store.usdSarRate);
-        if (!Number.isFinite(rate) || rate < 100) return;
-        state.exchangeRate = rate;
+      function formatSar(value) {
+        return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
       }
 
       function formatDate(value) {
@@ -209,6 +216,14 @@
         return ['NEW', 'PREPARING', 'ON_THE_WAY'];
       }
 
+      function statusBadgeClass(status) {
+        if (status === 'DELIVERED') return 'bg-emerald-100 text-emerald-700';
+        if (status === 'REJECTED' || status === 'CANCELLED') return 'bg-red-100 text-red-700';
+        if (status === 'ON_THE_WAY') return 'bg-sky-100 text-sky-700';
+        if (status === 'PREPARING') return 'bg-amber-100 text-amber-700';
+        return 'bg-surface-container text-on-surface';
+      }
+
       function setFooterCartCount(count) {
         var next = Math.max(0, Number(count) || 0);
         var badges = document.querySelectorAll('.cart-badge');
@@ -227,6 +242,105 @@
         });
       }
 
+      function findOrderById(orderId) {
+        if (!orderId) return null;
+        for (var i = 0; i < state.orders.length; i += 1) {
+          if (String(state.orders[i].id || '') === String(orderId)) {
+            return state.orders[i];
+          }
+        }
+        return null;
+      }
+
+      function orderLocationText(order) {
+        if (!order || !order.location) return 'الموقع غير متوفر';
+
+        var lat = Number(order.location.latitude);
+        var lng = Number(order.location.longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return 'GPS: ' + lat.toFixed(6) + ', ' + lng.toFixed(6);
+        }
+
+        var city = order.location.city ? String(order.location.city) : '';
+        var street = order.location.street ? String(order.location.street) : '';
+        var combined = [city, street].filter(Boolean).join(' - ');
+        return combined || 'الموقع غير متوفر';
+      }
+
+      function openOrderDetails(order) {
+        if (!order || !orderDetailsModal || !orderDetailsBody) return;
+
+        var total = Number(order && order.totals ? order.totals.total : 0) || 0;
+        var subtotal = Number(order && order.totals ? order.totals.subtotal : 0) || 0;
+        var itemCount = Number(order && order.itemCount ? order.itemCount : 0) || 0;
+        var items = Array.isArray(order.items) ? order.items : [];
+
+        if (orderDetailsTitle) {
+          orderDetailsTitle.textContent = 'تفاصيل الطلب #' + String(order.orderNumber || '-');
+        }
+
+        orderDetailsBody.innerHTML =
+          '<div class="space-y-4">' +
+          '<div class="bg-surface-container-low rounded-2xl p-4 space-y-2">' +
+          '<div class="flex items-center justify-between gap-2">' +
+          '<p class="text-sm text-on-surface-variant">حالة الطلب</p>' +
+          '<span class="text-xs font-bold px-3 py-1 rounded-full ' + statusBadgeClass(order.status) + '">' +
+          escapeHtml(statusLabel(order.status)) +
+          '</span>' +
+          '</div>' +
+          '<div class="flex items-center justify-between gap-2">' +
+          '<p class="text-sm text-on-surface-variant">تاريخ الطلب</p>' +
+          '<p class="text-sm font-bold">' + escapeHtml(formatDate(order.createdAt)) + '</p>' +
+          '</div>' +
+          '<div class="flex items-center justify-between gap-2">' +
+          '<p class="text-sm text-on-surface-variant">عدد الأصناف</p>' +
+          '<p class="text-sm font-bold">' + escapeHtml(toArabicNumber(itemCount)) + '</p>' +
+          '</div>' +
+          '<div class="flex items-center justify-between gap-2">' +
+          '<p class="text-sm text-on-surface-variant">الإجمالي</p>' +
+          '<p class="text-base font-black text-primary">' + escapeHtml(formatSar(total)) + '</p>' +
+          '</div>' +
+          '</div>' +
+          '<div class="bg-surface-container-low rounded-2xl p-4">' +
+          '<p class="text-sm text-on-surface-variant mb-2">معلومات التوصيل</p>' +
+          '<p class="text-sm font-bold">رقم التواصل: ' + escapeHtml(order.alternatePhone || '-') + '</p>' +
+          '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(orderLocationText(order)) + '</p>' +
+          '</div>' +
+          '<div class="space-y-2">' +
+          '<p class="text-sm font-bold text-on-surface">عناصر الطلب</p>' +
+          (items.length
+            ? items
+                .map(function (item) {
+                  var lineTotal = Number(item && item.lineTotal ? item.lineTotal : 0) || 0;
+                  var qty = Number(item && item.qty ? item.qty : 0) || 0;
+                  return (
+                    '<div class="bg-surface-container-lowest border border-primary/10 rounded-xl p-3 flex items-center justify-between gap-3">' +
+                    '<div class="min-w-0">' +
+                    '<p class="font-bold truncate">' + escapeHtml(item && item.name ? item.name : 'منتج') + '</p>' +
+                    '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(qty)) + ' × ' + escapeHtml(formatSar(item && item.unitPrice ? item.unitPrice : 0)) + '</p>' +
+                    '</div>' +
+                    '<p class="font-black text-sm text-on-background">' + escapeHtml(formatSar(lineTotal)) + '</p>' +
+                    '</div>'
+                  );
+                })
+                .join('')
+            : '<div class="bg-surface-container-low rounded-xl p-4 text-sm text-on-surface-variant text-center">لا يوجد عناصر مسجلة لهذا الطلب.</div>') +
+          '</div>' +
+          '<div class="bg-surface-container-low rounded-2xl p-4 text-xs text-on-surface-variant">' +
+          '<p class="flex items-center justify-between"><span>المجموع الفرعي</span><strong class="text-on-surface">' + escapeHtml(formatSar(subtotal)) + '</strong></p>' +
+          '<p class="flex items-center justify-between mt-1"><span>الخصم</span><strong class="text-on-surface">' + escapeHtml(formatSar(order && order.totals ? order.totals.discountTotal : 0)) + '</strong></p>' +
+          '<p class="flex items-center justify-between mt-1"><span>التوصيل</span><strong class="text-on-surface">' + escapeHtml(formatSar(order && order.totals ? order.totals.deliveryFee : 0)) + '</strong></p>' +
+          '</div>' +
+          '</div>';
+
+        orderDetailsModal.classList.remove('hidden');
+      }
+
+      function closeOrderDetails() {
+        if (!orderDetailsModal) return;
+        orderDetailsModal.classList.add('hidden');
+      }
+
       function orderMatchesFilter(order, query) {
         if (!query) return true;
         var normalized = query.toLowerCase();
@@ -237,6 +351,8 @@
       }
 
       function renderEmptyState() {
+        closeOrderDetails();
+
         if (currentBadge) {
           currentBadge.textContent = '0 نشط';
         }
@@ -274,7 +390,7 @@
           : 'الموقع غير متوفر';
 
         currentCard.innerHTML =
-          '<div class="space-y-4">' +
+          '<button type="button" class="w-full text-right space-y-4 transition-transform hover:scale-[0.995] active:scale-[0.99]" data-order-id="' + escapeHtml(order.id || '') + '">' +
           '<div class="flex justify-between items-start gap-3">' +
           '<div>' +
           '<h3 class="font-headline font-extrabold text-lg">#' + escapeHtml(order.orderNumber || '-') + '</h3>' +
@@ -282,15 +398,16 @@
           '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(formatDate(order.createdAt)) + '</p>' +
           '</div>' +
           '<div class="text-left">' +
-          '<p class="text-primary font-black text-xl">' + escapeHtml(formatPrice(total)) + '</p>' +
+          '<p class="text-primary font-black text-xl">' + escapeHtml(formatSar(total)) + '</p>' +
           '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(itemCount)) + ' صنف</p>' +
           '</div>' +
           '</div>' +
           '<div class="bg-surface-container rounded-xl p-3 text-xs text-on-surface-variant">' +
-          '<p class="font-bold">الهاتف البديل: ' + escapeHtml(order.alternatePhone || '-') + '</p>' +
+          '<p class="font-bold">رقم التواصل: ' + escapeHtml(order.alternatePhone || '-') + '</p>' +
           '<p class="mt-1">' + escapeHtml(locationText) + '</p>' +
           '</div>' +
-          '</div>';
+          '<p class="text-[11px] text-primary font-bold">اضغط لعرض تفاصيل الطلب</p>' +
+          '</button>';
       }
 
       function renderHistoryList(orders) {
@@ -310,17 +427,17 @@
             var total = Number(order && order.totals ? order.totals.total : 0) || 0;
             var itemCount = Number(order && order.itemCount ? order.itemCount : 0) || 0;
             return (
-              '<div class="bg-surface-container-low rounded-xl p-4 flex items-center justify-between gap-3">' +
+              '<button type="button" class="w-full text-right bg-surface-container-low rounded-xl p-4 flex items-center justify-between gap-3 transition-transform hover:scale-[0.995] active:scale-[0.99]" data-order-id="' + escapeHtml(order.id || '') + '">' +
               '<div class="min-w-0">' +
               '<h4 class="font-bold text-on-surface truncate">#' + escapeHtml(order.orderNumber || '-') + '</h4>' +
               '<p class="text-on-surface-variant text-xs mt-0.5">' + escapeHtml(formatDate(order.createdAt)) + '</p>' +
               '<p class="text-[11px] font-bold mt-1 ' + statusColor(order.status) + '">' + escapeHtml(statusLabel(order.status)) + '</p>' +
               '</div>' +
               '<div class="text-left flex-shrink-0">' +
-              '<p class="font-black text-on-background">' + escapeHtml(formatPrice(total)) + '</p>' +
+              '<p class="font-black text-on-background">' + escapeHtml(formatSar(total)) + '</p>' +
               '<p class="text-[10px] text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(itemCount)) + ' صنف</p>' +
               '</div>' +
-              '</div>'
+              '</button>'
             );
           })
           .join('');
@@ -376,6 +493,24 @@
       });
 
       document.addEventListener('click', function (event) {
+        var closeModalButton = event.target.closest('[data-close-order-modal="true"]');
+        if (closeModalButton) {
+          event.preventDefault();
+          closeOrderDetails();
+          return;
+        }
+
+        var orderButton = event.target.closest('[data-order-id]');
+        if (orderButton) {
+          event.preventDefault();
+          var orderId = orderButton.getAttribute('data-order-id');
+          var order = findOrderById(orderId);
+          if (order) {
+            openOrderDetails(order);
+          }
+          return;
+        }
+
         var cartButton = event.target.closest('[data-go-cart="true"]');
         if (!cartButton) return;
         event.preventDefault();
@@ -388,13 +523,18 @@
         });
       }
 
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          closeOrderDetails();
+        }
+      });
+
       window.addEventListener('message', function (event) {
         if (event.origin !== window.location.origin) return;
         var payload = event.data;
         if (!payload || payload.source !== 'react-shell') return;
 
         if (payload.type === 'cart-state') {
-          applyStoreSettings(payload.store || {});
           state.cartCount = Math.max(0, Number(payload.itemCount) || 0);
           setFooterCartCount(state.cartCount);
           return;
@@ -408,6 +548,7 @@
           }
 
           state.orders = Array.isArray(payload.orders) ? payload.orders : [];
+          closeOrderDetails();
           renderOrders();
         }
       });

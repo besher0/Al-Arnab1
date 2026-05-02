@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
 import { PrismaService } from '../prisma/prisma.service';
@@ -221,35 +226,6 @@ export class CartService {
     const updated = await this.prisma.$transaction(async (tx) => {
       await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.CANCELLED } });
 
-      for (const item of order.items) {
-        if (!item.productId) continue;
-
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
-        if (!product) {
-          // Product may have been deleted after the order was created.
-          continue;
-        }
-
-        const beforeQty = Number(product.stockQty);
-        const qty = Number(item.qty);
-        const afterQty = beforeQty + qty;
-
-        await tx.product.update({ where: { id: item.productId }, data: { stockQty: afterQty } });
-
-        await tx.inventoryMovement.create({
-          data: {
-            productId: item.productId,
-            type: 'RETURN',
-            qty: qty,
-            beforeQty: beforeQty,
-            afterQty: afterQty,
-            referenceType: 'ORDER',
-            referenceId: orderId,
-            createdById: userId,
-          },
-        });
-      }
-
       await tx.orderStatusLog.create({
         data: {
           orderId,
@@ -273,154 +249,27 @@ export class CartService {
   }
 
   async checkout(userId: string, payload: CheckoutCartDto) {
-    const alternatePhone = String(payload.alternatePhone || '').trim();
-    if (!alternatePhone) {
-      throw new BadRequestException('رقم الهاتف البديل مطلوب.');
-    }
-
-    const latitude = this.normalizeCoordinate(payload.latitude, -90, 90, 'خط العرض');
-    const longitude = this.normalizeCoordinate(payload.longitude, -180, 180, 'خط الطول');
-
-    const cart = await this.ensureActiveCart(userId);
-    const cartWithItems = await this.prisma.cart.findUnique({
-      where: { id: cart.id },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-          orderBy: {
-            createdAt: 'asc',
-          },
-        },
-      },
-    });
-
-    const cartItems = cartWithItems?.items ?? [];
-    if (!cartItems.length) {
-      throw new BadRequestException('السلة فارغة. أضف منتجات أولاً.');
-    }
-
-    const subtotal = roundTo2(
-      cartItems.reduce((sum, item) => {
-        const unitPrice = decimalToNumber(item.unitPriceSnapshot);
-        const qty = decimalToNumber(item.qty);
-        return sum + roundTo2(unitPrice * qty);
-      }, 0),
-    );
-
-    const discountTotal = 0;
-    const deliveryFee = 0;
-    const total = roundTo2(subtotal - discountTotal + deliveryFee);
-
-    const createdOrder = await this.prisma.$transaction(async (tx) => {
-      for (const item of cartItems) {
-        if (!item.product || !item.product.isActive) {
-          throw new NotFoundException('أحد المنتجات في السلة غير متوفر.');
-        }
-
-        const qty = roundTo2(decimalToNumber(item.qty));
-        const stockQty = roundTo2(decimalToNumber(item.product.stockQty));
-
-        if (qty <= 0) {
-          throw new BadRequestException('يوجد عنصر بكمية غير صالحة في السلة.');
-        }
-
-        if (stockQty < qty) {
-          throw new BadRequestException(
-            `الكمية المطلوبة من "${item.product.nameAr}" أكبر من المخزون المتاح.`,
-          );
-        }
+    return this.withDbRetry(async () => {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { phone: true, isActive: true },
+      });
+      if (!user || !user.isActive) {
+        throw new NotFoundException('المستخدم غير موجود.');
       }
 
-      await tx.userAddress.updateMany({
-        where: { userId, isDefault: true },
-        data: { isDefault: false },
-      });
+      const normalizedUserPhone = typeof user.phone === 'string' ? user.phone.trim() : '';
+      const hasRealAccountPhone =
+        Boolean(normalizedUserPhone) && !normalizedUserPhone.startsWith('guest-');
+      const contactPhone = hasRealAccountPhone ? normalizedUserPhone : null;
 
-      const address = await tx.userAddress.create({
-        data: {
-          userId,
-          label: 'موقع الطلب',
-          city: 'توصيل عبر GPS',
-          street: `GPS: ${latitude.toFixed(7)}, ${longitude.toFixed(7)}`,
-          building: alternatePhone,
-          latitude,
-          longitude,
-          isDefault: true,
-        },
-      });
+      const latitude = this.normalizeCoordinate(payload.latitude, -90, 90, 'خط العرض');
+      const longitude = this.normalizeCoordinate(payload.longitude, -180, 180, 'خط الطول');
 
-      const order = await this.createOrderWithUniqueNumber(tx, {
-        userId,
-        addressId: address.id,
-        status: OrderStatus.NEW,
-        subtotal,
-        discountTotal,
-        deliveryFee,
-        total,
-        notes: 'تم إنشاء الطلب من واجهة العميل.',
-      });
-
-      await tx.orderItem.createMany({
-        data: cartItems.map((item) => {
-          const unitPrice = roundTo2(decimalToNumber(item.unitPriceSnapshot));
-          const qty = roundTo2(decimalToNumber(item.qty));
-          const lineTotal = roundTo2(unitPrice * qty);
-
-          return {
-            orderId: order.id,
-            productId: item.productId,
-            nameSnapshot: item.product?.nameAr || 'منتج',
-            unitPrice,
-            qty,
-            lineTotal,
-          };
-        }),
-      });
-
-      await tx.orderStatusLog.create({
-        data: {
-          orderId: order.id,
-          status: OrderStatus.NEW,
-          note: 'تم إنشاء الطلب.',
-        },
-      });
-
-      for (const item of cartItems) {
-        if (!item.product) continue;
-
-        const qty = roundTo2(decimalToNumber(item.qty));
-        const beforeQty = roundTo2(decimalToNumber(item.product.stockQty));
-        const afterQty = roundTo2(beforeQty - qty);
-
-        await tx.product.update({
-          where: { id: item.product.id },
-          data: {
-            stockQty: afterQty,
-          },
-        });
-
-        await tx.inventoryMovement.create({
-          data: {
-            productId: item.product.id,
-            type: 'ORDER_DEDUCT',
-            qty,
-            beforeQty,
-            afterQty,
-            referenceType: 'ORDER',
-            referenceId: order.id,
-            createdById: userId,
-          },
-        });
-      }
-
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
-
-      return tx.order.findUnique({
-        where: { id: order.id },
+      const cart = await this.ensureActiveCart(userId);
+      const cartWithItems = await this.prisma.cart.findUnique({
+        where: { id: cart.id },
         include: {
-          address: true,
           items: {
             include: {
               product: true,
@@ -431,16 +280,152 @@ export class CartService {
           },
         },
       });
-    });
 
-    if (!createdOrder) {
-      throw new BadRequestException('تعذر إنشاء الطلب. حاول مرة أخرى.');
+      const cartItems = cartWithItems?.items ?? [];
+      if (!cartItems.length) {
+        throw new BadRequestException('السلة فارغة. أضف منتجات أولاً.');
+      }
+
+      const subtotal = roundTo2(
+        cartItems.reduce((sum, item) => {
+          const unitPrice = decimalToNumber(item.unitPriceSnapshot);
+          const qty = decimalToNumber(item.qty);
+          return sum + roundTo2(unitPrice * qty);
+        }, 0),
+      );
+
+      const discountTotal = 0;
+      const deliveryFee = 0;
+      const total = roundTo2(subtotal - discountTotal + deliveryFee);
+
+      const createdOrder = await this.prisma.$transaction(async (tx) => {
+        for (const item of cartItems) {
+          if (!item.product || !item.product.isActive) {
+            throw new NotFoundException('أحد المنتجات في السلة غير متوفر.');
+          }
+
+          const qty = roundTo2(decimalToNumber(item.qty));
+
+          if (qty <= 0) {
+            throw new BadRequestException('يوجد عنصر بكمية غير صالحة في السلة.');
+          }
+
+        }
+
+        await tx.userAddress.updateMany({
+          where: { userId, isDefault: true },
+          data: { isDefault: false },
+        });
+
+        const address = await tx.userAddress.create({
+          data: {
+            userId,
+            label: 'موقع الطلب',
+            city: 'توصيل عبر GPS',
+            street: `GPS: ${latitude.toFixed(7)}, ${longitude.toFixed(7)}`,
+            building: contactPhone,
+            latitude,
+            longitude,
+            isDefault: true,
+          },
+        });
+
+        const order = await this.createOrderWithUniqueNumber(tx, {
+          userId,
+          addressId: address.id,
+          status: OrderStatus.NEW,
+          subtotal,
+          discountTotal,
+          deliveryFee,
+          total,
+          notes: 'تم إنشاء الطلب من واجهة العميل.',
+        });
+
+        await tx.orderItem.createMany({
+          data: cartItems.map((item) => {
+            const unitPrice = roundTo2(decimalToNumber(item.unitPriceSnapshot));
+            const qty = roundTo2(decimalToNumber(item.qty));
+            const lineTotal = roundTo2(unitPrice * qty);
+
+            return {
+              orderId: order.id,
+              productId: item.productId,
+              nameSnapshot: item.product?.nameAr || 'منتج',
+              unitPrice,
+              qty,
+              lineTotal,
+            };
+          }),
+        });
+
+        await tx.orderStatusLog.create({
+          data: {
+            orderId: order.id,
+            status: OrderStatus.NEW,
+            note: 'تم إنشاء الطلب.',
+          },
+        });
+
+        await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+        return tx.order.findUnique({
+          where: { id: order.id },
+          include: {
+            address: true,
+            items: {
+              include: {
+                product: true,
+              },
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
+          },
+        });
+      });
+
+      if (!createdOrder) {
+        throw new BadRequestException('تعذر إنشاء الطلب. حاول مرة أخرى.');
+      }
+
+      return {
+        order: this.mapUserOrder(createdOrder),
+        cart: await this.getCart(userId),
+      };
+    });
+  }
+
+  private isDbConnectionError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') {
+      return false;
     }
 
-    return {
-      order: this.mapUserOrder(createdOrder),
-      cart: await this.getCart(userId),
-    };
+    const maybeCode = (error as { code?: string }).code;
+    return maybeCode === 'P1001' || maybeCode === 'P1002';
+  }
+
+  private async withDbRetry<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!this.isDbConnectionError(error)) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 900));
+
+    try {
+      return await operation();
+    } catch (error) {
+      if (this.isDbConnectionError(error)) {
+        throw new ServiceUnavailableException(
+          'تعذر الاتصال بقاعدة البيانات. حاول مرة ثانية بعد ثوانٍ.',
+        );
+      }
+
+      throw error;
+    }
   }
 
   private async ensureActiveCart(userId: string) {

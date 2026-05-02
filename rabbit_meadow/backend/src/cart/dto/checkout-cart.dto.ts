@@ -1,10 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsString, Length, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class CheckoutCartDto {
-  @IsString()
-  @Length(6, 20)
-  alternatePhone!: string;
+  @IsOptional()
+  alternatePhone?: string;
 
   @Type(() => Number)
   @IsNumber()

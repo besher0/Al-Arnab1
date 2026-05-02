@@ -256,7 +256,6 @@ function BridgeListener() {
       if (payload.type === 'checkout-order') {
         try {
           const checkoutResponse = await checkoutOrder({
-            alternatePhone: payload.alternatePhone || '',
             latitude: payload.latitude,
             longitude: payload.longitude,
           })
@@ -350,6 +349,8 @@ function BridgeListener() {
 }
 
 function AppRoutes() {
+  const authUiVersion = '20260502-1'
+
   return (
     <>
       <BridgeListener />
@@ -360,7 +361,7 @@ function AppRoutes() {
           path="/welcome"
           element={
             <PublicOnlyRoute>
-              <FramePage src="/stitch/welcome.html" title="welcome" />
+              <FramePage src={`/stitch/welcome.html?v=${authUiVersion}`} title="welcome" />
             </PublicOnlyRoute>
           }
         />
@@ -368,7 +369,7 @@ function AppRoutes() {
           path="/login"
           element={
             <PublicOnlyRoute>
-              <FramePage src="/stitch/login.html" title="login" />
+              <FramePage src={`/stitch/login.html?v=${authUiVersion}`} title="login" />
             </PublicOnlyRoute>
           }
         />
@@ -376,7 +377,7 @@ function AppRoutes() {
           path="/signup"
           element={
             <PublicOnlyRoute>
-              <FramePage src="/stitch/signup.html" title="signup" />
+              <FramePage src={`/stitch/signup.html?v=${authUiVersion}`} title="signup" />
             </PublicOnlyRoute>
           }
         />

@@ -86,7 +86,6 @@ function productsMapFromList(productsList) {
             categoryId: product?.categoryId ? String(product.categoryId) : '',
             categoryName: product?.categoryName ? String(product.categoryName) : '',
             imageUrl: product?.imageUrl ? String(product.imageUrl) : '',
-            stockQty: numberValue(product?.stockQty, 0),
             unit: product?.unit ? String(product.unit) : '',
           },
         ]
@@ -298,14 +297,9 @@ export function ShopProvider({ children }) {
   }, [token])
 
   const checkoutOrder = useCallback(
-    async ({ alternatePhone, latitude, longitude }) => {
+    async ({ latitude, longitude }) => {
       if (!token) {
         throw new Error('يجب تسجيل الدخول أولاً.')
-      }
-
-      const cleanAlternatePhone = String(alternatePhone || '').trim()
-      if (!cleanAlternatePhone) {
-        throw new Error('رقم الهاتف البديل مطلوب.')
       }
 
       const lat = Number(latitude)
@@ -315,11 +309,12 @@ export function ShopProvider({ children }) {
         throw new Error('موقع التوصيل غير صالح.')
       }
 
-      const checkoutResponse = await api.cart.checkout(token, {
-        alternatePhone: cleanAlternatePhone,
+      const checkoutPayload = {
         latitude: lat,
         longitude: lng,
-      })
+      }
+
+      const checkoutResponse = await api.cart.checkout(token, checkoutPayload)
 
       if (checkoutResponse?.cart) {
         setCart(normalizeCartResponse(checkoutResponse.cart))

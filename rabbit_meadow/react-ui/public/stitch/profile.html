@@ -52,7 +52,7 @@
     height: 0;
   }
 </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
+  <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -71,7 +71,7 @@
     <section class="bg-surface-card border border-primary/10 rounded-3xl p-6 shadow-[0_14px_36px_rgba(26,54,93,0.08)] relative overflow-hidden">
       <div class="absolute -top-12 -left-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl"></div>
       <div class="relative flex items-center gap-4">
-        <div id="user-avatar" class="w-16 h-16 rounded-full bg-primary text-on-primary font-black text-2xl flex items-center justify-center">؟</div>
+        <div id="user-avatar" class="w-16 h-16 rounded-full bg-primary text-on-primary font-black text-2xl flex items-center justify-center">م</div>
         <div>
           <h2 id="user-name" class="font-headline font-black text-2xl leading-tight">...</h2>
           <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
@@ -172,7 +172,7 @@
 
     function firstLetter(value) {
       var clean = String(value || '').trim();
-      if (!clean) return '؟';
+      if (!clean) return 'م';
       return clean.charAt(0);
     }
 
@@ -253,3 +253,5 @@
 </script>
 </body>
 </html>
+
+

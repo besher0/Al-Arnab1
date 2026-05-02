@@ -1,243 +1,225 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#87CEEB',
-            'on-primary': '#FFFFFF',
-            background: '#F0F8FF',
-            surface: '#FFFFFF',
-            'on-surface': '#1A365D',
-            'on-surface-variant': '#718096',
-            border: '#D8E9F6',
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول | الأرنب</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3fa8d1',
+              secondary: '#f97316',
+              background: '#f4fbff',
+              surface: '#ffffff',
+              ink: '#14324a',
+              muted: '#59748a',
+            },
+            fontFamily: {
+              headline: ['Tajawal', 'sans-serif'],
+              body: ['Almarai', 'sans-serif'],
+            },
+            boxShadow: {
+              card: '0 20px 50px rgba(20, 50, 74, 0.12)',
+            },
           },
-          fontFamily: {
-            headline: ['Tajawal', 'sans-serif'],
-            body: ['Almarai', 'sans-serif'],
-          },
-<<<<<<< ours
         },
-      },
-    };
-  </script>
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
-
-    html,
-    body {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    html::-webkit-scrollbar,
-    body::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-    }
-
-    .login-shell {
-      transform-origin: top center;
-    }
-
-    @media (max-height: 760px) {
-      .login-shell {
-        transform: scale(0.92);
       }
-    }
-  </style>
-=======
-        }
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Almarai', sans-serif;
-            background-color: #F0F8FF;
-        }
-        h1, h2, h3, .headline {
-            font-family: 'Tajawal', sans-serif;
-        }
-        .blue-gradient {
-            background: linear-gradient(135deg, #87CEEB 0%, #5CACEE 100%);
-        }
+
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      }
+
+      html,
+      body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      body {
+        font-family: 'Almarai', sans-serif;
+      }
+
+      .login-content {
+        width: min(100%, 33rem);
+      }
     </style>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Almarai', sans-serif;
-            background-color: #F0F8FF;
-        }
-        h1, h2, h3, .headline {
-            font-family: 'Tajawal', sans-serif;
-        }
-        .blue-gradient {
-            background: linear-gradient(135deg, #87CEEB 0%, #5CACEE 100%);
-        }
-    </style>
-<style>
-        html,
-        body {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        html::-webkit-scrollbar,
-        body::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
-
-        .login-fit {
-            transform-origin: top center;
-        }
-
-        @media (max-height: 860px) {
-            .login-fit {
-                transform: scale(0.92);
-            }
-        }
-
-        @media (max-height: 760px) {
-            .login-fit {
-                transform: scale(0.86);
-            }
-        }
-    </style>
-    <link href="/shared/fonts.css" rel="stylesheet" />
-<<<<<<< ours
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+    <script src="/stitch/stitch-alert.js"></script>
 </head>
-<body class="bg-background text-on-surface font-body h-screen overflow-hidden flex items-center justify-center p-4">
-  <div class="fixed -top-24 -right-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl"></div>
-  <div class="fixed -bottom-24 -left-16 w-80 h-80 bg-primary/20 rounded-full blur-3xl"></div>
 
-  <section class="login-shell w-full max-w-md relative z-10">
-    <header class="text-center mb-7">
-      <div class="inline-flex w-20 h-20 rounded-3xl bg-white items-center justify-center shadow-sm border border-border mb-4">
-        <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">pets</span>
-      </div>
-      <h1 class="font-headline font-black text-4xl text-on-surface">Al-Arnab</h1>
-      <p class="text-on-surface-variant mt-2">تسجيل الدخول إلى حسابك</p>
-    </header>
-
-    <div class="bg-surface border border-border rounded-[28px] p-6 shadow-[0_14px_40px_rgba(26,54,93,0.09)]">
-      <h2 class="font-headline font-extrabold text-2xl mb-6">أهلًا بعودتك</h2>
-
-      <form id="login-form" class="space-y-4">
-        <div>
-          <label for="login-phone" class="block text-sm font-bold text-on-surface-variant mb-2">رقم الهاتف</label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">call</span>
-            <input id="login-phone" type="tel" placeholder="05xxxxxxxx" class="w-full h-12 rounded-full border border-border bg-white pr-12 pl-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          </div>
-        </div>
-
-        <div>
-          <label for="login-password" class="block text-sm font-bold text-on-surface-variant mb-2">كلمة المرور</label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
-            <input id="login-password" type="password" placeholder="••••••••" class="w-full h-12 rounded-full border border-border bg-white pr-12 pl-12 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            <button type="button" data-password-toggle="login-password" class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-              <span class="material-symbols-outlined text-[20px]">visibility</span>
-            </button>
-          </div>
-        </div>
-
-        <button type="submit" class="w-full h-12 rounded-full bg-primary text-on-primary font-headline font-bold text-lg shadow-md shadow-sky-200 hover:opacity-90 transition-all">
-          تسجيل الدخول
-        </button>
-      </form>
-
-      <p class="text-center text-sm text-on-surface-variant mt-6">
-        ليس لديك حساب؟
-        <a id="go-signup" href="/signup" class="font-extrabold text-on-surface hover:underline">إنشاء حساب</a>
-      </p>
+  <body class="min-h-screen overflow-x-hidden bg-background text-ink">
+    <div class="pointer-events-none fixed inset-0">
+      <div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/20 blur-3xl"></div>
     </div>
-  </section>
 
-  <script>
-    (function () {
-      function send(type, payload) {
-        window.parent.postMessage(
-          Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
-          window.location.origin,
-        );
-      }
+    <main class="relative z-10 mx-auto flex min-h-screen w-full items-center justify-center px-4 py-4 sm:px-6 sm:py-5">
+      <div class="login-content">
+        <section class="mb-4 text-center sm:mb-5">
+          <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/90 shadow-lg shadow-primary/20 sm:h-20 sm:w-20">
+            <span class="material-symbols-outlined text-5xl text-primary">cruelty_free</span>
+          </div>
+          <h1 class="font-headline text-[clamp(1.8rem,5.1vw,2.35rem)] font-black tracking-tight text-primary">الأرنب</h1>
+          <p class="mt-1 break-words text-[13px] font-semibold leading-5 text-muted">طازج كل يوم، ويوصل لباب البيت</p>
+        </section>
 
-      var signupLink = document.getElementById('go-signup');
-      if (signupLink) {
-        signupLink.addEventListener('click', function (event) {
-          event.preventDefault();
-          send('navigate', { to: '/signup' });
-        });
-      }
+        <section class="rounded-3xl border border-white/60 bg-surface/90 p-5 shadow-card backdrop-blur sm:p-6">
+          <h2 class="font-headline text-xl font-extrabold text-ink sm:text-2xl">تسجيل الدخول</h2>
+          <p class="mt-2 break-words text-[13px] leading-5 text-muted">أدخل رقم الهاتف للمتابعة إلى حسابك.</p>
 
-      var form = document.getElementById('login-form');
-      var phoneInput = document.getElementById('login-phone');
+          <form id="login-form" class="mt-4 space-y-3.5" novalidate autocomplete="off">
+            <label class="block space-y-1.5">
+              <span class="block pr-1 text-xs font-bold text-muted sm:text-sm">رقم الهاتف</span>
+              <div class="relative">
+                <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary">call</span>
+                <input
+                  id="login-phone-input"
+                  type="tel"
+                  dir="ltr"
+                  autocomplete="off"
+                  name="login_phone_input"
+                  placeholder="09********"
+                  class="h-11 w-full rounded-2xl border-0 bg-slate-50 pr-12 pl-4 text-sm font-semibold text-ink placeholder:text-slate-400 focus:ring-2 focus:ring-primary/35"
+                />
+              </div>
+            </label>
 
-      var toggles = document.querySelectorAll('[data-password-toggle]');
-      toggles.forEach(function (button) {
-        button.addEventListener('click', function () {
-          var inputId = button.getAttribute('data-password-toggle');
-          if (!inputId) return;
+            <label class="block space-y-1.5">
+              <span class="block pr-1 text-xs font-bold text-muted sm:text-sm">كلمة المرور</span>
+              <div class="relative">
+                <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary">lock</span>
+                <input
+                  id="login-password-input"
+                  type="password"
+                  autocomplete="new-password"
+                  name="login_password_input"
+                  placeholder="********"
+                  class="h-11 w-full rounded-2xl border-0 bg-slate-50 pr-12 pl-12 text-sm font-semibold text-ink placeholder:text-slate-400 focus:ring-2 focus:ring-primary/35"
+                />
+                <button
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-primary"
+                  type="button"
+                  data-password-toggle="login-password-input"
+                  aria-label="إظهار أو إخفاء كلمة المرور"
+                >
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                </button>
+              </div>
+            </label>
 
-          var input = document.getElementById(inputId);
-          if (!input) return;
+            <button
+              type="submit"
+              class="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-headline text-base font-extrabold text-white shadow-lg shadow-primary/25 transition hover:brightness-95 active:scale-[0.99]"
+            >
+              <span>دخول</span>
+              <span class="material-symbols-outlined text-lg">login</span>
+            </button>
+          </form>
+        </section>
 
-          var hidden = input.type === 'password';
-          input.type = hidden ? 'text' : 'password';
+        <p class="mt-4 text-center text-[13px] leading-5 text-muted sm:text-sm">
+          ليس لديك حساب؟
+          <a id="signup-link" href="/signup" class="font-extrabold text-primary hover:underline">أنشئ حسابًا</a>
+        </p>
+      </div>
+    </main>
 
-          var icon = button.querySelector('.material-symbols-outlined');
-          if (icon) {
-            icon.textContent = hidden ? 'visibility_off' : 'visibility';
-          }
-        });
-      });
+    <script>
+      (function () {
+        function send(type, payload) {
+          window.parent.postMessage(
+            Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+            window.location.origin,
+          )
+        }
 
-      if (form) {
+        var signupLink = document.getElementById('signup-link')
+        if (signupLink) {
+          signupLink.addEventListener('click', function (event) {
+            event.preventDefault()
+            send('navigate', { to: '/signup' })
+          })
+        }
+
+        var form = document.getElementById('login-form')
+        if (!form) return
+
+        var inputs = form.querySelectorAll('input')
+        inputs.forEach(function (input) {
+          input.value = ''
+        })
+
+        window.addEventListener('pageshow', function () {
+          inputs.forEach(function (input) {
+            input.value = ''
+          })
+        })
+
+        var toggleButtons = document.querySelectorAll('[data-password-toggle]')
+        toggleButtons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            var inputId = button.getAttribute('data-password-toggle')
+            if (!inputId) return
+
+            var targetInput = document.getElementById(inputId)
+            if (!targetInput) return
+
+            var isPassword = targetInput.type === 'password'
+            targetInput.type = isPassword ? 'text' : 'password'
+
+            var icon = button.querySelector('.material-symbols-outlined')
+            if (icon) {
+              icon.textContent = isPassword ? 'visibility_off' : 'visibility'
+            }
+          })
+        })
+
         form.addEventListener('submit', function (event) {
-          event.preventDefault();
+          event.preventDefault()
 
-          var phone = String(phoneInput && phoneInput.value ? phoneInput.value : '').trim();
+          var phoneInput = document.getElementById('login-phone-input')
+          var phone = (phoneInput && phoneInput.value ? phoneInput.value : '').trim()
+
           if (!phone) {
-            alert('رقم الهاتف مطلوب.');
-            return;
+            alert('رقم الهاتف مطلوب.')
+            return
           }
 
-          send('auth-login', { phone: phone });
-        });
-      }
+          send('auth-login', { phone: phone })
+        })
 
-      window.addEventListener('message', function (event) {
-        if (event.origin !== window.location.origin) return;
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return
 
-        var payload = event.data;
-        if (!payload || payload.source !== 'react-shell') return;
-        if (payload.type !== 'auth-error') return;
+          var payload = event.data
+          if (!payload || payload.source !== 'react-shell') return
+          if (payload.type !== 'auth-error') return
 
-        alert(payload.message || 'تعذر تسجيل الدخول.');
-      });
-    })();
-  </script>
-</body>
+          alert(payload.message || 'تعذر تسجيل الدخول.')
+        })
+      })()
+    </script>
+  </body>
 </html>
+
