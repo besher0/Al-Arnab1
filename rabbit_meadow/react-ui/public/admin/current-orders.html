@@ -15,14 +15,14 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
         <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 50px">طلباتي الجارية</h1>
+            <h1 class="page-title">طلباتي الجارية</h1>
             <p class="page-subtitle">Al-Arnab</p>
           </div>
         </div>
@@ -34,80 +34,16 @@
       </header>
 
       <main class="container stack">
-        <section class="row" data-toggle-group>
-          <button class="pill active" data-toggle-item>الكل (3)</button>
-          <button class="pill" data-toggle-item>جاري التجهيز</button>
-          <button class="pill" data-toggle-item>في الطريق</button>
+        <section class="row orders-filter-row" data-filter-group>
+          <button class="pill active" data-filter="ALL">الكل (0)</button>
+          <button class="pill" data-filter="NEW">جديد (0)</button>
+          <button class="pill" data-filter="PREPARING">جاري التجهيز (0)</button>
+          <button class="pill" data-filter="ON_THE_WAY">في الطريق (0)</button>
         </section>
 
-        <section class="card stack">
-          <div class="row">
-            <div class="price-sm">١٤٢.٥٠ ريال</div>
-            <div>
-              <strong style="font-size: 34px">طلب #RN-9021</strong>
-              <div class="muted">تم الطلب في 10:45 صباحاً</div>
-            </div>
-          </div>
-
-          <img
-            class="map-preview"
-            src="https://images.unsplash.com/photo-1581262177006-4b6c5d4f6f95?auto=format&fit=crop&w=1200&q=80"
-            alt="خريطة"
-          />
-
-          <article class="soft-card">
-            <div class="row">
-              <span class="material-symbols-outlined" style="color: #66bbdf">location_on</span>
-              <strong style="font-size: 32px">عنوان التوصيل</strong>
-            </div>
-            <p class="muted" style="margin: 8px 0 0">حي الياسمين، شارع العليا مبنى 42، شقة 5</p>
-          </article>
-
-          <article class="soft-card">
-            <div class="row">
-              <span class="material-symbols-outlined" style="color: #66bbdf">info</span>
-              <strong style="font-size: 32px">تعليمات التوصيل</strong>
-            </div>
-            <p class="muted" style="margin: 8px 0 0">يرجى ترك الطلب عند الباب والاتصال قبل الوصول.</p>
-          </article>
-
-          <article class="soft-card">
-            <div class="row mb-12">
-              <span class="material-symbols-outlined" style="color: #66bbdf">shopping_basket</span>
-              <strong style="font-size: 32px">ملخص المنتجات (4 أصناف)</strong>
-            </div>
-            <div class="order-products">
-              <span class="badge-soft">حليب طازج ×2</span>
-              <span class="badge-soft">خضروات عضوية ×2</span>
-              <span class="badge-soft">طماطم كرزية ×1</span>
-            </div>
-          </article>
-
-          <div class="action-row">
-            <button class="icon-btn" style="width: 56px; height: 56px">
-              <span class="material-symbols-outlined">call</span>
-            </button>
-            <button class="cta" data-route="/admin/orders/detail">تحديث الحالة</button>
-          </div>
+        <section id="current-orders-list" class="stack">
+          <article class="card orders-empty">جاري تحميل الطلبات...</article>
         </section>
-
-        <article class="timeline-item row">
-          <button class="pill" data-route="/admin/orders/detail">التفاصيل</button>
-          <div>
-            <strong style="font-size: 32px">طلب #RN-8842</strong>
-            <div class="muted">جاري التجهيز · 12 منتج</div>
-          </div>
-          <span class="material-symbols-outlined" style="font-size: 28px; color: #67bbdf">local_shipping</span>
-        </article>
-
-        <article class="timeline-item row">
-          <button class="pill" data-route="/admin/orders/detail">التفاصيل</button>
-          <div>
-            <strong style="font-size: 32px">طلب #RN-7521</strong>
-            <div class="muted">بانتظار الاستلام · 3 منتجات</div>
-          </div>
-          <span class="material-symbols-outlined" style="font-size: 28px; color: #8a9ab0">inventory_2</span>
-        </article>
       </main>
 
       <nav class="bottom-nav five">
@@ -135,5 +71,181 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+          return;
+        }
+
+        var listElement = document.getElementById('current-orders-list');
+        var filterButtons = Array.prototype.slice.call(document.querySelectorAll('[data-filter]'));
+        var orders = [];
+        var activeFilter = 'ALL';
+
+        var STATUS_LABELS = {
+          NEW: 'جديد',
+          PREPARING: 'جاري التجهيز',
+          ON_THE_WAY: 'في الطريق',
+          DELIVERED: 'تم التوصيل',
+          REJECTED: 'مرفوض',
+          CANCELLED: 'ملغي',
+        };
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function numberLabel(value) {
+          return Number(value || 0).toLocaleString('ar-SA');
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ر.س';
+        }
+
+        function formatDateTime(value) {
+          var date = new Date(value);
+          if (Number.isNaN(date.getTime())) return '-';
+
+          return date.toLocaleString('ar-SA', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        }
+
+        function statusLabel(status) {
+          return STATUS_LABELS[status] || 'غير محدد';
+        }
+
+        function statusClass(status) {
+          if (status === 'PREPARING' || status === 'ON_THE_WAY') return 'success';
+          if (status === 'NEW') return 'warning';
+          return 'danger';
+        }
+
+        function digitsOnly(value) {
+          return String(value || '').replace(/[^+\d]/g, '');
+        }
+
+        function getCounts() {
+          return {
+            ALL: orders.length,
+            NEW: orders.filter(function (order) { return order.status === 'NEW'; }).length,
+            PREPARING: orders.filter(function (order) { return order.status === 'PREPARING'; }).length,
+            ON_THE_WAY: orders.filter(function (order) { return order.status === 'ON_THE_WAY'; }).length,
+          };
+        }
+
+        function renderFilters() {
+          var counts = getCounts();
+
+          filterButtons.forEach(function (button) {
+            var filter = button.getAttribute('data-filter') || 'ALL';
+            var label = statusLabel(filter);
+            if (filter === 'ALL') {
+              label = 'الكل';
+            }
+
+            button.textContent = label + ' (' + numberLabel(counts[filter] || 0) + ')';
+            button.classList.toggle('active', filter === activeFilter);
+          });
+        }
+
+        function filteredOrders() {
+          if (activeFilter === 'ALL') return orders;
+          return orders.filter(function (order) {
+            return order.status === activeFilter;
+          });
+        }
+
+        function renderOrders() {
+          if (!listElement) return;
+          var data = filteredOrders();
+
+          if (!data.length) {
+            listElement.innerHTML = '<article class="card orders-empty">لا توجد طلبات ضمن هذا التصنيف حالياً.</article>';
+            return;
+          }
+
+          listElement.innerHTML = data
+            .map(function (order) {
+              var route = '/admin/orders/detail?id=' + encodeURIComponent(order.id || '');
+              var phone = digitsOnly(order.customer && order.customer.phone ? order.customer.phone : '');
+
+              return [
+                '<article class="card stack">',
+                '  <div class="row">',
+                '    <span class="tag ' + statusClass(order.status) + '">' + escapeHtml(statusLabel(order.status)) + '</span>',
+                '    <strong class="orders-customer">طلب #' + escapeHtml(order.orderNumber || '-') + '</strong>',
+                '  </div>',
+                '  <div class="row">',
+                '    <div>',
+                '      <div class="muted tiny">العميل</div>',
+                '      <strong>' + escapeHtml(order.customer && order.customer.name ? order.customer.name : '-') + '</strong>',
+                '    </div>',
+                '    <div class="text-left">',
+                '      <div class="muted tiny">الإجمالي</div>',
+                '      <div class="price-sm">' + escapeHtml(formatMoney(order.total)) + '</div>',
+                '    </div>',
+                '  </div>',
+                '  <div class="row">',
+                '    <span class="muted tiny">' + escapeHtml(formatDateTime(order.createdAt)) + '</span>',
+                '    <span class="muted tiny">' + escapeHtml(order.customer && order.customer.phone ? order.customer.phone : '-') + '</span>',
+                '  </div>',
+                '  <div class="action-row">',
+                '    <button class="pill active" data-route="' + escapeHtml(route) + '">عرض التفاصيل</button>',
+                phone
+                  ? '    <a class="icon-btn" href="tel:' + escapeHtml(phone) + '" title="اتصال"><span class="material-symbols-outlined">call</span></a>'
+                  : '    <span></span>',
+                '  </div>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+
+          window.AdminBridge.bindRoutes(listElement);
+        }
+
+        function bindFilters() {
+          filterButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+              activeFilter = button.getAttribute('data-filter') || 'ALL';
+              renderFilters();
+              renderOrders();
+            });
+          });
+        }
+
+        async function loadCurrentOrders() {
+          if (!listElement) return;
+          listElement.innerHTML = '<article class="card orders-empty">جاري تحميل الطلبات...</article>';
+
+          try {
+            var response = await window.AdminBridge.apiRequest('/admin/orders/current');
+            orders = Array.isArray(response) ? response : [];
+            renderFilters();
+            renderOrders();
+          } catch (error) {
+            orders = [];
+            renderFilters();
+            listElement.innerHTML =
+              '<article class="card orders-empty">تعذر تحميل الطلبات. تأكد من تسجيل الدخول بحساب أدمن.</article>';
+          }
+        }
+
+        bindFilters();
+        loadCurrentOrders();
+      })();
+    </script>
   </body>
 </html>

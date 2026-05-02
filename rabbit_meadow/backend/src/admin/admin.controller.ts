@@ -20,6 +20,7 @@ import { CreateDiscountDto } from './dto/create-discount.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { SalesReportQueryDto } from './dto/sales-report-query.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { UpdateProductNewStatusDto } from './dto/update-product-new-status.dto';
 import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -67,6 +68,11 @@ export class AdminController {
     return this.adminService.createCategory(payload);
   }
 
+  @Get('uploads/cloudinary-signature')
+  cloudinaryUploadSignature() {
+    return this.adminService.getCloudinaryUploadSignature();
+  }
+
   @Get('products')
   products() {
     return this.adminService.listProducts();
@@ -75,6 +81,14 @@ export class AdminController {
   @Post('products')
   createProduct(@Req() req: RequestWithUser, @Body() payload: CreateProductDto) {
     return this.adminService.createProduct(payload, req.user.sub);
+  }
+
+  @Patch('products/:id/new')
+  updateProductNewStatus(
+    @Param('id') id: string,
+    @Body() payload: UpdateProductNewStatusDto,
+  ) {
+    return this.adminService.updateProductNewStatus(id, payload.isNew);
   }
 
   @Post('discounts')

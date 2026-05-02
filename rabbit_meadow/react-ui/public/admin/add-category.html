@@ -15,14 +15,14 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
         <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 44px">إضافة صنف جديد</h1>
+            <h1 class="page-title">إضافة صنف جديد</h1>
           </div>
         </div>
         <img
@@ -35,7 +35,7 @@
       <main class="container stack">
         <section class="hero" style="background: linear-gradient(135deg, #295786, #1e3f67 75%)">
           <h2>توسيع متجرك العضوي</h2>
-          <p>أضف أصنافاً جديدة بلمسة جمالية تعكس جودة منتجات الأرنب والصور الواضحة.</p>
+          <p>أضف أصنافًا جديدة مع صورة حقيقية تظهر مباشرة في واجهة التطبيق.</p>
         </section>
 
         <section class="card stack">
@@ -49,22 +49,25 @@
             <input id="category-name-en" class="input-field" type="text" placeholder="e.g. Leafy Greens" />
           </label>
 
-          <label>
+          <div>
             <div class="label">صورة الصنف</div>
-            <div class="media-box" style="min-height: 170px; background-image: url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center">
-              <div style="background: rgba(245, 250, 255, 0.8); padding: 16px; border-radius: 18px">
+            <input id="category-image-file" type="file" accept="image/*" hidden />
+            <button id="category-image-picker" class="media-box media-box-button" type="button">
+              <div>
                 <div class="media-icon">
                   <span class="material-symbols-outlined">add_photo_alternate</span>
                 </div>
-                <strong style="font-size: 33px">اضغط هنا لرفع الصورة</strong>
-                <p class="muted small">PNG أو JPG بنسبة 16:9</p>
+                <strong class="stock-media-title">اضغط لاختيار صورة ورفعها</strong>
+                <p class="muted small">PNG أو JPG، حجم أقصى 5 ميجابايت</p>
               </div>
-            </div>
-          </label>
+            </button>
+            <img id="category-image-preview" class="media-preview" alt="صورة الصنف" hidden />
+            <div id="category-image-feedback" class="tiny muted upload-status">لم يتم رفع صورة بعد.</div>
+          </div>
 
           <label>
             <div class="label">وصف الصنف (اختياري)</div>
-            <textarea id="category-description" class="textarea-field" placeholder="أضف وصفاً مختصراً يظهر للعملاء..."></textarea>
+            <textarea id="category-description" class="textarea-field" placeholder="أضف وصفًا مختصرًا يظهر للعملاء..."></textarea>
           </label>
 
           <div class="action-row">
@@ -74,52 +77,28 @@
         </section>
 
         <section class="card stack">
-          <h3 style="font-size: 34px">الأصناف المضافة مؤخراً</h3>
-          <article class="row soft-card">
-            <span class="badge-soft">منذ 10 دقائق</span>
-            <div>
-              <strong style="font-size: 31px">جزر بلدي</strong>
-            </div>
-            <span class="material-symbols-outlined" style="color: #22b56d">nutrition</span>
-          </article>
-          <article class="row soft-card">
-            <span class="badge-soft">الآن</span>
-            <div>
-              <strong style="font-size: 31px">أعشاب طازجة</strong>
-            </div>
-            <span class="material-symbols-outlined" style="color: #67bbde">grass</span>
-          </article>
+          <h3 class="stock-section-title">الأصناف المضافة مؤخرًا</h3>
+          <div id="recent-categories-list" class="stack">
+            <article class="soft-card orders-empty">جاري تحميل الأصناف...</article>
+          </div>
         </section>
       </main>
-
-      <nav class="bottom-nav five">
-        <button class="nav-item" data-route="/admin/dashboard">
-          <span class="material-symbols-outlined nav-icon">settings</span>
-          Settings
-        </button>
-        <button class="nav-item" data-route="/admin/orders/current">
-          <span class="material-symbols-outlined nav-icon">shopping_cart</span>
-          Orders
-        </button>
-        <button class="nav-item active" data-route="/admin/categories/new" style="border-radius: 50%; min-height: 58px; margin-top: -22px">
-          <span class="material-symbols-outlined nav-icon">add</span>
-        </button>
-        <button class="nav-item" data-route="/admin/categories/new">
-          <span class="material-symbols-outlined nav-icon">category</span>
-          Categories
-        </button>
-        <button class="nav-item" data-route="/admin/products/new">
-          <span class="material-symbols-outlined nav-icon">inventory_2</span>
-          Inventory
-        </button>
-      </nav>
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
     <script>
       (function () {
         var saveButton = document.getElementById('save-category-btn');
+        var imageInput = document.getElementById('category-image-file');
+        var imagePicker = document.getElementById('category-image-picker');
+        var imagePreview = document.getElementById('category-image-preview');
+        var imageFeedback = document.getElementById('category-image-feedback');
+        var recentList = document.getElementById('recent-categories-list');
+
         if (!saveButton || !window.AdminBridge) return;
+
+        var uploadedImageUrl = '';
+        var isUploading = false;
 
         function slugify(value) {
           return String(value || '')
@@ -131,6 +110,163 @@
             .replace(/^-|-$/g, '');
         }
 
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatDate(value) {
+          var date = new Date(value);
+          if (Number.isNaN(date.getTime())) return 'الآن';
+          return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+          });
+        }
+
+        function setImageFeedback(message, isError) {
+          if (!imageFeedback) return;
+          imageFeedback.textContent = message || '';
+          imageFeedback.classList.toggle('is-error', Boolean(isError));
+          imageFeedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        async function uploadToCloudinary(file) {
+          if (!file) return;
+
+          if (!file.type || file.type.indexOf('image/') !== 0) {
+            setImageFeedback('الملف يجب أن يكون صورة.', true);
+            return;
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            setImageFeedback('حجم الصورة أكبر من 5 ميجابايت.', true);
+            return;
+          }
+
+          isUploading = true;
+          setImageFeedback('جاري رفع الصورة...', false);
+          if (imagePicker) {
+            imagePicker.disabled = true;
+          }
+
+          try {
+            var sign = await window.AdminBridge.apiRequest('/admin/uploads/cloudinary-signature');
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', String(sign.apiKey || ''));
+            formData.append('timestamp', String(sign.timestamp || ''));
+            formData.append('signature', String(sign.signature || ''));
+            formData.append('folder', String(sign.folder || 'al-arnab'));
+
+            var response = await fetch(String(sign.uploadUrl || ''), {
+              method: 'POST',
+              body: formData,
+            });
+
+            var data = null;
+            try {
+              data = await response.json();
+            } catch (error) {
+              data = null;
+            }
+
+            if (!response.ok) {
+              var cloudError =
+                (data && data.error && data.error.message) ||
+                'تعذر رفع الصورة إلى Cloudinary.';
+              throw new Error(cloudError);
+            }
+
+            uploadedImageUrl = data && (data.secure_url || data.url) ? String(data.secure_url || data.url) : '';
+            if (!uploadedImageUrl) {
+              throw new Error('لم يتم استلام رابط الصورة بعد الرفع.');
+            }
+
+            if (imagePreview) {
+              imagePreview.src = uploadedImageUrl;
+              imagePreview.hidden = false;
+            }
+
+            setImageFeedback('تم رفع الصورة بنجاح.', false);
+          } catch (error) {
+            uploadedImageUrl = '';
+            if (imagePreview) {
+              imagePreview.src = '';
+              imagePreview.hidden = true;
+            }
+            setImageFeedback((error && error.message) || 'تعذر رفع الصورة.', true);
+          } finally {
+            isUploading = false;
+            if (imagePicker) {
+              imagePicker.disabled = false;
+            }
+          }
+        }
+
+        function renderRecentCategories(categories) {
+          if (!recentList) return;
+
+          if (!Array.isArray(categories) || !categories.length) {
+            recentList.innerHTML = '<article class="soft-card orders-empty">لا توجد أصناف مضافة بعد.</article>';
+            return;
+          }
+
+          var sorted = categories
+            .slice()
+            .sort(function (left, right) {
+              var leftTime = new Date((left && left.createdAt) || 0).getTime();
+              var rightTime = new Date((right && right.createdAt) || 0).getTime();
+              return rightTime - leftTime;
+            })
+            .slice(0, 5);
+
+          recentList.innerHTML = sorted
+            .map(function (category) {
+              var name = category && category.nameAr ? category.nameAr : '-';
+              var createdAt = formatDate(category && category.createdAt ? category.createdAt : null);
+
+              return [
+                '<article class="row soft-card">',
+                '  <span class="badge-soft">' + escapeHtml(createdAt) + '</span>',
+                '  <div><strong>' + escapeHtml(name) + '</strong></div>',
+                '  <span class="material-symbols-outlined" style="color: #67bbde">category</span>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+        }
+
+        async function loadRecentCategories() {
+          if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') return;
+          if (recentList) {
+            recentList.innerHTML = '<article class="soft-card orders-empty">جاري تحميل الأصناف...</article>';
+          }
+
+          try {
+            var categories = await window.AdminBridge.apiRequest('/admin/categories');
+            renderRecentCategories(Array.isArray(categories) ? categories : []);
+          } catch (error) {
+            renderRecentCategories([]);
+          }
+        }
+
+        if (imagePicker && imageInput) {
+          imagePicker.addEventListener('click', function () {
+            imageInput.click();
+          });
+
+          imageInput.addEventListener('change', function () {
+            var file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+            uploadToCloudinary(file);
+          });
+        }
+
         saveButton.addEventListener('click', async function () {
           var nameAr = (document.getElementById('category-name-ar') || {}).value || '';
           var nameEn = (document.getElementById('category-name-en') || {}).value || '';
@@ -138,6 +274,11 @@
 
           if (!nameAr.trim()) {
             alert('اسم الصنف بالعربية مطلوب.');
+            return;
+          }
+
+          if (isUploading) {
+            alert('انتظر حتى انتهاء رفع الصورة.');
             return;
           }
 
@@ -152,17 +293,20 @@
                 nameAr: nameAr.trim(),
                 nameEn: nameEn.trim() || undefined,
                 description: description.trim() || undefined,
+                imageUrl: uploadedImageUrl || undefined,
                 slug: slugify(nameEn || nameAr) || 'category-' + Date.now(),
               },
             });
 
             window.AdminBridge.go('/admin/dashboard');
           } catch (error) {
-            alert('تعذر حفظ الصنف. تأكد من تسجيل الدخول كأدمن.');
+            alert((error && error.message) || 'تعذر حفظ الصنف. تأكد من تسجيل الدخول كأدمن.');
             saveButton.disabled = false;
             saveButton.textContent = originalLabel;
           }
         });
+
+        loadRecentCategories();
       })();
     </script>
   </body>

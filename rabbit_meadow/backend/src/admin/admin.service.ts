@@ -1,5 +1,7 @@
 ﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OrderStatus } from '@prisma/client';
+import { createHash } from 'node:crypto';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -11,7 +13,10 @@ import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getDashboard() {
     const now = new Date();
@@ -253,6 +258,7 @@ export class AdminService {
       stockQty: decimalToNumber(product.stockQty),
       minStock: decimalToNumber(product.minStock),
       isActive: product.isActive,
+      isNew: product.isNew,
       imageUrl: product.imageUrl,
       createdAt: product.createdAt,
     }));
@@ -281,6 +287,7 @@ export class AdminService {
         stockQty: payload.stockQty,
         minStock: payload.minStock,
         imageUrl: payload.imageUrl,
+        ...(payload.isNew !== undefined ? { isNew: payload.isNew } : {}),
         isActive: payload.isActive ?? true,
       },
       create: {
@@ -296,6 +303,7 @@ export class AdminService {
         stockQty: payload.stockQty,
         minStock: payload.minStock,
         imageUrl: payload.imageUrl,
+        isNew: payload.isNew ?? false,
         isActive: payload.isActive ?? true,
       },
     });
@@ -314,6 +322,38 @@ export class AdminService {
     });
 
     return product;
+  }
+
+  async updateProductNewStatus(productId: string, isNew: boolean) {
+    const existing = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('المنتج غير موجود.');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id: productId },
+      data: { isNew },
+      include: { category: true },
+    });
+
+    return {
+      id: updated.id,
+      nameAr: updated.nameAr,
+      categoryId: updated.categoryId,
+      categoryName: updated.category.nameAr,
+      unit: updated.unit,
+      sellPrice: decimalToNumber(updated.sellPrice),
+      costPrice: decimalToNumber(updated.costPrice),
+      stockQty: decimalToNumber(updated.stockQty),
+      minStock: decimalToNumber(updated.minStock),
+      isActive: updated.isActive,
+      isNew: updated.isNew,
+      imageUrl: updated.imageUrl,
+      createdAt: updated.createdAt,
+    };
   }
 
   async createDiscount(payload: CreateDiscountDto, adminId: string) {
@@ -455,6 +495,36 @@ export class AdminService {
         status: order.status,
         createdAt: order.createdAt,
       })),
+    };
+  }
+
+  getCloudinaryUploadSignature() {
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME', '').trim();
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY', '').trim();
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET', '').trim();
+    const folder = this.configService
+      .get<string>('CLOUDINARY_UPLOAD_FOLDER', 'al-arnab')
+      .trim();
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new BadRequestException(
+        'إعدادات Cloudinary غير مكتملة. تأكد من CLOUDINARY_CLOUD_NAME وCLOUDINARY_API_KEY وCLOUDINARY_API_SECRET.',
+      );
+    }
+
+    const timestamp = Math.floor(Date.now() / 1000);
+    const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
+    const signature = createHash('sha1')
+      .update(`${paramsToSign}${apiSecret}`)
+      .digest('hex');
+
+    return {
+      cloudName,
+      apiKey,
+      timestamp,
+      folder,
+      signature,
+      uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
     };
   }
 

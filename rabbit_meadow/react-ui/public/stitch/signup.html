@@ -114,10 +114,10 @@
 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
 <span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
 </div>
-<input class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
+<input id="signup-password-input" class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
 <div class="absolute inset-y-0 left-4 flex items-center">
-<button class="text-outline hover:text-primary transition-colors" type="button">
-<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<button class="text-outline hover:text-primary transition-colors" data-password-toggle="signup-password-input" type="button">
+<span class="material-symbols-outlined">visibility</span>
 </button>
 </div>
 </div>
@@ -129,7 +129,12 @@
 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
 <span class="material-symbols-outlined text-outline" data-icon="verified_user">verified_user</span>
 </div>
-<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
+<input id="signup-confirm-password-input" class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/50 transition-all" placeholder="••••••••" type="password"/>
+<div class="absolute inset-y-0 left-4 flex items-center">
+<button class="text-outline hover:text-primary transition-colors" data-password-toggle="signup-confirm-password-input" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
 </div>
 </div>
 <!-- Submit Button -->
@@ -182,15 +187,68 @@
     var form = document.querySelector('form');
     if (!form) return;
 
+    function bindPasswordToggles() {
+      var toggleButtons = document.querySelectorAll('[data-password-toggle]');
+      toggleButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var inputId = button.getAttribute('data-password-toggle');
+          if (!inputId) return;
+          var targetInput = document.getElementById(inputId);
+          if (!targetInput) return;
+
+          var isPassword = targetInput.type === 'password';
+          targetInput.type = isPassword ? 'text' : 'password';
+
+          var icon = button.querySelector('.material-symbols-outlined');
+          if (icon) {
+            icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+          }
+        });
+      });
+    }
+
+    bindPasswordToggles();
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
-      var textInputs = form.querySelectorAll('input[type="text"], input:not([type])');
-      var nameInput = textInputs[0];
+      var nameInput = form.querySelector('input[type="text"]');
       var phoneInput = form.querySelector('input[type="tel"]');
+      var passwordInput = document.getElementById('signup-password-input');
+      var confirmPasswordInput = document.getElementById('signup-confirm-password-input');
+
+      var name = (nameInput && nameInput.value ? nameInput.value : '').trim();
+      var phone = (phoneInput && phoneInput.value ? phoneInput.value : '').trim();
+      var password = (passwordInput && passwordInput.value ? passwordInput.value : '').trim();
+      var confirmPassword = (confirmPasswordInput && confirmPasswordInput.value ? confirmPasswordInput.value : '').trim();
+
+      if (!name) {
+        alert('الاسم مطلوب.');
+        return;
+      }
+
+      if (!phone) {
+        alert('رقم الهاتف مطلوب.');
+        return;
+      }
+
+      if (phone.length < 6 || phone.length > 20) {
+        alert('رقم الهاتف يجب أن يكون بين 6 و 20 حرف.');
+        return;
+      }
+
+      if (!password || !confirmPassword) {
+        alert('يرجى إدخال كلمة المرور وتأكيدها.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('كلمتا المرور غير متطابقتين.');
+        return;
+      }
 
       send('auth-register', {
-        name: (nameInput && nameInput.value) || 'مستخدم جديد',
-        phone: (phoneInput && phoneInput.value) || '05XXXXXXXX',
+        name: name,
+        phone: phone,
       });
     });
 
@@ -204,3 +262,4 @@
   })();
 </script>
 </body></html>
+

@@ -15,14 +15,14 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
         <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 44px">إضافة منتج جديد</h1>
+            <h1 class="page-title">إضافة منتج جديد</h1>
           </div>
         </div>
         <img
@@ -41,7 +41,7 @@
         <section class="card stack">
           <div class="row">
             <span class="material-symbols-outlined" style="color: #67bde2">info</span>
-            <h3 style="font-size: 38px">المعلومات الأساسية</h3>
+            <h3 class="stock-section-title">المعلومات الأساسية</h3>
           </div>
 
           <label>
@@ -58,7 +58,7 @@
         <section class="card stack">
           <div class="row">
             <span class="material-symbols-outlined" style="color: #67bde2">payments</span>
-            <h3 style="font-size: 38px">السعر والكمية</h3>
+            <h3 class="stock-section-title">السعر والكمية</h3>
           </div>
 
           <label>
@@ -87,23 +87,34 @@
               </select>
             </label>
           </div>
+
+          <label class="new-product-toggle">
+            <div class="label">إعداد العرض</div>
+            <div class="new-product-toggle-box">
+              <input id="product-is-new" type="checkbox" />
+              <span>عرض المنتج ضمن قسم المنتجات الجديدة</span>
+            </div>
+          </label>
         </section>
 
         <section class="card stack">
           <div class="row">
             <span class="material-symbols-outlined" style="color: #67bde2">image</span>
-            <h3 style="font-size: 38px">صورة المنتج</h3>
+            <h3 class="stock-section-title">صورة المنتج</h3>
           </div>
 
-          <div class="media-box">
+          <input id="product-image-file" type="file" accept="image/*" hidden />
+          <button id="product-image-picker" class="media-box media-box-button" type="button">
             <div>
               <div class="media-icon">
                 <span class="material-symbols-outlined">cloud_upload</span>
               </div>
-              <strong style="font-size: 30px">اسحب الصورة هنا أو اضغط للرفع</strong>
+              <strong class="stock-media-title">اسحب الصورة هنا أو اضغط للرفع</strong>
               <p class="muted small">PNG أو JPG، حجم أقصى 5 ميجابايت</p>
             </div>
-          </div>
+          </button>
+          <img id="product-image-preview" class="media-preview" alt="صورة المنتج" hidden />
+          <div id="product-image-feedback" class="tiny muted upload-status">لم يتم رفع صورة بعد.</div>
         </section>
 
         <button class="ghost" data-route="/admin/dashboard">إلغاء التغييرات</button>
@@ -121,7 +132,15 @@
 
         var categorySelect = document.getElementById('product-category-id');
         var saveButton = document.getElementById('save-product-btn');
+        var imageInput = document.getElementById('product-image-file');
+        var imagePicker = document.getElementById('product-image-picker');
+        var imagePreview = document.getElementById('product-image-preview');
+        var imageFeedback = document.getElementById('product-image-feedback');
+
         if (!categorySelect || !saveButton) return;
+
+        var uploadedImageUrl = '';
+        var isUploading = false;
 
         function makeProductId(name) {
           var base = String(name || '')
@@ -151,10 +170,86 @@
           return 'KG';
         }
 
+        function setImageFeedback(message, isError) {
+          if (!imageFeedback) return;
+          imageFeedback.textContent = message || '';
+          imageFeedback.classList.toggle('is-error', Boolean(isError));
+          imageFeedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        async function uploadToCloudinary(file) {
+          if (!file) return;
+
+          if (!file.type || file.type.indexOf('image/') !== 0) {
+            setImageFeedback('الملف يجب أن يكون صورة.', true);
+            return;
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            setImageFeedback('حجم الصورة أكبر من 5 ميجابايت.', true);
+            return;
+          }
+
+          isUploading = true;
+          setImageFeedback('جاري رفع الصورة...', false);
+          if (imagePicker) imagePicker.disabled = true;
+
+          try {
+            var sign = await window.AdminBridge.apiRequest('/admin/uploads/cloudinary-signature');
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', String(sign.apiKey || ''));
+            formData.append('timestamp', String(sign.timestamp || ''));
+            formData.append('signature', String(sign.signature || ''));
+            formData.append('folder', String(sign.folder || 'al-arnab'));
+
+            var response = await fetch(String(sign.uploadUrl || ''), {
+              method: 'POST',
+              body: formData,
+            });
+
+            var data = null;
+            try {
+              data = await response.json();
+            } catch (error) {
+              data = null;
+            }
+
+            if (!response.ok) {
+              var cloudError =
+                (data && data.error && data.error.message) ||
+                'تعذر رفع الصورة إلى Cloudinary.';
+              throw new Error(cloudError);
+            }
+
+            uploadedImageUrl = data && (data.secure_url || data.url) ? String(data.secure_url || data.url) : '';
+            if (!uploadedImageUrl) {
+              throw new Error('لم يتم استلام رابط الصورة بعد الرفع.');
+            }
+
+            if (imagePreview) {
+              imagePreview.src = uploadedImageUrl;
+              imagePreview.hidden = false;
+            }
+
+            setImageFeedback('تم رفع الصورة بنجاح.', false);
+          } catch (error) {
+            uploadedImageUrl = '';
+            if (imagePreview) {
+              imagePreview.src = '';
+              imagePreview.hidden = true;
+            }
+            setImageFeedback((error && error.message) || 'تعذر رفع الصورة.', true);
+          } finally {
+            isUploading = false;
+            if (imagePicker) imagePicker.disabled = false;
+          }
+        }
+
         async function loadCategories() {
           try {
             var categories = await window.AdminBridge.apiRequest('/admin/categories');
-            categorySelect.innerHTML = '<option value=\"\">اختر التصنيف...</option>';
+            categorySelect.innerHTML = '<option value="">اختر التصنيف...</option>';
 
             (categories || []).forEach(function (category) {
               var option = document.createElement('option');
@@ -163,8 +258,19 @@
               categorySelect.appendChild(option);
             });
           } catch (error) {
-            categorySelect.innerHTML = '<option value=\"\">تعذر تحميل التصنيفات</option>';
+            categorySelect.innerHTML = '<option value="">تعذر تحميل التصنيفات</option>';
           }
+        }
+
+        if (imagePicker && imageInput) {
+          imagePicker.addEventListener('click', function () {
+            imageInput.click();
+          });
+
+          imageInput.addEventListener('change', function () {
+            var file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+            uploadToCloudinary(file);
+          });
         }
 
         saveButton.addEventListener('click', async function () {
@@ -174,6 +280,7 @@
           var sellPrice = Number((document.getElementById('product-sell-price') || {}).value || 0);
           var categoryId = categorySelect.value || '';
           var unitLabel = ((document.getElementById('product-unit') || {}).value || '').trim();
+          var isNew = Boolean((document.getElementById('product-is-new') || {}).checked);
 
           if (!nameAr.trim()) {
             alert('اسم المنتج مطلوب.');
@@ -182,6 +289,11 @@
 
           if (!categoryId) {
             alert('اختر التصنيف أولاً.');
+            return;
+          }
+
+          if (isUploading) {
+            alert('انتظر حتى انتهاء رفع الصورة.');
             return;
           }
 
@@ -202,12 +314,14 @@
                 stockQty: 0,
                 minStock: 0,
                 unit: unitValue(unitLabel),
+                isNew: isNew,
+                imageUrl: uploadedImageUrl || undefined,
               },
             });
 
             window.AdminBridge.go('/admin/dashboard');
           } catch (error) {
-            alert('تعذر حفظ المنتج. تأكد من تسجيل الدخول كأدمن.');
+            alert((error && error.message) || 'تعذر حفظ المنتج. تأكد من تسجيل الدخول كأدمن.');
             saveButton.disabled = false;
             saveButton.textContent = originalLabel;
           }

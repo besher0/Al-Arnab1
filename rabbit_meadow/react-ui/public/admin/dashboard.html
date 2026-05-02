@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
   <head>
     <meta charset="utf-8" />
@@ -15,7 +15,7 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
         <button class="icon-btn" data-route="/admin/orders/current" title="الطلبات">
           <span class="material-symbols-outlined">storefront</span>
@@ -45,36 +45,48 @@
           <div class="row">
             <div>
               <div class="muted small">سعر الصرف الحالي</div>
-              <strong style="font-size: 25px">USD = 3.75 SAR</strong>
+              <strong class="exchange-rate-value" data-exchange-rate-label>USD = 0 SAR</strong>
             </div>
-            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bce3">currency_exchange</span>
+            <span class="material-symbols-outlined" style="font-size: 24px; color: #69bce3">currency_exchange</span>
           </div>
-          <button class="pill" style="width: 120px">تعديل ✎</button>
+          <div class="row exchange-rate-editor">
+            <button class="pill active" type="button" data-exchange-rate-save>حفظ</button>
+            <input
+              class="input-field exchange-rate-input"
+              type="number"
+              min="0"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="3.75"
+              data-exchange-rate-input
+            />
+          </div>
+          <div class="tiny muted exchange-rate-feedback" data-exchange-rate-feedback></div>
         </section>
 
         <section class="card row">
           <div>
             <div class="muted">إجمالي مبيعات اليوم</div>
-            <div class="price">٤,٥٢٠ ر.س</div>
+            <div class="price" data-daily-sales>0 ر.س</div>
           </div>
-          <span class="material-symbols-outlined" style="font-size: 34px; color: #69bde4">payments</span>
+          <span class="material-symbols-outlined" style="font-size: 30px; color: #69bde4">payments</span>
         </section>
 
         <section class="grid-2">
           <article class="metric-card">
             <span class="tag danger">تنبيه</span>
-            <div class="metric-value">١٢</div>
-            <div class="muted">أصناف نفدت</div>
+            <div class="metric-value" data-low-stock-products>0</div>
+            <div class="muted">أصناف منخفضة المخزون</div>
           </article>
           <article class="metric-card">
             <span class="tag success">نشط</span>
-            <div class="metric-value">٢٤</div>
+            <div class="metric-value" data-active-orders>0</div>
             <div class="muted">طلبات نشطة</div>
           </article>
         </section>
 
         <section>
-          <h3 class="section-title" style="font-size: 40px">إجراءات سريعة</h3>
+          <h3 class="section-title">إجراءات سريعة</h3>
           <div class="quick-grid mt-12">
             <button class="quick-item" data-route="/admin/reports/sales">
               <div class="icon"><span class="material-symbols-outlined">query_stats</span></div>
@@ -93,49 +105,36 @@
 
         <section>
           <div class="row mb-12">
-            <h3 class="section-title" style="font-size: 41px; margin: 0">آخر الطلبات</h3>
-            <button class="ghost" style="width: auto; min-height: auto; padding: 0" data-route="/admin/orders/current">
-              عرض الكل
-            </button>
+            <h3 class="section-title section-title-inline">إدارة المنتجات الجديدة</h3>
+            <button class="ghost orders-link" data-route="/admin/products/new">إضافة منتج</button>
           </div>
+          <div class="new-products-table-card">
+            <table class="new-products-table">
+              <thead>
+                <tr>
+                  <th>المنتج</th>
+                  <th>التصنيف</th>
+                  <th>السعر</th>
+                  <th>الحالة</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody data-new-products-body>
+                <tr>
+                  <td colspan="5" class="muted text-center">جاري تحميل المنتجات...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tiny muted new-products-feedback" data-new-products-feedback></div>
+        </section>
 
-          <article class="order-row mb-12" data-route="/admin/orders/detail">
-            <div class="row">
-              <span class="tiny muted">منذ ٥ دقائق</span>
-              <img
-                class="avatar"
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
-                alt="عميل"
-              />
-            </div>
-            <div class="mt-12">
-              <strong style="font-size: 32px">أحمد العمري</strong>
-              <div class="muted">AR-1092# رقم الطلب</div>
-              <div class="row mt-12">
-                <span class="badge-soft">جاري التجهيز</span>
-                <span class="price-sm">١٨٥ ر.س</span>
-              </div>
-            </div>
-          </article>
-
-          <article class="order-row" data-route="/admin/orders/detail">
-            <div class="row">
-              <span class="tiny muted">منذ ١٢ دقيقة</span>
-              <img
-                class="avatar"
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80"
-                alt="عميل"
-              />
-            </div>
-            <div class="mt-12">
-              <strong style="font-size: 32px">سارة خالد</strong>
-              <div class="muted">AR-1091# رقم الطلب</div>
-              <div class="row mt-12">
-                <span class="badge-soft">جديد</span>
-                <span class="price-sm">٩٢ ر.س</span>
-              </div>
-            </div>
-          </article>
+        <section>
+          <div class="row mb-12">
+            <h3 class="section-title section-title-inline">آخر الطلبات</h3>
+            <button class="ghost orders-link" data-route="/admin/orders/current">عرض الكل</button>
+          </div>
+          <div class="stack" data-latest-orders></div>
         </section>
       </main>
 
@@ -160,5 +159,318 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        var storeCurrency = 'SAR';
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatNumber(value) {
+          var number = Number(value || 0);
+          return number.toLocaleString('ar-SA', { maximumFractionDigits: 2 });
+        }
+
+        function currencyLabel(currency) {
+          if (currency === 'SAR') return 'ر.س';
+          return currency || 'SAR';
+        }
+
+        function formatMoney(value, currency) {
+          return formatNumber(value) + ' ' + currencyLabel(currency);
+        }
+
+        function formatRate(rate, currency) {
+          return 'USD = ' + formatNumber(rate) + ' ' + (currency || 'SAR');
+        }
+
+        function statusLabel(status) {
+          var labels = {
+            NEW: 'جديد',
+            PREPARING: 'جاري التجهيز',
+            ON_THE_WAY: 'في الطريق',
+            DELIVERED: 'تم التسليم',
+            REJECTED: 'مرفوض',
+            CANCELLED: 'ملغي',
+          };
+          return labels[status] || 'غير محدد';
+        }
+
+        function relativeTime(dateValue) {
+          if (!dateValue) return 'الآن';
+          var date = new Date(dateValue);
+          if (Number.isNaN(date.getTime())) return 'الآن';
+
+          var diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+          if (diffMinutes < 1) return 'الآن';
+          if (diffMinutes < 60) return 'منذ ' + formatNumber(diffMinutes) + ' دقيقة';
+
+          var hours = Math.floor(diffMinutes / 60);
+          if (hours < 24) return 'منذ ' + formatNumber(hours) + ' ساعة';
+
+          var days = Math.floor(hours / 24);
+          return 'منذ ' + formatNumber(days) + ' يوم';
+        }
+
+        function setExchangeFeedback(message, isError) {
+          var feedback = document.querySelector('[data-exchange-rate-feedback]');
+          if (!feedback) return;
+          feedback.textContent = message || '';
+          feedback.classList.toggle('is-error', Boolean(isError));
+          feedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function setNewProductsFeedback(message, isError) {
+          var feedback = document.querySelector('[data-new-products-feedback]');
+          if (!feedback) return;
+          feedback.textContent = message || '';
+          feedback.classList.toggle('is-error', Boolean(isError));
+          feedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function renderNewProducts(products) {
+          var body = document.querySelector('[data-new-products-body]');
+          if (!body) return;
+
+          if (!Array.isArray(products) || products.length === 0) {
+            body.innerHTML =
+              '<tr><td colspan="5" class="muted text-center">لا توجد منتجات مضافة حتى الآن.</td></tr>';
+            return;
+          }
+
+          body.innerHTML = products
+            .map(function (product) {
+              var id = String(product && product.id ? product.id : '');
+              var isNew = Boolean(product && product.isNew);
+              var statusClass = isNew ? 'is-on' : 'is-off';
+              var statusLabel = isNew ? 'ضمن الجديد' : 'غير مضاف';
+              var actionLabel = isNew ? 'إزالة' : 'إضافة';
+              var nextState = isNew ? 'false' : 'true';
+
+              return [
+                '<tr>',
+                '  <td>' + escapeHtml(product && product.nameAr ? product.nameAr : '-') + '</td>',
+                '  <td>' + escapeHtml(product && product.categoryName ? product.categoryName : '-') + '</td>',
+                '  <td>' + escapeHtml(formatMoney(product && product.sellPrice ? product.sellPrice : 0, storeCurrency)) + '</td>',
+                '  <td><span class="new-state-badge ' + statusClass + '">' + statusLabel + '</span></td>',
+                '  <td>',
+                '    <button class="new-products-action ' +
+                  statusClass +
+                  '" data-new-product-id="' +
+                  escapeHtml(id) +
+                  '" data-new-product-next="' +
+                  nextState +
+                  '">' +
+                  actionLabel +
+                  '</button>',
+                '  </td>',
+                '</tr>',
+              ].join('');
+            })
+            .join('');
+        }
+
+        async function loadNewProducts() {
+          if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+            return;
+          }
+
+          var body = document.querySelector('[data-new-products-body]');
+          if (body) {
+            body.innerHTML = '<tr><td colspan="5" class="muted text-center">جاري تحميل المنتجات...</td></tr>';
+          }
+
+          try {
+            var products = await window.AdminBridge.apiRequest('/admin/products');
+            var sorted = (Array.isArray(products) ? products.slice() : []).sort(function (left, right) {
+              var leftTime = new Date((left && left.createdAt) || 0).getTime();
+              var rightTime = new Date((right && right.createdAt) || 0).getTime();
+              return rightTime - leftTime;
+            });
+
+            renderNewProducts(sorted);
+            setNewProductsFeedback('', false);
+          } catch (error) {
+            renderNewProducts([]);
+            setNewProductsFeedback('تعذر تحميل المنتجات. تأكد من تسجيل الدخول كأدمن.', true);
+          }
+        }
+
+        function bindNewProductsActions() {
+          var tableBody = document.querySelector('[data-new-products-body]');
+          if (!tableBody) return;
+
+          tableBody.addEventListener('click', async function (event) {
+            var button = event.target.closest('[data-new-product-id]');
+            if (!button) return;
+
+            event.preventDefault();
+            var productId = button.getAttribute('data-new-product-id') || '';
+            var nextState = button.getAttribute('data-new-product-next') === 'true';
+            if (!productId) return;
+
+            button.disabled = true;
+            setNewProductsFeedback('جاري تحديث حالة المنتج...', false);
+
+            try {
+              await window.AdminBridge.apiRequest('/admin/products/' + encodeURIComponent(productId) + '/new', {
+                method: 'PATCH',
+                body: { isNew: nextState },
+              });
+              await loadNewProducts();
+              setNewProductsFeedback('تم تحديث حالة المنتج.', false);
+            } catch (error) {
+              setNewProductsFeedback('تعذر تحديث المنتج. حاول مرة أخرى.', true);
+            } finally {
+              button.disabled = false;
+            }
+          });
+        }
+
+        function renderLatestOrders(orders) {
+          var list = document.querySelector('[data-latest-orders]');
+          if (!list) return;
+
+          if (!Array.isArray(orders) || orders.length === 0) {
+            list.innerHTML =
+              '<article class="order-row"><div class="muted">لا يوجد طلبات بعد. أضف منتجاتك الحقيقية وابدأ استقبال الطلبات.</div></article>';
+            return;
+          }
+
+          list.innerHTML = orders
+            .map(function (order) {
+              var customerName = order.customerName || 'عميل';
+              var orderNumber = order.orderNumber || '-';
+              var status = statusLabel(order.status);
+              var total = formatMoney(order.total, storeCurrency);
+              var createdAt = relativeTime(order.createdAt);
+
+              return [
+                '<article class="order-row mb-12" data-route="/admin/orders/current">',
+                '  <div class="row">',
+                '    <span class="tiny muted">' + escapeHtml(createdAt) + '</span>',
+                '    <span class="badge-soft">' + escapeHtml(status) + '</span>',
+                '  </div>',
+                '  <div class="mt-12">',
+                '    <strong class="order-customer-name">' + escapeHtml(customerName) + '</strong>',
+                '    <div class="muted">رقم الطلب ' + escapeHtml(orderNumber) + '</div>',
+                '    <div class="row mt-12">',
+                '      <span class="muted small">الإجمالي</span>',
+                '      <span class="price-sm">' + escapeHtml(total) + '</span>',
+                '    </div>',
+                '  </div>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+
+          if (window.AdminBridge && typeof window.AdminBridge.bindRoutes === 'function') {
+            window.AdminBridge.bindRoutes(list);
+          }
+        }
+
+        async function loadDashboard() {
+          if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+            return;
+          }
+
+          try {
+            var response = await window.AdminBridge.apiRequest('/admin/dashboard');
+            var store = response && response.store ? response.store : {};
+            var metrics = response && response.metrics ? response.metrics : {};
+            var latestOrders = response && response.latestOrders ? response.latestOrders : [];
+
+            storeCurrency = store.currency || 'SAR';
+
+            var exchangeLabel = document.querySelector('[data-exchange-rate-label]');
+            var exchangeInput = document.querySelector('[data-exchange-rate-input]');
+            var dailySales = document.querySelector('[data-daily-sales]');
+            var lowStock = document.querySelector('[data-low-stock-products]');
+            var activeOrders = document.querySelector('[data-active-orders]');
+
+            if (exchangeLabel) {
+              exchangeLabel.textContent = formatRate(store.usdSarRate || 0, storeCurrency);
+            }
+
+            if (exchangeInput) {
+              var currentRate = Number(store.usdSarRate || 0);
+              exchangeInput.value = currentRate > 0 ? currentRate.toFixed(2) : '';
+            }
+
+            if (dailySales) {
+              dailySales.textContent = formatMoney(metrics.dailySales || 0, storeCurrency);
+            }
+
+            if (lowStock) {
+              lowStock.textContent = formatNumber(metrics.lowStockProducts || 0);
+            }
+
+            if (activeOrders) {
+              activeOrders.textContent = formatNumber(metrics.activeOrders || 0);
+            }
+
+            renderLatestOrders(latestOrders);
+          } catch (error) {
+            renderLatestOrders([]);
+          }
+        }
+
+        function bindExchangeRateEditor() {
+          var saveButton = document.querySelector('[data-exchange-rate-save]');
+          var exchangeInput = document.querySelector('[data-exchange-rate-input]');
+          var exchangeLabel = document.querySelector('[data-exchange-rate-label]');
+          if (!saveButton || !exchangeInput || !exchangeLabel) return;
+
+          saveButton.addEventListener('click', async function () {
+            var nextRate = Number(exchangeInput.value);
+
+            if (!Number.isFinite(nextRate) || nextRate < 0) {
+              setExchangeFeedback('أدخل سعر صرف صالح (مثال: 3.75).', true);
+              return;
+            }
+
+            saveButton.disabled = true;
+            setExchangeFeedback('جاري الحفظ...', false);
+
+            try {
+              var updated = await window.AdminBridge.apiRequest('/admin/settings/store', {
+                method: 'PATCH',
+                body: { usdSarRate: nextRate },
+              });
+
+              storeCurrency = updated && updated.currency ? updated.currency : storeCurrency;
+              exchangeLabel.textContent = formatRate(nextRate, storeCurrency);
+              setExchangeFeedback('تم تحديث سعر الصرف.', false);
+              await loadDashboard();
+              await loadNewProducts();
+            } catch (error) {
+              setExchangeFeedback('تعذر تحديث سعر الصرف. تأكد من تسجيل الدخول كأدمن.', true);
+            } finally {
+              saveButton.disabled = false;
+            }
+          });
+        }
+
+        function initDashboard() {
+          bindNewProductsActions();
+          bindExchangeRateEditor();
+          loadDashboard().then(function () {
+            return loadNewProducts();
+          });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initDashboard);
+        } else {
+          initDashboard();
+        }
+      })();
+    </script>
   </body>
 </html>

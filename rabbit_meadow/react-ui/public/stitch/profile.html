@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#87CEEB",
+          "on-primary": "#FFFFFF",
+          "surface": "#F0F8FF",
+          "surface-card": "#FFFFFF",
+          "surface-soft": "#EAF5FF",
+          "on-surface": "#1A365D",
+          "on-surface-variant": "#718096",
+          "outline": "#C6DFF2",
+          "danger": "#B02500"
+        },
+        borderRadius: {
+          DEFAULT: "1rem",
+          lg: "2rem",
+          xl: "3rem",
+          full: "9999px"
+        },
+        fontFamily: {
+          headline: ["Tajawal", "sans-serif"],
+          body: ["Almarai", "sans-serif"],
+          label: ["Almarai", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+</style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased pb-32">
+  <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+      </div>
+      <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">حسابي</h1>
+    </div>
+    <button id="refresh-profile" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">refresh</span>
+    </button>
+  </header>
+
+  <main class="pt-24 px-4 max-w-2xl mx-auto space-y-6">
+    <section class="bg-surface-card border border-primary/10 rounded-3xl p-6 shadow-[0_14px_36px_rgba(26,54,93,0.08)] relative overflow-hidden">
+      <div class="absolute -top-12 -left-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl"></div>
+      <div class="relative flex items-center gap-4">
+        <div id="user-avatar" class="w-16 h-16 rounded-full bg-primary text-on-primary font-black text-2xl flex items-center justify-center">؟</div>
+        <div>
+          <h2 id="user-name" class="font-headline font-black text-2xl leading-tight">...</h2>
+          <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-3">
+      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
+        <p class="text-on-surface-variant text-xs font-bold mb-1">الاسم</p>
+        <p id="field-name" class="font-bold text-base">-</p>
+      </div>
+      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
+        <p class="text-on-surface-variant text-xs font-bold mb-1">رقم الهاتف</p>
+        <p id="field-phone" class="font-bold text-base" dir="ltr">-</p>
+      </div>
+      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
+        <p class="text-on-surface-variant text-xs font-bold mb-1">نوع الحساب</p>
+        <p id="field-role" class="font-bold text-base">-</p>
+      </div>
+    </section>
+
+    <section class="bg-surface-card border border-outline rounded-2xl p-4">
+      <button id="logout-btn" class="w-full flex items-center justify-center gap-2 rounded-full bg-danger text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">logout</span>
+        <span>تسجيل الخروج</span>
+      </button>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="home">home</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+      <span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <div class="relative">
+        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+        <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+      </div>
+      <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+      <span class="material-symbols-outlined" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+      <span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
+    </a>
+  </nav>
+
+<script>
+  (function () {
+    var state = { waitingLogout: false };
+
+    function toArabicNumber(value) {
+      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      return String(value).replace(/[0-9]/g, function (digit) {
+        return map[Number(digit)] || digit;
+      });
+    }
+
+    function setFooterCartCount(count) {
+      var next = Math.max(0, Number(count) || 0);
+      var badges = document.querySelectorAll('.cart-badge');
+      badges.forEach(function (badge) {
+        badge.textContent = toArabicNumber(next);
+        badge.style.display = next > 0 ? 'flex' : 'none';
+      });
+    }
+
+    function send(type, payload) {
+      window.parent.postMessage(
+        Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+        window.location.origin,
+      );
+    }
+
+    function bindLink(link, to) {
+      if (!link) return;
+      link.href = to;
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        send('navigate', { to: to });
+      });
+    }
+
+    function roleLabel(role) {
+      if (role === 'ADMIN') return 'مدير النظام';
+      if (role === 'CUSTOMER') return 'عميل';
+      return role || '-';
+    }
+
+    function firstLetter(value) {
+      var clean = String(value || '').trim();
+      if (!clean) return '؟';
+      return clean.charAt(0);
+    }
+
+    function setUserData(user) {
+      var name = user && user.name ? String(user.name) : 'مستخدم';
+      var phone = user && user.phone ? String(user.phone) : '-';
+      var role = user && user.role ? String(user.role) : '';
+
+      var title = document.getElementById('user-name');
+      var welcome = document.getElementById('user-welcome');
+      var avatar = document.getElementById('user-avatar');
+      var fieldName = document.getElementById('field-name');
+      var fieldPhone = document.getElementById('field-phone');
+      var fieldRole = document.getElementById('field-role');
+
+      if (title) title.textContent = name;
+      if (welcome) welcome.textContent = 'مرحباً بك في حسابك.';
+      if (avatar) avatar.textContent = firstLetter(name);
+      if (fieldName) fieldName.textContent = name;
+      if (fieldPhone) fieldPhone.textContent = phone;
+      if (fieldRole) fieldRole.textContent = roleLabel(role);
+    }
+
+    function setLogoutLoading(isLoading) {
+      state.waitingLogout = Boolean(isLoading);
+      var button = document.getElementById('logout-btn');
+      if (!button) return;
+
+      button.disabled = state.waitingLogout;
+      button.classList.toggle('opacity-70', state.waitingLogout);
+      button.classList.toggle('cursor-not-allowed', state.waitingLogout);
+      var label = button.querySelector('span:last-child');
+      if (label) {
+        label.textContent = state.waitingLogout ? 'جاري تسجيل الخروج...' : 'تسجيل الخروج';
+      }
+    }
+
+    var navLinks = document.querySelectorAll('nav a');
+    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
+    navLinks.forEach(function (link, index) {
+      if (navRoutes[index]) {
+        bindLink(link, navRoutes[index]);
+      }
+    });
+
+    var refreshButton = document.getElementById('refresh-profile');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', function () {
+        send('request-state');
+      });
+    }
+
+    var logoutButton = document.getElementById('logout-btn');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', function () {
+        if (state.waitingLogout) return;
+        setLogoutLoading(true);
+        send('logout');
+        window.setTimeout(function () {
+          setLogoutLoading(false);
+        }, 3500);
+      });
+    }
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin) return;
+      var payload = event.data;
+      if (!payload || payload.source !== 'react-shell') return;
+      if (payload.type !== 'cart-state') return;
+
+      setFooterCartCount(payload.itemCount || 0);
+      setUserData(payload.user || null);
+      setLogoutLoading(false);
+    });
+
+    send('request-state');
+  })();
+</script>
+</body>
+</html>

@@ -149,6 +149,22 @@
 </nav>
 <script>
   (function () {
+    var API_BASE =
+      window.location.protocol + '//' + window.location.hostname + ':3000/api';
+    var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
+    var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
+    var heroImage = document.querySelector('main .aspect-square img');
+    var titleNode = document.querySelector('main h1.font-headline');
+    var subtitleNode = document.querySelector('main p.font-body');
+    var priceNode = document.querySelector('main span.font-headline.text-3xl');
+    var qtyNode = document.querySelector('.product-action-bar span.font-headline');
+    var state = {
+      products: [],
+      selectedProductId: '',
+      qty: 1,
+      cartById: {},
+    };
+
     function toArabicNumber(value) {
       var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
       return String(value).replace(/[0-9]/g, function (digit) {
@@ -156,13 +172,17 @@
       });
     }
 
-    function setCartCount(count) {
-      var badge = document.querySelector('header button .absolute');
-      if (!badge) return;
+    function parseArabicNumber(value) {
+      var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+      var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
+        return map[digit] || digit;
+      });
+      var parsed = parseInt(normalized, 10);
+      return Number.isNaN(parsed) ? 1 : parsed;
+    }
 
-      var next = Math.max(0, Number(count) || 0);
-      badge.textContent = toArabicNumber(next);
-      badge.style.display = next > 0 ? 'flex' : 'none';
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
     }
 
     function setFooterCartCount(count) {
@@ -172,6 +192,83 @@
         badge.textContent = toArabicNumber(next);
         badge.style.display = next > 0 ? 'flex' : 'none';
       });
+    }
+
+    function getSelectedProductFromRoute() {
+      try {
+        var path = window.parent && window.parent.location ? window.parent.location.pathname : '';
+        var match = String(path || '').match(/\/product\/([^/?#]+)/);
+        if (match && match[1]) {
+          return decodeURIComponent(match[1]);
+        }
+      } catch (_error) {
+        // Ignore cross-context failures.
+      }
+      return '';
+    }
+
+    function getSelectedProductId() {
+      return (
+        getSelectedProductFromRoute() ||
+        window.localStorage.getItem(STORAGE_PRODUCT) ||
+        ''
+      );
+    }
+
+    function getSelectedProduct() {
+      return state.products.find(function (product) {
+        return product.id === state.selectedProductId;
+      });
+    }
+
+    function syncQtyNode() {
+      if (!qtyNode) return;
+      qtyNode.textContent = toArabicNumber(Math.max(1, Number(state.qty) || 1));
+    }
+
+    function renderProductDetails() {
+      var product = getSelectedProduct();
+      if (!product) {
+        if (titleNode) titleNode.textContent = 'منتج غير متوفر';
+        if (subtitleNode) subtitleNode.textContent = 'تعذر تحميل تفاصيل المنتج';
+        if (priceNode) priceNode.textContent = formatSar(0);
+        return;
+      }
+
+      if (heroImage) {
+        heroImage.alt = product.name || 'منتج';
+        if (product.imageUrl) {
+          heroImage.src = product.imageUrl;
+        }
+      }
+
+      if (titleNode) titleNode.textContent = product.name || 'منتج';
+      if (subtitleNode) {
+        subtitleNode.textContent = product.categoryName || product.description || 'منتج طازج من الأرنب';
+      }
+      if (priceNode) {
+        priceNode.textContent = formatSar(product.price);
+      }
+
+      window.localStorage.setItem(STORAGE_PRODUCT, product.id);
+      if (product.categoryId) {
+        window.localStorage.setItem(STORAGE_CATEGORY, product.categoryId);
+      }
+    }
+
+    function applyCartState(payload) {
+      var items = Array.isArray(payload && payload.items) ? payload.items : [];
+      state.cartById = {};
+      items.forEach(function (item) {
+        var id = String(item && item.id ? item.id : '');
+        if (!id) return;
+        state.cartById[id] = Math.max(0, Number(item.qty) || 0);
+      });
+
+      var selectedQty = Math.max(0, Number(state.cartById[state.selectedProductId]) || 0);
+      state.qty = Math.max(1, selectedQty || state.qty || 1);
+      syncQtyNode();
+      setFooterCartCount(payload && payload.itemCount ? payload.itemCount : 0);
     }
 
     function send(type, payload) {
@@ -190,32 +287,15 @@
       });
     }
 
-    function parseArabicNumber(value) {
-      var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
-      var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
-        return map[digit] || digit;
-      });
-      var parsed = parseInt(normalized, 10);
-      return Number.isNaN(parsed) ? 1 : parsed;
-    }
-
-    function toArabicNumber(value) {
-      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return String(value).replace(/[0-9]/g, function (digit) {
-        return map[Number(digit)] || digit;
-      });
-    }
-
     var navLinks = document.querySelectorAll('nav a');
-    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
+    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
     navLinks.forEach(function (link, index) {
       if (navRoutes[index]) {
         bindLink(link, navRoutes[index]);
       }
     });
 
-    var qtyNode = document.querySelector('.product-action-bar span.font-headline');
-    var qty = parseArabicNumber(qtyNode ? qtyNode.textContent : '1');
+    state.qty = parseArabicNumber(qtyNode ? qtyNode.textContent : '1');
 
     var bottomButtons = document.querySelectorAll('.product-action-bar button');
     var plusButton = null;
@@ -230,15 +310,15 @@
 
     if (plusButton) {
       plusButton.addEventListener('click', function () {
-        qty += 1;
-        if (qtyNode) qtyNode.textContent = toArabicNumber(qty);
+        state.qty += 1;
+        syncQtyNode();
       });
     }
 
     if (minusButton) {
       minusButton.addEventListener('click', function () {
-        qty = Math.max(1, qty - 1);
-        if (qtyNode) qtyNode.textContent = toArabicNumber(qty);
+        state.qty = Math.max(1, state.qty - 1);
+        syncQtyNode();
       });
     }
 
@@ -247,7 +327,8 @@
     });
     if (addButton) {
       addButton.addEventListener('click', function () {
-        send('add-item', { id: 'tomato', qty: qty });
+        if (!state.selectedProductId) return;
+        send('add-item', { id: state.selectedProductId, qty: state.qty });
         send('navigate', { to: '/cart' });
       });
     }
@@ -268,9 +349,33 @@
       if (!payload || payload.source !== 'react-shell') return;
       if (payload.type !== 'cart-state') return;
 
-      setCartCount(payload.itemCount || 0);
-      setFooterCartCount(payload.itemCount || 0);
+      applyCartState(payload);
     });
+
+    fetch(API_BASE + '/catalog/products')
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('catalog');
+        }
+        return response.json();
+      })
+      .then(function (products) {
+        state.products = Array.isArray(products) ? products : [];
+        state.selectedProductId = getSelectedProductId();
+
+        var hasSelected = state.products.some(function (product) {
+          return product.id === state.selectedProductId;
+        });
+        if (!hasSelected) {
+          state.selectedProductId = (state.products[0] && state.products[0].id) || '';
+        }
+
+        renderProductDetails();
+        syncQtyNode();
+      })
+      .catch(function () {
+        renderProductDetails();
+      });
 
     send('request-state');
   })();

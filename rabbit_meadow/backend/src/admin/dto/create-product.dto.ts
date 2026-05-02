@@ -59,4 +59,9 @@ export class CreateProductDto {
   @Type(() => Boolean)
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isNew?: boolean;
 }

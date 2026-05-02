@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
@@ -321,6 +321,22 @@
 </nav>
 <script>
   (function () {
+    var API_BASE =
+      window.location.protocol + '//' + window.location.hostname + ':3000/api';
+    var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
+    var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
+    var categoryNameNode = document.querySelector('nav .font-bold.text-primary');
+    var headerTitleNode = document.querySelector('h2.font-tajawal.font-extrabold');
+    var productsGrid = document.querySelector('.grid.grid-cols-2.gap-3.px-2');
+    var quickCartBadge = document.querySelector('.fixed.bottom-28 .absolute');
+    var state = {
+      categories: [],
+      products: [],
+      selectedCategoryId: '',
+      qtyByProduct: {},
+    };
+    var routeSelectedCategoryId = '';
+
     function toArabicNumber(value) {
       var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
       return String(value).replace(/[0-9]/g, function (digit) {
@@ -328,8 +344,50 @@
       });
     }
 
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function readCategoryIdFromSearch(searchValue) {
+      var raw = String(searchValue || '').trim();
+      if (!raw) return '';
+      var search = raw.charAt(0) === '?' ? raw.slice(1) : raw;
+      var params = new URLSearchParams(search);
+      return (params.get('categoryId') || params.get('category') || '').trim();
+    }
+
+    function applyRouteCategorySelection(searchValue) {
+      var fromRoute = readCategoryIdFromSearch(searchValue);
+      if (!fromRoute) return;
+
+      routeSelectedCategoryId = fromRoute;
+      window.localStorage.setItem(STORAGE_CATEGORY, fromRoute);
+
+      if (!state.categories.length) return;
+      var exists = state.categories.some(function (category) {
+        return category.id === fromRoute;
+      });
+      if (!exists) return;
+
+      if (state.selectedCategoryId !== fromRoute) {
+        state.selectedCategoryId = fromRoute;
+        renderHeader();
+        renderProducts();
+        refreshAllQuantities();
+      }
+    }
+
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
+    }
+
     function setCartCount(count) {
-      var badge = document.querySelector('.fixed.bottom-28 button .absolute');
+      var badge = quickCartBadge;
       if (!badge) return;
 
       var next = Math.max(0, Number(count) || 0);
@@ -344,6 +402,100 @@
         badge.textContent = toArabicNumber(next);
         badge.style.display = next > 0 ? 'flex' : 'none';
       });
+    }
+
+    function setQtyInUi(productId, qty) {
+      var qtyNodes = document.querySelectorAll('[data-qty-for="' + productId + '"]');
+      qtyNodes.forEach(function (node) {
+        node.textContent = toArabicNumber(Math.max(0, Number(qty) || 0));
+      });
+    }
+
+    function refreshAllQuantities() {
+      Object.keys(state.qtyByProduct).forEach(function (productId) {
+        setQtyInUi(productId, state.qtyByProduct[productId]);
+      });
+    }
+
+    function getCategoryLabel(categoryId) {
+      var category = state.categories.find(function (item) {
+        return item.id === categoryId;
+      });
+      return category ? category.nameAr : 'التصنيف';
+    }
+
+    function renderHeader() {
+      var label = getCategoryLabel(state.selectedCategoryId);
+      if (categoryNameNode) categoryNameNode.textContent = label;
+      if (headerTitleNode) headerTitleNode.textContent = label;
+    }
+
+    function renderProducts() {
+      if (!productsGrid) return;
+
+      var filtered = state.products.filter(function (product) {
+        if (!state.selectedCategoryId) return true;
+        return product.categoryId === state.selectedCategoryId;
+      });
+
+      if (!filtered.length) {
+        productsGrid.innerHTML =
+          '<div class="col-span-2 bg-surface-container-lowest rounded-2xl p-6 text-center text-sm text-on-surface-variant border border-outline/10">لا توجد منتجات في هذا التصنيف حالياً.</div>';
+        return;
+      }
+
+      productsGrid.innerHTML = filtered
+        .map(function (product) {
+          var qty = Math.max(0, Number(state.qtyByProduct[product.id]) || 0);
+          return (
+            '<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5" data-open-product="' +
+            escapeHtml(product.id) +
+            '">' +
+            '<div class="h-32 overflow-hidden relative">' +
+            (product.imageUrl
+              ? '<img class="w-full h-full object-cover" alt="' +
+                escapeHtml(product.name || 'منتج') +
+                '" src="' +
+                escapeHtml(product.imageUrl) +
+                '"/>'
+              : '<div class="w-full h-full flex items-center justify-center text-primary/60 bg-surface-container"><span class="material-symbols-outlined text-3xl">inventory_2</span></div>') +
+            '</div>' +
+            '<div class="p-3 flex flex-col flex-grow">' +
+            '<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">' +
+            escapeHtml(product.name || 'منتج') +
+            '</h3>' +
+            '<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">' +
+            escapeHtml(product.unit || '') +
+            '</span>' +
+            '<div class="mt-2 mb-3"><span class="text-lg font-black text-primary block">' +
+            formatSar(product.price) +
+            '</span></div>' +
+            '<div class="mt-auto space-y-2">' +
+            '<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">' +
+            '<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors" data-action="minus" data-product-id="' +
+            escapeHtml(product.id) +
+            '">' +
+            '<span class="material-symbols-outlined text-sm">remove</span></button>' +
+            '<span class="text-xs font-bold" data-qty-for="' +
+            escapeHtml(product.id) +
+            '">' +
+            toArabicNumber(qty) +
+            '</span>' +
+            '<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors" data-action="plus" data-product-id="' +
+            escapeHtml(product.id) +
+            '">' +
+            '<span class="material-symbols-outlined text-sm">add</span></button>' +
+            '</div>' +
+            '<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform" data-action="add" data-product-id="' +
+            escapeHtml(product.id) +
+            '">' +
+            '<span class="material-symbols-outlined text-base">shopping_basket</span>أضف</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+          );
+        })
+        .join('');
     }
 
     function send(type, payload) {
@@ -363,30 +515,11 @@
     }
 
     var navLinks = document.querySelectorAll('nav a');
-    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
+    var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
     navLinks.forEach(function (link, index) {
       if (navRoutes[index]) {
         bindLink(link, navRoutes[index]);
       }
-    });
-
-    var productCards = document.querySelectorAll('main .grid > div');
-    productCards.forEach(function (card) {
-      card.style.cursor = 'pointer';
-      card.addEventListener('click', function (event) {
-        if (event.target && event.target.closest('button')) return;
-        send('navigate', { to: '/product' });
-      });
-    });
-
-    var addButtons = Array.from(document.querySelectorAll('button')).filter(function (btn) {
-      return (btn.textContent || '').indexOf('أضف') !== -1;
-    });
-    var productIds = ['milk', 'feta', 'yogurt', 'butter', 'labneh'];
-    addButtons.forEach(function (btn, index) {
-      btn.addEventListener('click', function () {
-        send('add-item', { id: productIds[index] || 'milk', qty: 1 });
-      });
     });
 
     var quickCart = Array.from(document.querySelectorAll('button')).find(function (btn) {
@@ -399,15 +532,106 @@
       });
     }
 
+    document.addEventListener('click', function (event) {
+      var actionButton = event.target.closest('[data-action][data-product-id]');
+      if (actionButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        var productId = actionButton.getAttribute('data-product-id');
+        var action = actionButton.getAttribute('data-action');
+        if (!productId) return;
+
+        var currentQty = Math.max(0, Number(state.qtyByProduct[productId]) || 0);
+        if (action === 'add' || action === 'plus') {
+          var nextPlus = currentQty + 1;
+          state.qtyByProduct[productId] = nextPlus;
+          setQtyInUi(productId, nextPlus);
+          send('add-item', { id: productId, qty: 1 });
+          return;
+        }
+
+        if (action === 'minus') {
+          var nextMinus = Math.max(0, currentQty - 1);
+          state.qtyByProduct[productId] = nextMinus;
+          setQtyInUi(productId, nextMinus);
+          send('set-qty', { id: productId, qty: nextMinus });
+        }
+        return;
+      }
+
+      var card = event.target.closest('[data-open-product]');
+      if (!card) return;
+      var productId = card.getAttribute('data-open-product');
+      if (!productId) return;
+      window.localStorage.setItem(STORAGE_PRODUCT, productId);
+      send('navigate', { to: '/product' });
+    });
+
+    function applyBootstrap(payload) {
+      state.categories = Array.isArray(payload && payload.categories) ? payload.categories : [];
+      state.products = Array.isArray(payload && payload.products) ? payload.products : [];
+
+      var savedCategory =
+        routeSelectedCategoryId || window.localStorage.getItem(STORAGE_CATEGORY) || '';
+      var hasSaved = state.categories.some(function (category) {
+        return category.id === savedCategory;
+      });
+      state.selectedCategoryId = hasSaved
+        ? savedCategory
+        : (state.categories[0] && state.categories[0].id) || '';
+
+      if (state.selectedCategoryId) {
+        window.localStorage.setItem(STORAGE_CATEGORY, state.selectedCategoryId);
+      }
+
+      renderHeader();
+      renderProducts();
+      refreshAllQuantities();
+    }
+
     window.addEventListener('message', function (event) {
       if (event.origin !== window.location.origin) return;
       var payload = event.data;
       if (!payload || payload.source !== 'react-shell') return;
       if (payload.type !== 'cart-state') return;
 
+      if (payload.route && payload.route.pathname === '/category-products') {
+        applyRouteCategorySelection(payload.route.search || '');
+      }
+
+      var items = Array.isArray(payload.items) ? payload.items : [];
+      state.qtyByProduct = {};
+      items.forEach(function (item) {
+        var id = String(item && item.id ? item.id : '');
+        if (!id) return;
+        state.qtyByProduct[id] = Math.max(0, Number(item.qty) || 0);
+      });
+
+      refreshAllQuantities();
       setCartCount(payload.itemCount || 0);
       setFooterCartCount(payload.itemCount || 0);
     });
+
+    renderHeader();
+    renderProducts();
+    applyRouteCategorySelection(window.location.search);
+
+    fetch(API_BASE + '/catalog/bootstrap')
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('catalog');
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        applyBootstrap(payload || {});
+      })
+      .catch(function () {
+        state.categories = [];
+        state.products = [];
+        renderHeader();
+        renderProducts();
+      });
 
     send('request-state');
   })();

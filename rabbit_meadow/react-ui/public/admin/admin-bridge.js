@@ -199,6 +199,7 @@
 
     if (file === 'dashboard.html') return 'dashboard';
     if (file === 'sales-report.html') return 'reports';
+    if (file === 'add-category.html') return 'categories';
 
     if (
       file === 'current-orders.html' ||
@@ -210,7 +211,6 @@
 
     if (
       file === 'add-product.html' ||
-      file === 'add-category.html' ||
       file === 'new-discount.html'
     ) {
       return 'stock';
@@ -230,7 +230,7 @@
       shell.appendChild(nav);
     }
 
-    nav.className = 'bottom-nav admin-unified-footer';
+    nav.className = 'bottom-nav admin-unified-footer five';
     nav.removeAttribute('style');
     nav.innerHTML = [
       '<button class="nav-item" data-footer-key="dashboard" data-route="/admin/dashboard">',
@@ -238,6 +238,9 @@
       '</button>',
       '<button class="nav-item" data-footer-key="orders" data-route="/admin/orders/current">',
       '<span class="material-symbols-outlined nav-icon">shopping_bag</span>الطلبات',
+      '</button>',
+      '<button class="nav-item" data-footer-key="categories" data-route="/admin/categories/new">',
+      '<span class="material-symbols-outlined nav-icon">category</span>التصنيفات',
       '</button>',
       '<button class="nav-item" data-footer-key="stock" data-route="/admin/products/new">',
       '<span class="material-symbols-outlined nav-icon">inventory_2</span>المخزون',

@@ -15,14 +15,15 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
-        <button class="icon-btn" data-route="/admin/dashboard" title="القائمة">
-          <span class="material-symbols-outlined">menu</span>
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 48px">تقرير المبيعات</h1>
+            <h1 class="page-title">تقرير المبيعات</h1>
+            <p class="page-subtitle">Al-Arnab</p>
           </div>
         </div>
         <img
@@ -36,89 +37,57 @@
         <section class="soft-card stack">
           <div class="row">
             <span class="material-symbols-outlined" style="color: #65bbdf">calendar_month</span>
-            <h3 style="font-size: 38px">تحديد الفترة الزمنية</h3>
+            <h3>تحديد الفترة الزمنية</h3>
           </div>
           <div class="grid-2">
             <label>
               <div class="label">من تاريخ</div>
-              <input class="input-field" value="10/01/2023" />
+              <input id="report-from" class="input-field" type="date" />
             </label>
             <label>
               <div class="label">إلى تاريخ</div>
-              <input class="input-field" value="10/31/2023" />
+              <input id="report-to" class="input-field" type="date" />
             </label>
           </div>
-          <button class="cta">
+          <button id="report-refresh" class="cta" type="button">
             <span class="material-symbols-outlined" style="vertical-align: middle">refresh</span>
             تحديث البيانات
           </button>
+          <div id="report-feedback" class="tiny muted"></div>
         </section>
 
         <section class="card row" style="align-items: stretch">
           <div style="width: 4px; border-radius: 999px; background: #7ec8e8"></div>
           <div style="flex: 1">
             <div class="muted">إجمالي المبيعات</div>
-            <div class="stat-large">١٤,٥٨٠ ر.س</div>
-            <div class="muted small">↑ 12% زيادة عن الشهر الماضي</div>
+            <div id="report-revenue" class="stat-large">0 ر.س</div>
+            <div id="report-period" class="muted small">-</div>
           </div>
         </section>
 
         <section class="grid-2">
           <article class="metric-card text-center">
-            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bee4">shopping_basket</span>
-            <div class="metric-value">١٨٤</div>
+            <span class="material-symbols-outlined" style="font-size: 24px; color: #69bee4">shopping_basket</span>
+            <div id="report-orders-count" class="metric-value">0</div>
             <div class="muted">عدد الطلبات</div>
-            <div class="tiny muted">طلب مكتمل</div>
+            <div class="tiny muted">مكتملة ضمن الفترة</div>
           </article>
           <article class="metric-card text-center">
-            <span class="material-symbols-outlined" style="font-size: 28px; color: #69bee4">savings</span>
-            <div class="metric-value">٤,٣٣٠</div>
+            <span class="material-symbols-outlined" style="font-size: 24px; color: #69bee4">savings</span>
+            <div id="report-profit" class="metric-value">0</div>
             <div class="muted">صافي الربح</div>
-            <div class="tiny muted">ر.س بعد الخصومات</div>
+            <div id="report-cost" class="tiny muted">التكلفة: 0 ر.س</div>
           </article>
         </section>
 
         <section>
           <div class="row mb-12">
-            <h3 class="section-title" style="font-size: 42px; margin: 0">تفاصيل العمليات</h3>
-            <button class="ghost" style="width: auto; min-height: auto; color: #67bbde">عرض الكل ←</button>
+            <h3 class="section-title" style="margin: 0">تفاصيل العمليات</h3>
           </div>
 
-          <article class="order-row mb-12 row">
-            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
-            <div>
-              <strong style="font-size: 32px">طلب #8943</strong>
-              <div class="muted tiny">4 أكتوبر 2023 · 8:30 م</div>
-            </div>
-            <div class="text-left">
-              <div class="price-sm">٤٥٠ ر.س</div>
-              <span class="tag success">مكتمل</span>
-            </div>
-          </article>
-
-          <article class="order-row mb-12 row">
-            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
-            <div>
-              <strong style="font-size: 32px">طلب #8941</strong>
-              <div class="muted tiny">3 أكتوبر 2023 · 10:15 م</div>
-            </div>
-            <div class="text-left">
-              <div class="price-sm">١,٢٠٠ ر.س</div>
-              <span class="tag success">مكتمل</span>
-            </div>
-          </article>
-
-          <article class="order-row row">
-            <span class="material-symbols-outlined" style="font-size: 30px; color: #8ea2bc">receipt_long</span>
-            <div>
-              <strong style="font-size: 32px">طلب #8940</strong>
-              <div class="muted tiny">3 أكتوبر 2023 · 11:00 ص</div>
-            </div>
-            <div class="text-left">
-              <div class="price-sm">٨٥ ر.س</div>
-              <span class="tag warning">مسترجع</span>
-            </div>
-          </article>
+          <div id="report-operations" class="report-operations">
+            <article class="order-row report-empty">جاري تحميل التقرير...</article>
+          </div>
         </section>
       </main>
 
@@ -143,5 +112,174 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+          return;
+        }
+
+        var fromInput = document.getElementById('report-from');
+        var toInput = document.getElementById('report-to');
+        var refreshButton = document.getElementById('report-refresh');
+        var feedback = document.getElementById('report-feedback');
+
+        var revenueNode = document.getElementById('report-revenue');
+        var periodNode = document.getElementById('report-period');
+        var countNode = document.getElementById('report-orders-count');
+        var profitNode = document.getElementById('report-profit');
+        var costNode = document.getElementById('report-cost');
+        var operationsNode = document.getElementById('report-operations');
+
+        var STATUS_LABELS = {
+          NEW: 'جديد',
+          PREPARING: 'جاري التجهيز',
+          ON_THE_WAY: 'في الطريق',
+          DELIVERED: 'مكتمل',
+          REJECTED: 'مرفوض',
+          CANCELLED: 'ملغي',
+        };
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function toDateInputValue(date) {
+          var year = date.getFullYear();
+          var month = String(date.getMonth() + 1).padStart(2, '0');
+          var day = String(date.getDate()).padStart(2, '0');
+          return year + '-' + month + '-' + day;
+        }
+
+        function fromStartIso(dateValue) {
+          return dateValue + 'T00:00:00.000Z';
+        }
+
+        function toEndIso(dateValue) {
+          return dateValue + 'T23:59:59.999Z';
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ر.س';
+        }
+
+        function formatNumber(value) {
+          return Number(value || 0).toLocaleString('ar-SA');
+        }
+
+        function formatDateTime(value) {
+          var date = new Date(value);
+          if (Number.isNaN(date.getTime())) return '-';
+
+          return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        }
+
+        function statusClass(status) {
+          if (status === 'DELIVERED') return 'success';
+          if (status === 'REJECTED' || status === 'CANCELLED') return 'danger';
+          return 'warning';
+        }
+
+        function renderOperations(operations) {
+          if (!operationsNode) return;
+
+          if (!Array.isArray(operations) || operations.length === 0) {
+            operationsNode.innerHTML =
+              '<article class="order-row report-empty">لا توجد عمليات مكتملة ضمن الفترة المحددة.</article>';
+            return;
+          }
+
+          operationsNode.innerHTML = operations
+            .map(function (operation) {
+              return [
+                '<article class="order-row row">',
+                '  <span class="material-symbols-outlined" style="font-size: 22px; color: #8ea2bc">receipt_long</span>',
+                '  <div>',
+                '    <strong>طلب #' + escapeHtml(operation.orderNumber || '-') + '</strong>',
+                '    <div class="muted tiny">' + escapeHtml(formatDateTime(operation.createdAt)) + '</div>',
+                '  </div>',
+                '  <div class="text-left">',
+                '    <div class="price-sm">' + escapeHtml(formatMoney(operation.total)) + '</div>',
+                '    <span class="tag ' + statusClass(operation.status) + '">' + escapeHtml(STATUS_LABELS[operation.status] || 'غير محدد') + '</span>',
+                '  </div>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+        }
+
+        function setFeedback(message, isError) {
+          if (!feedback) return;
+          feedback.textContent = message || '';
+          feedback.classList.toggle('is-error', Boolean(message) && Boolean(isError));
+          feedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function applyReport(report) {
+          var totals = report && report.totals ? report.totals : {};
+          revenueNode.textContent = formatMoney(totals.revenue || 0);
+          countNode.textContent = formatNumber(totals.ordersCount || 0);
+          profitNode.textContent = formatMoney(totals.grossProfit || 0);
+          costNode.textContent = 'التكلفة: ' + formatMoney(totals.cost || 0);
+
+          var fromLabel = report && report.from ? formatDateTime(report.from).split('،')[0] : '-';
+          var toLabel = report && report.to ? formatDateTime(report.to).split('،')[0] : '-';
+          periodNode.textContent = 'الفترة: ' + fromLabel + ' - ' + toLabel;
+
+          renderOperations(report && report.operations ? report.operations : []);
+        }
+
+        async function loadReport() {
+          if (!fromInput || !toInput || !operationsNode) return;
+          if (!fromInput.value || !toInput.value) return;
+
+          if (fromInput.value > toInput.value) {
+            setFeedback('تاريخ البداية يجب أن يكون قبل تاريخ النهاية.', true);
+            return;
+          }
+
+          refreshButton.disabled = true;
+          setFeedback('جاري تحديث التقرير...', false);
+          operationsNode.innerHTML = '<article class="order-row report-empty">جاري تحميل التقرير...</article>';
+
+          try {
+            var from = encodeURIComponent(fromStartIso(fromInput.value));
+            var to = encodeURIComponent(toEndIso(toInput.value));
+            var report = await window.AdminBridge.apiRequest('/admin/reports/sales?from=' + from + '&to=' + to);
+            applyReport(report || {});
+            setFeedback('تم تحديث التقرير بنجاح.', false);
+          } catch (error) {
+            setFeedback('تعذر تحميل التقرير. تأكد من تسجيل الدخول بحساب أدمن.', true);
+            operationsNode.innerHTML = '<article class="order-row report-empty">تعذر تحميل بيانات العمليات.</article>';
+          } finally {
+            refreshButton.disabled = false;
+          }
+        }
+
+        function setDefaultDates() {
+          var today = new Date();
+          var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+          fromInput.value = toDateInputValue(monthStart);
+          toInput.value = toDateInputValue(today);
+        }
+
+        refreshButton.addEventListener('click', loadReport);
+        setDefaultDates();
+        loadReport();
+      })();
+    </script>
   </body>
 </html>

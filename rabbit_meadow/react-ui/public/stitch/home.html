@@ -101,7 +101,7 @@
                 <span class="material-symbols-outlined text-xs">arrow_back_ios</span>
 </button>
 </div>
-<div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4">
+<div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4" data-offers-list>
 <!-- Product Card 1 -->
 <div class="min-w-[170px] bg-white rabbit-card-shape p-3 shadow-sm flex-shrink-0 relative border border-primary/5">
 <div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">خصم 30%</div>
@@ -184,6 +184,12 @@
 </div>
 </section>
 <!-- Section 3: Latest/Most Ordered Section (الأكثر طلباً) -->
+<section>
+<div class="flex justify-between items-end mb-4 px-2">
+<h2 class="text-xl font-black text-on-surface flex items-center gap-2">المنتجات الجديدة</h2>
+</div>
+<div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4" data-new-products-list></div>
+</section>
 <section class="pb-8">
 <div class="flex justify-between items-end mb-4 px-2">
 <h2 class="text-xl font-black text-on-surface">الأكثر طلباً 👑</h2>
@@ -257,12 +263,22 @@
 <span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
 </a>
 </nav>
-<!-- Floating Action Button for Support -->
-<button class="fixed bottom-28 left-6 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center squash-and-stretch z-40">
-<span class="material-symbols-outlined material-symbols-filled">chat_bubble</span>
-</button>
 <script>
     (function () {
+        var API_BASE =
+            window.location.protocol + '//' + window.location.hostname + ':3000/api';
+        var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
+        var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
+        var offersContainer = document.querySelector('[data-offers-list]');
+        var newProductsContainer = document.querySelector('[data-new-products-list]');
+        var categoriesContainer = document.querySelector('.grid.grid-cols-4.gap-4');
+        var popularContainer = document.querySelector('.space-y-4');
+        var searchInput = document.querySelector('input[type="text"]');
+        var state = {
+            categories: [],
+            products: [],
+        };
+
         function toArabicNumber(value) {
             var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             return String(value).replace(/[0-9]/g, function (digit) {
@@ -270,13 +286,18 @@
             });
         }
 
-        function setFooterCartCount(count) {
-            var next = Math.max(0, Number(count) || 0);
-            var badges = document.querySelectorAll('.cart-badge');
-            badges.forEach(function (badge) {
-                badge.textContent = toArabicNumber(next);
-                badge.style.display = next > 0 ? 'flex' : 'none';
-            });
+        function formatSar(value) {
+            var numeric = Math.max(0, Number(value) || 0);
+            return numeric.toFixed(2) + ' ر.س';
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function send(type, payload) {
@@ -295,43 +316,303 @@
             });
         }
 
+        function setFooterCartCount(count) {
+            var next = Math.max(0, Number(count) || 0);
+            var badges = document.querySelectorAll('.cart-badge');
+            badges.forEach(function (badge) {
+                badge.textContent = toArabicNumber(next);
+                badge.style.display = next > 0 ? 'flex' : 'none';
+            });
+        }
+
+        async function fetchBootstrap() {
+            var response = await fetch(API_BASE + '/catalog/bootstrap');
+            if (!response.ok) {
+                throw new Error('تعذر تحميل بيانات المتجر.');
+            }
+            return response.json();
+        }
+
+        function renderOffers(products) {
+            if (!offersContainer) return;
+            if (!products.length) {
+                offersContainer.innerHTML =
+                    '<div class="w-full bg-white rabbit-card-shape p-4 text-center text-sm text-on-surface-variant">لا توجد منتجات مفعّلة حالياً.</div>';
+                return;
+            }
+
+            offersContainer.innerHTML = products
+                .slice(0, 8)
+                .map(function (product) {
+                    return (
+                        '<div class="min-w-[170px] bg-white rabbit-card-shape p-3 shadow-sm flex-shrink-0 relative border border-primary/5" data-open-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<div class="h-32 w-full rounded-xl overflow-hidden mb-3 bg-surface-container">' +
+                        (product.imageUrl
+                            ? '<img class="w-full h-full object-cover" alt="' +
+                              escapeHtml(product.name || 'منتج') +
+                              '" src="' +
+                              escapeHtml(product.imageUrl) +
+                              '"/>'
+                            : '<div class="w-full h-full flex items-center justify-center text-primary/60"><span class="material-symbols-outlined">inventory_2</span></div>') +
+                        '</div>' +
+                        '<h3 class="text-sm font-bold text-on-surface mb-1 truncate">' +
+                        escapeHtml(product.name || 'منتج') +
+                        '</h3>' +
+                        '<div class="flex items-center gap-2 mb-3">' +
+                        '<span class="text-primary font-black text-base">' +
+                        formatSar(product.price) +
+                        '</span>' +
+                        '<span class="text-on-surface-variant text-xs truncate">' +
+                        escapeHtml(product.unit || '') +
+                        '</span>' +
+                        '</div>' +
+                        '<button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2" data-add-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<span class="material-symbols-outlined text-sm">shopping_cart</span>أضف للسلة</button>' +
+                        '</div>'
+                    );
+                })
+                .join('');
+        }
+
+        function renderNewProducts(products) {
+            if (!newProductsContainer) return;
+
+            var newProducts = (products || []).filter(function (product) {
+                var flag = product && product.isNew;
+                return flag === true || flag === 1 || flag === 'true';
+            });
+
+            if (!newProducts.length) {
+                newProductsContainer.innerHTML =
+                    '<div class="w-full bg-white rabbit-card-shape p-4 text-center text-sm text-on-surface-variant">لا توجد منتجات جديدة حالياً.</div>';
+                return;
+            }
+
+            newProductsContainer.innerHTML = newProducts
+                .slice(0, 8)
+                .map(function (product) {
+                    return (
+                        '<div class="min-w-[170px] bg-white rabbit-card-shape p-3 shadow-sm flex-shrink-0 relative border border-primary/5" data-open-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<div class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">جديد</div>' +
+                        '<div class="h-32 w-full rounded-xl overflow-hidden mb-3 bg-surface-container">' +
+                        (product.imageUrl
+                            ? '<img class="w-full h-full object-cover" alt="' +
+                              escapeHtml(product.name || 'منتج') +
+                              '" src="' +
+                              escapeHtml(product.imageUrl) +
+                              '"/>'
+                            : '<div class="w-full h-full flex items-center justify-center text-primary/60"><span class="material-symbols-outlined">inventory_2</span></div>') +
+                        '</div>' +
+                        '<h3 class="text-sm font-bold text-on-surface mb-1 truncate">' +
+                        escapeHtml(product.name || 'منتج') +
+                        '</h3>' +
+                        '<div class="flex items-center gap-2 mb-3">' +
+                        '<span class="text-primary font-black text-base">' +
+                        formatSar(product.price) +
+                        '</span>' +
+                        '<span class="text-on-surface-variant text-xs truncate">' +
+                        escapeHtml(product.unit || '') +
+                        '</span>' +
+                        '</div>' +
+                        '<button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2" data-add-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<span class="material-symbols-outlined text-sm">shopping_cart</span>أضف للسلة</button>' +
+                        '</div>'
+                    );
+                })
+                .join('');
+        }
+
+        function renderCategories(categories) {
+            if (!categoriesContainer) return;
+            if (!categories.length) {
+                categoriesContainer.innerHTML =
+                    '<div class="col-span-4 text-center text-sm text-on-surface-variant bg-white rounded-2xl p-4 border border-primary/10">لا توجد تصنيفات مفعّلة حالياً.</div>';
+                return;
+            }
+
+            categoriesContainer.innerHTML = categories
+                .slice(0, 8)
+                .map(function (category) {
+                    return (
+                        '<div class="flex flex-col items-center gap-2 group cursor-pointer" data-category-id="' +
+                        escapeHtml(category.id) +
+                        '">' +
+                        '<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">' +
+                        (category.imageUrl
+                            ? '<img class="w-4/5 h-4/5 object-contain" alt="' +
+                              escapeHtml(category.nameAr || 'تصنيف') +
+                              '" src="' +
+                              escapeHtml(category.imageUrl) +
+                              '"/>'
+                            : '<span class="material-symbols-outlined text-primary text-3xl">category</span>') +
+                        '</div>' +
+                        '<span class="text-[12px] font-bold text-on-surface text-center line-clamp-2">' +
+                        escapeHtml(category.nameAr || 'تصنيف') +
+                        '</span>' +
+                        '</div>'
+                    );
+                })
+                .join('');
+        }
+
+        function renderPopular(products) {
+            if (!popularContainer) return;
+            if (!products.length) {
+                popularContainer.innerHTML =
+                    '<div class="bg-white p-4 rounded-2xl text-center text-sm text-on-surface-variant border border-primary/5">لا توجد منتجات للعرض حالياً.</div>';
+                return;
+            }
+
+            popularContainer.innerHTML = products
+                .slice(0, 8)
+                .map(function (product) {
+                    return (
+                        '<div class="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-primary/5" data-open-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-surface-container">' +
+                        (product.imageUrl
+                            ? '<img class="w-full h-full object-cover" alt="' +
+                              escapeHtml(product.name || 'منتج') +
+                              '" src="' +
+                              escapeHtml(product.imageUrl) +
+                              '"/>'
+                            : '<div class="w-full h-full flex items-center justify-center text-primary/60"><span class="material-symbols-outlined">inventory_2</span></div>') +
+                        '</div>' +
+                        '<div class="flex-grow min-w-0">' +
+                        '<h4 class="font-bold text-on-surface text-sm truncate">' +
+                        escapeHtml(product.name || 'منتج') +
+                        '</h4>' +
+                        '<p class="text-primary font-black text-sm">' +
+                        formatSar(product.price) +
+                        '</p>' +
+                        '</div>' +
+                        '<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md squash-and-stretch" data-add-product="' +
+                        escapeHtml(product.id) +
+                        '">' +
+                        '<span class="material-symbols-outlined">add</span>' +
+                        '</button>' +
+                        '</div>'
+                    );
+                })
+                .join('');
+        }
+
+        function applySearch() {
+            var query = (searchInput && searchInput.value ? searchInput.value : '')
+                .trim()
+                .toLowerCase();
+
+            if (!query) {
+                renderOffers(state.products);
+                renderNewProducts(state.products);
+                renderPopular(state.products);
+                renderCategories(state.categories);
+                return;
+            }
+
+            var filteredProducts = state.products.filter(function (product) {
+                var name = String(product.name || '').toLowerCase();
+                var category = String(product.categoryName || '').toLowerCase();
+                return name.indexOf(query) !== -1 || category.indexOf(query) !== -1;
+            });
+            var filteredCategories = state.categories.filter(function (category) {
+                return String(category.nameAr || '').toLowerCase().indexOf(query) !== -1;
+            });
+
+            renderOffers(filteredProducts);
+            renderNewProducts(filteredProducts);
+            renderPopular(filteredProducts);
+            renderCategories(filteredCategories);
+        }
+
+        function bindDynamicActions() {
+            document.addEventListener('click', function (event) {
+                var addButton = event.target.closest('[data-add-product]');
+                if (addButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    var addId = addButton.getAttribute('data-add-product');
+                    if (addId) {
+                        send('add-item', { id: addId, qty: 1 });
+                    }
+                    return;
+                }
+
+                var categoryCard = event.target.closest('[data-category-id]');
+                if (categoryCard) {
+                    var categoryId = categoryCard.getAttribute('data-category-id');
+                    if (categoryId) {
+                        window.localStorage.setItem(STORAGE_CATEGORY, categoryId);
+                        send('navigate', {
+                            to: '/category-products?categoryId=' + encodeURIComponent(categoryId),
+                        });
+                    }
+                    return;
+                }
+
+                var productCard = event.target.closest('[data-open-product]');
+                if (productCard) {
+                    var productId = productCard.getAttribute('data-open-product');
+                    if (productId) {
+                        window.localStorage.setItem(STORAGE_PRODUCT, productId);
+                        send('navigate', { to: '/product' });
+                    }
+                }
+            });
+        }
+
         var navLinks = document.querySelectorAll('nav a');
-        var navRoutes = ['/home', '/categories', '/orders', '/cart', '/orders'];
+        var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
         navLinks.forEach(function (link, index) {
             if (navRoutes[index]) {
                 bindLink(link, navRoutes[index]);
             }
         });
 
-        var offerButtons = Array.from(document.querySelectorAll('button')).filter(function (btn) {
-            return (btn.textContent || '').indexOf('أضف للسلة') !== -1;
-        });
-        var offerIds = ['grapes', 'carrot', 'bread'];
-        offerButtons.forEach(function (btn, index) {
-            btn.addEventListener('click', function () {
-                send('add-item', { id: offerIds[index] || 'carrot', qty: 1 });
-            });
-        });
+        bindDynamicActions();
 
-        var quickAddButtons = Array.from(document.querySelectorAll('button')).filter(function (btn) {
-            var icon = btn.querySelector('.material-symbols-outlined');
-            return icon && icon.textContent.trim() === 'add';
-        });
-        var quickIds = ['milk', 'grapes', 'carrot'];
-        quickAddButtons.forEach(function (btn, index) {
-            btn.addEventListener('click', function () {
-                send('add-item', { id: quickIds[index] || 'carrot', qty: 1 });
-            });
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', applySearch);
+        }
+
+        renderOffers([]);
+        renderNewProducts([]);
+        renderCategories([]);
+        renderPopular([]);
 
         window.addEventListener('message', function (event) {
             if (event.origin !== window.location.origin) return;
             var payload = event.data;
             if (!payload || payload.source !== 'react-shell') return;
             if (payload.type !== 'cart-state') return;
-
             setFooterCartCount(payload.itemCount || 0);
         });
+
+        fetchBootstrap()
+            .then(function (payload) {
+                state.categories = Array.isArray(payload && payload.categories)
+                    ? payload.categories
+                    : [];
+                state.products = Array.isArray(payload && payload.products)
+                    ? payload.products
+                    : [];
+                applySearch();
+            })
+            .catch(function () {
+                renderOffers([]);
+                renderNewProducts([]);
+                renderCategories([]);
+                renderPopular([]);
+            });
 
         send('request-state');
     })();

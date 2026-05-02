@@ -1,4 +1,9 @@
-﻿const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+﻿const fallbackApiBase =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:3000/api`
+    : 'http://localhost:3000/api'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || fallbackApiBase
 
 async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
   const headers = {
@@ -65,5 +70,15 @@ export const api = {
         body: { qty },
       }),
     clear: (token) => apiRequest('/cart/clear', { method: 'DELETE', token }),
+    checkout: (token, payload) =>
+      apiRequest('/cart/checkout', {
+        method: 'POST',
+        token,
+        body: payload,
+      }),
+  },
+  orders: {
+    mine: (token) => apiRequest('/cart/orders', { token }),
   },
 }
+

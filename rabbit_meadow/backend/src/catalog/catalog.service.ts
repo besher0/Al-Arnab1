@@ -51,6 +51,7 @@ export class CatalogService {
       minStock: decimalToNumber(product.minStock),
       imageUrl: product.imageUrl,
       isActive: product.isActive,
+      isNew: product.isNew,
     }));
   }
 

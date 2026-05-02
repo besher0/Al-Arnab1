@@ -172,6 +172,7 @@ export function ShopProvider({ children }) {
 
       const authPayload = await api.auth.login({ phone: cleanPhone })
       await applyAuthState(authPayload)
+      return authPayload
     },
     [applyAuthState],
   )
@@ -194,6 +195,7 @@ export function ShopProvider({ children }) {
         phone: cleanPhone,
       })
       await applyAuthState(authPayload)
+      return authPayload
     },
     [applyAuthState],
   )
@@ -204,6 +206,7 @@ export function ShopProvider({ children }) {
         name: name ? String(name).trim() : undefined,
       })
       await applyAuthState(authPayload)
+      return authPayload
     },
     [applyAuthState],
   )
@@ -275,6 +278,50 @@ export function ShopProvider({ children }) {
     setCart(normalizeCartResponse(cartResponse))
   }, [token])
 
+  const checkoutOrder = useCallback(
+    async ({ alternatePhone, latitude, longitude }) => {
+      if (!token) {
+        throw new Error('يجب تسجيل الدخول أولاً.')
+      }
+
+      const cleanAlternatePhone = String(alternatePhone || '').trim()
+      if (!cleanAlternatePhone) {
+        throw new Error('رقم الهاتف البديل مطلوب.')
+      }
+
+      const lat = Number(latitude)
+      const lng = Number(longitude)
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        throw new Error('موقع التوصيل غير صالح.')
+      }
+
+      const checkoutResponse = await api.cart.checkout(token, {
+        alternatePhone: cleanAlternatePhone,
+        latitude: lat,
+        longitude: lng,
+      })
+
+      if (checkoutResponse?.cart) {
+        setCart(normalizeCartResponse(checkoutResponse.cart))
+      } else {
+        const cartResponse = await api.cart.get(token)
+        setCart(normalizeCartResponse(cartResponse))
+      }
+
+      return checkoutResponse
+    },
+    [token],
+  )
+
+  const listOrders = useCallback(async () => {
+    if (!token) {
+      throw new Error('يجب تسجيل الدخول أولاً.')
+    }
+
+    return api.orders.mine(token)
+  }, [token])
+
   const value = useMemo(
     () => ({
       isBootstrapping,
@@ -293,6 +340,8 @@ export function ShopProvider({ children }) {
       addItem,
       setQty,
       clearCart,
+      checkoutOrder,
+      listOrders,
       token,
     }),
     [
@@ -302,8 +351,10 @@ export function ShopProvider({ children }) {
       cart.items,
       cart.subtotal,
       clearCart,
+      checkoutOrder,
       isAuthenticated,
       isBootstrapping,
+      listOrders,
       login,
       loginGuest,
       logout,

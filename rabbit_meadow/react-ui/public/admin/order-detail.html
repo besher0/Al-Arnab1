@@ -15,20 +15,20 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
         <button class="icon-btn" data-route="/admin/orders/current" title="رجوع">
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 44px">الطلب الجديد #1085</h1>
+            <h1 id="order-title" class="page-title">تفاصيل الطلب</h1>
           </div>
         </div>
         <img
           class="avatar"
           src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
-          alt="صورة عميل"
+          alt="admin"
         />
       </header>
 
@@ -37,67 +37,58 @@
           <div class="row">
             <div>
               <div class="muted tiny">اسم العميل</div>
-              <strong style="font-size: 36px">أحمد العلي</strong>
+              <strong id="order-customer" class="orders-customer">-</strong>
             </div>
             <div class="text-left">
               <div class="muted tiny">إجمالي الطلب</div>
-              <div class="price-sm">١٨٥.٠٠ ر.س</div>
+              <div id="order-total" class="price-sm">0 ر.س</div>
             </div>
           </div>
 
-          <article class="soft-card row">
-            <span class="badge-soft">3x</span>
-            <strong style="font-size: 29px">موز عضوي</strong>
-            <span class="muted">٤٥.٠٠ ر.س</span>
-          </article>
-          <article class="soft-card row">
-            <span class="badge-soft">1x</span>
-            <strong style="font-size: 29px">حليب طازج</strong>
-            <span class="muted">١٤٠.٠٠ ر.س</span>
-          </article>
+          <div id="order-items" class="stack">
+            <article class="soft-card orders-empty">جاري تحميل المنتجات...</article>
+          </div>
         </section>
 
         <section>
-          <h3 class="section-title" style="font-size: 36px; margin-bottom: 10px">عنوان التوصيل</h3>
-          <article class="card" style="padding: 0; overflow: hidden">
-            <img
-              class="map-preview"
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
-              alt="خريطة"
-              style="border-radius: 30px 30px 0 0; min-height: 210px"
-            />
-            <div style="padding: 14px 18px" class="row">
+          <h3 class="section-title" style="margin-bottom: 8px">عنوان التوصيل</h3>
+          <article class="card">
+            <div class="row">
               <span class="material-symbols-outlined" style="color: #67bbde">home</span>
-              <strong style="font-size: 26px">الياسمين، شارع العليا فيلا 42</strong>
+              <strong id="order-address">-</strong>
             </div>
           </article>
         </section>
 
         <section class="soft-card stack">
-          <h3 style="font-size: 38px">قبول الطلب وتحديد وقت التجهيز</h3>
-          <div class="row" data-toggle-group>
-            <button class="pill" data-toggle-item>15 دقيقة</button>
-            <button class="pill active" data-toggle-item>20 دقيقة</button>
-            <button class="pill" data-toggle-item>30 دقيقة</button>
+          <h3>قبول الطلب وتحديد وقت التجهيز</h3>
+          <div class="row orders-filter-row" id="prep-options">
+            <button class="pill" data-prep-minutes="15" type="button">15 دقيقة</button>
+            <button class="pill active" data-prep-minutes="20" type="button">20 دقيقة</button>
+            <button class="pill" data-prep-minutes="30" type="button">30 دقيقة</button>
           </div>
-          <button class="cta" data-route="/admin/orders/current">
+          <button id="accept-order" class="cta" type="button">
             <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
             قبول الطلب
           </button>
         </section>
 
         <section class="card stack" style="border-style: dashed">
-          <h3 style="font-size: 38px; color: var(--admin-danger)">رفض الطلب</h3>
-          <div class="row" data-toggle-group>
-            <button class="chip active" data-toggle-item style="background: rgba(239, 78, 79, 0.12); color: #d64040">المادة غير متوفرة</button>
-            <button class="chip" data-toggle-item>ضغط كبير</button>
-            <button class="chip" data-toggle-item>خارج نطاق التغطية</button>
+          <h3 style="color: var(--admin-danger)">رفض الطلب</h3>
+          <div class="row orders-filter-row" id="reject-options">
+            <button class="chip active" data-reject-reason="المادة غير متوفرة" type="button" style="background: rgba(239, 78, 79, 0.12); color: #d64040">
+              المادة غير متوفرة
+            </button>
+            <button class="chip" data-reject-reason="ضغط كبير" type="button">ضغط كبير</button>
+            <button class="chip" data-reject-reason="خارج نطاق التغطية" type="button">خارج نطاق التغطية</button>
           </div>
-          <button class="outline-danger" data-route="/admin/orders/current">
+          <button id="reject-order" class="outline-danger" type="button">
             <span class="material-symbols-outlined" style="vertical-align: middle">cancel</span>
             رفض الطلب
           </button>
         </section>
+
+        <div id="order-feedback" class="tiny muted"></div>
       </main>
 
       <nav class="bottom-nav">
@@ -121,5 +112,192 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+          return;
+        }
+
+        var titleNode = document.getElementById('order-title');
+        var customerNode = document.getElementById('order-customer');
+        var totalNode = document.getElementById('order-total');
+        var itemsNode = document.getElementById('order-items');
+        var addressNode = document.getElementById('order-address');
+        var feedbackNode = document.getElementById('order-feedback');
+
+        var acceptButton = document.getElementById('accept-order');
+        var rejectButton = document.getElementById('reject-order');
+
+        var prepButtons = Array.prototype.slice.call(document.querySelectorAll('[data-prep-minutes]'));
+        var rejectButtons = Array.prototype.slice.call(document.querySelectorAll('[data-reject-reason]'));
+
+        var params = new URLSearchParams(window.location.search);
+        var orderId = params.get('id') || '';
+        var selectedPrepMinutes = 20;
+        var selectedRejectReason = 'المادة غير متوفرة';
+        var isStatusLocked = false;
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ر.س';
+        }
+
+        function setFeedback(message, isError) {
+          if (!feedbackNode) return;
+          feedbackNode.textContent = message || '';
+          feedbackNode.classList.toggle('is-error', Boolean(message) && Boolean(isError));
+          feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function renderItems(items) {
+          if (!itemsNode) return;
+
+          if (!Array.isArray(items) || items.length === 0) {
+            itemsNode.innerHTML = '<article class="soft-card orders-empty">لا يوجد منتجات داخل هذا الطلب.</article>';
+            return;
+          }
+
+          itemsNode.innerHTML = items
+            .map(function (item) {
+              var qty = Number(item.qty || 0).toLocaleString('ar-SA');
+
+              return [
+                '<article class="soft-card row">',
+                '  <span class="badge-soft">' + escapeHtml(qty) + 'x</span>',
+                '  <strong>' + escapeHtml(item.name || '-') + '</strong>',
+                '  <span class="muted">' + escapeHtml(formatMoney(item.lineTotal)) + '</span>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+        }
+
+        function formatAddress(address) {
+          if (!address) return 'لا يوجد عنوان مسجل.';
+
+          var parts = [address.label, address.city, address.street, address.building].filter(Boolean);
+          if (!parts.length) return 'لا يوجد عنوان مسجل.';
+          return parts.join(' - ');
+        }
+
+        function setActionsDisabled(isDisabled) {
+          acceptButton.disabled = isDisabled;
+          rejectButton.disabled = isDisabled;
+        }
+
+        async function loadOrder() {
+          if (!orderId) {
+            setFeedback('معرف الطلب غير موجود. ارجع لصفحة الطلبات واختر الطلب من جديد.', true);
+            renderItems([]);
+            return;
+          }
+
+          setFeedback('جاري تحميل تفاصيل الطلب...', false);
+          setActionsDisabled(true);
+
+          try {
+            var order = await window.AdminBridge.apiRequest('/admin/orders/' + encodeURIComponent(orderId));
+            isStatusLocked = ['DELIVERED', 'REJECTED', 'CANCELLED'].indexOf(order.status) !== -1;
+            titleNode.textContent = 'تفاصيل الطلب #' + (order.orderNumber || '-');
+            customerNode.textContent = order.customer && order.customer.name ? order.customer.name : '-';
+            totalNode.textContent = formatMoney(order.totals && order.totals.total ? order.totals.total : 0);
+            addressNode.textContent = formatAddress(order.address);
+            renderItems(order.items || []);
+
+            if (isStatusLocked) {
+              setFeedback('هذا الطلب مغلق ولا يمكن تعديل حالته.', true);
+            } else {
+              setFeedback('', false);
+            }
+          } catch (error) {
+            setFeedback('تعذر تحميل تفاصيل الطلب.', true);
+            renderItems([]);
+          } finally {
+            setActionsDisabled(isStatusLocked);
+          }
+        }
+
+        async function updateStatus(payload, successMessage) {
+          if (!orderId || isStatusLocked) return;
+
+          setActionsDisabled(true);
+          setFeedback('جاري تحديث حالة الطلب...', false);
+
+          try {
+            await window.AdminBridge.apiRequest('/admin/orders/' + encodeURIComponent(orderId) + '/status', {
+              method: 'PATCH',
+              body: payload,
+            });
+            setFeedback(successMessage, false);
+            await loadOrder();
+          } catch (error) {
+            setFeedback('تعذر تحديث حالة الطلب. حاول مرة ثانية.', true);
+          } finally {
+            setActionsDisabled(false);
+          }
+        }
+
+        prepButtons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            prepButtons.forEach(function (item) {
+              item.classList.remove('active');
+            });
+            button.classList.add('active');
+            selectedPrepMinutes = Number(button.getAttribute('data-prep-minutes') || 20);
+          });
+        });
+
+        rejectButtons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            rejectButtons.forEach(function (item) {
+              item.classList.remove('active');
+              if (item.getAttribute('data-reject-reason') === 'المادة غير متوفرة') {
+                item.style.background = 'transparent';
+                item.style.color = '';
+              }
+            });
+            button.classList.add('active');
+            button.style.background = 'rgba(239, 78, 79, 0.12)';
+            button.style.color = '#d64040';
+            selectedRejectReason = button.getAttribute('data-reject-reason') || 'المادة غير متوفرة';
+          });
+        });
+
+        acceptButton.addEventListener('click', function () {
+          updateStatus(
+            {
+              status: 'PREPARING',
+              prepMinutes: selectedPrepMinutes,
+              note: 'تم قبول الطلب',
+            },
+            'تم قبول الطلب وتحديث وقت التجهيز.',
+          );
+        });
+
+        rejectButton.addEventListener('click', function () {
+          updateStatus(
+            {
+              status: 'REJECTED',
+              rejectReason: selectedRejectReason,
+              note: 'تم رفض الطلب',
+            },
+            'تم رفض الطلب بنجاح.',
+          );
+        });
+
+        loadOrder();
+      })();
+    </script>
   </body>
 </html>

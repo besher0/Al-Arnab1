@@ -34,9 +34,15 @@ function ProtectedRoute({ children }) {
 
 function PublicOnlyRoute({ children }) {
   const { isAuthenticated, isBootstrapping } = useShop()
+  const location = useLocation()
 
   if (isBootstrapping) {
     return <LoadingShell />
+  }
+
+  // Allow opening /login even when already authenticated to switch accounts.
+  if (location.pathname === '/login') {
+    return children
   }
 
   if (isAuthenticated) {
@@ -84,6 +90,9 @@ function BridgeListener() {
     addItem,
     setQty,
     logout,
+    checkoutOrder,
+    listOrders,
+    user,
     cartItems,
     itemCount,
     subtotal,
@@ -105,6 +114,10 @@ function BridgeListener() {
         {
           source: 'react-shell',
           type: 'cart-state',
+          route: {
+            pathname: location.pathname,
+            search: location.search,
+          },
           isAuthenticated,
           itemCount,
           subtotal,
@@ -118,6 +131,14 @@ function BridgeListener() {
             imageUrl: item.imageUrl,
             nameEn: item.nameEn,
           })),
+          user: user
+            ? {
+                id: user.id || '',
+                name: user.name || '',
+                phone: user.phone || '',
+                role: user.role || '',
+              }
+            : null,
         },
         window.location.origin,
       )
@@ -131,18 +152,24 @@ function BridgeListener() {
     }
 
     function sendAuthError(targetWindow, message) {
+      sendFrameMessage(targetWindow, 'auth-error', {
+        message: message || 'تعذر إتمام العملية.',
+      })
+    }
+
+    function sendFrameMessage(targetWindow, type, payload = {}) {
       if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
         return
       }
 
       targetWindow.postMessage(
-        {
-          source: 'react-shell',
-          type: 'auth-error',
-          message: message || 'تعذر إتمام العملية.',
-        },
+        Object.assign({ source: 'react-shell', type }, payload),
         window.location.origin,
       )
+    }
+
+    function postAuthPath(authPayload) {
+      return authPayload?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home'
     }
 
     async function onMessage(event) {
@@ -167,8 +194,8 @@ function BridgeListener() {
 
       if (payload.type === 'auth-login') {
         try {
-          await login(payload.phone || '')
-          navigate('/home', { replace: true })
+          const authPayload = await login(payload.phone || '')
+          navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
           sendAuthError(event.source, error?.message)
         }
@@ -177,11 +204,11 @@ function BridgeListener() {
 
       if (payload.type === 'auth-register') {
         try {
-          await register({
+          const authPayload = await register({
             name: payload.name || '',
             phone: payload.phone || '',
           })
-          navigate('/home', { replace: true })
+          navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
           sendAuthError(event.source, error?.message)
         }
@@ -190,8 +217,8 @@ function BridgeListener() {
 
       if (payload.type === 'auth-guest') {
         try {
-          await loginGuest(payload.name || 'ضيف الأرنب')
-          navigate('/home', { replace: true })
+          const authPayload = await loginGuest(payload.name || 'ضيف الأرنب')
+          navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
           sendAuthError(event.source, error?.message)
         }
@@ -214,6 +241,46 @@ function BridgeListener() {
           await setQty(payload.id, Math.max(0, qty))
         } catch (error) {
           sendAuthError(event.source, error?.message)
+        }
+        return
+      }
+
+      if (payload.type === 'checkout-order') {
+        try {
+          const checkoutResponse = await checkoutOrder({
+            alternatePhone: payload.alternatePhone || '',
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+          })
+
+          sendFrameMessage(event.source, 'checkout-result', {
+            success: true,
+            order: checkoutResponse?.order || null,
+          })
+
+          syncCurrentFrame()
+        } catch (error) {
+          sendFrameMessage(event.source, 'checkout-result', {
+            success: false,
+            message: error?.message || 'تعذر تأكيد الطلب.',
+          })
+        }
+        return
+      }
+
+      if (payload.type === 'orders-list') {
+        try {
+          const orders = await listOrders()
+          sendFrameMessage(event.source, 'orders-result', {
+            success: true,
+            orders: Array.isArray(orders) ? orders : [],
+          })
+        } catch (error) {
+          sendFrameMessage(event.source, 'orders-result', {
+            success: false,
+            message: error?.message || 'تعذر تحميل الطلبات.',
+            orders: [],
+          })
         }
         return
       }
@@ -251,12 +318,15 @@ function BridgeListener() {
     }
   }, [
     addItem,
+    checkoutOrder,
     cartMap,
     cartItems,
     isAuthenticated,
     isBootstrapping,
     itemCount,
+    listOrders,
     location.pathname,
+    location.search,
     login,
     loginGuest,
     logout,
@@ -264,6 +334,7 @@ function BridgeListener() {
     register,
     setQty,
     subtotal,
+    user,
   ])
 
   return null
@@ -357,7 +428,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="/profile" element={<Navigate to="/orders" replace />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <FramePage src="/stitch/profile.html" title="profile" />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin"

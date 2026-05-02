@@ -15,14 +15,14 @@
     <link href="/admin/admin.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="admin-shell">
+    <section class="admin-shell admin-compact">
       <header class="admin-header">
-        <button class="icon-btn" data-route="/admin/dashboard" title="القائمة">
-          <span class="material-symbols-outlined">menu</span>
+        <button class="icon-btn" data-route="/admin/orders/current" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title" style="font-size: 46px">الطلبات</h1>
+            <h1 class="page-title">الطلبات المكتملة</h1>
             <p class="page-subtitle">Al-Arnab</p>
           </div>
         </div>
@@ -33,76 +33,11 @@
         />
       </header>
 
-      <main class="container">
-        <h2 class="section-title">الطلبات المكتملة</h2>
-        <p class="section-caption">تاريخ طلباتك مع طازجة الأرنب، كل طلب تم تسليمه بنجاح.</p>
+      <main class="container stack">
+        <p class="section-caption">كل الطلبات التي تم تسليمها بنجاح.</p>
 
-        <section class="card mb-20 stack">
-          <div class="row">
-            <span class="tag success">✓ تم التوصيل</span>
-            <div>
-              <div class="muted tiny">رقم الطلب</div>
-              <strong style="font-size: 35px">#RB-8291</strong>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <article class="soft-card text-center">
-              <div class="muted tiny">إجمالي المبلغ</div>
-              <div class="price-sm">١٤٥.٥٠ ر.س</div>
-            </article>
-            <article class="soft-card text-center">
-              <div class="muted tiny">تاريخ التسليم</div>
-              <strong style="font-size: 29px">14 أكتوبر 2023</strong>
-            </article>
-          </div>
-
-          <div class="order-products" style="justify-content: flex-end">
-            <img class="thumb" src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=120&q=80" alt="منتج" />
-            <img class="thumb" src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=120&q=80" alt="منتج" />
-            <img class="thumb" src="https://images.unsplash.com/photo-1445282768818-728615cc910a?auto=format&fit=crop&w=120&q=80" alt="منتج" />
-            <span class="badge-soft">+4</span>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="row">
-            <button class="cta" style="max-width: 145px; min-height: 44px; font-size: 23px">إعادة الطلب</button>
-            <button class="ghost" style="width: auto; min-height: auto; font-size: 20px; color: #67bbde">عرض الفاتورة</button>
-          </div>
-        </section>
-
-        <section class="card stack">
-          <div class="row">
-            <span class="tag success">✓ تم التوصيل</span>
-            <div>
-              <div class="muted tiny">رقم الطلب</div>
-              <strong style="font-size: 35px">#RB-87540</strong>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <article class="soft-card text-center">
-              <div class="muted tiny">إجمالي المبلغ</div>
-              <div class="price-sm">٨٩.٠٠ ر.س</div>
-            </article>
-            <article class="soft-card text-center">
-              <div class="muted tiny">تاريخ التسليم</div>
-              <strong style="font-size: 29px">02 أكتوبر 2023</strong>
-            </article>
-          </div>
-
-          <div class="order-products" style="justify-content: flex-end">
-            <img class="thumb" src="https://images.unsplash.com/photo-1447175008436-054170c2e979?auto=format&fit=crop&w=120&q=80" alt="منتج" />
-            <img class="thumb" src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=120&q=80" alt="منتج" />
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="row">
-            <button class="cta" style="max-width: 145px; min-height: 44px; font-size: 23px">إعادة الطلب</button>
-            <button class="ghost" style="width: auto; min-height: auto; font-size: 20px; color: #67bbde">عرض الفاتورة</button>
-          </div>
+        <section id="completed-orders-list" class="stack">
+          <article class="card orders-empty">جاري تحميل الطلبات...</article>
         </section>
       </main>
 
@@ -127,5 +62,96 @@
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+          return;
+        }
+
+        var listElement = document.getElementById('completed-orders-list');
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ر.س';
+        }
+
+        function formatDate(value) {
+          var date = new Date(value);
+          if (Number.isNaN(date.getTime())) return '-';
+          return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit',
+          });
+        }
+
+        function renderOrders(orders) {
+          if (!listElement) return;
+
+          if (!Array.isArray(orders) || orders.length === 0) {
+            listElement.innerHTML = '<article class="card orders-empty">لا توجد طلبات مكتملة حالياً.</article>';
+            return;
+          }
+
+          listElement.innerHTML = orders
+            .map(function (order) {
+              var route = '/admin/orders/detail?id=' + encodeURIComponent(order.id || '');
+
+              return [
+                '<article class="card stack">',
+                '  <div class="row">',
+                '    <span class="tag success">تم التوصيل</span>',
+                '    <strong class="orders-customer">طلب #' + escapeHtml(order.orderNumber || '-') + '</strong>',
+                '  </div>',
+                '  <div class="grid-2">',
+                '    <article class="soft-card text-center">',
+                '      <div class="muted tiny">إجمالي المبلغ</div>',
+                '      <div class="price-sm">' + escapeHtml(formatMoney(order.total)) + '</div>',
+                '    </article>',
+                '    <article class="soft-card text-center">',
+                '      <div class="muted tiny">تاريخ التسليم</div>',
+                '      <strong>' + escapeHtml(formatDate(order.createdAt)) + '</strong>',
+                '    </article>',
+                '  </div>',
+                '  <div class="row">',
+                '    <span class="muted">' + escapeHtml(order.customer && order.customer.name ? order.customer.name : '-') + '</span>',
+                '    <span class="muted tiny">' + escapeHtml(order.customer && order.customer.phone ? order.customer.phone : '-') + '</span>',
+                '  </div>',
+                '  <button class="cta" data-route="' + escapeHtml(route) + '">عرض التفاصيل</button>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+
+          window.AdminBridge.bindRoutes(listElement);
+        }
+
+        async function loadCompletedOrders() {
+          if (!listElement) return;
+          listElement.innerHTML = '<article class="card orders-empty">جاري تحميل الطلبات...</article>';
+
+          try {
+            var response = await window.AdminBridge.apiRequest('/admin/orders/completed');
+            renderOrders(Array.isArray(response) ? response : []);
+          } catch (error) {
+            listElement.innerHTML =
+              '<article class="card orders-empty">تعذر تحميل الطلبات المكتملة. تأكد من تسجيل الدخول بحساب أدمن.</article>';
+          }
+        }
+
+        loadCompletedOrders();
+      })();
+    </script>
   </body>
 </html>

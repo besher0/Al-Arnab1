@@ -38,7 +38,12 @@ Server URL: `http://localhost:3000/api`
 
 ## Seeded Accounts
 - Admin: `0500000000`
-- Customer: `0511111111`
+
+## Cleanup Demo Data
+- Delete seeded/demo catalog and transactional data while keeping admin users:
+```bash
+npm run prisma:cleanup-demo
+```
 
 ## Main Endpoints
 ### Auth
