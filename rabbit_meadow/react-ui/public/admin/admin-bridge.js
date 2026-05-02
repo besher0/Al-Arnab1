@@ -1,7 +1,16 @@
 ﻿(function () {
   var SHOP_STATE_KEY = 'al-arnab-admin-shop-state';
   var USER_TOKEN_KEY = 'al-arnab-token';
-  var API_BASE_URL = window.__AL_ARNAB_API_BASE__ || 'http://localhost:3000/api';
+  var API_BASE_URL =
+    window.__AL_ARNAB_API_BASE__ ||
+    (function () {
+      try {
+        return window.localStorage.getItem('al-arnab-api-base') || '';
+      } catch (error) {
+        return '';
+      }
+    })() ||
+    window.location.origin + '/api';
 
   function send(type, payload) {
     window.parent.postMessage(

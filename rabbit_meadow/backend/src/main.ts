@@ -14,9 +14,17 @@ async function bootstrap() {
     }),
   );
 
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+  const configuredOrigins = (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const frontendOrigins = Array.from(
+    new Set([...configuredOrigins, 'http://localhost:5173', 'http://127.0.0.1:5173']),
+  );
+
   app.enableCors({
-    origin: [frontendOrigin, 'http://127.0.0.1:5173'],
+    origin: frontendOrigins,
     credentials: true,
   });
 

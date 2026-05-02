@@ -151,7 +151,15 @@
 <script>
   (function () {
     var API_BASE =
-      window.location.protocol + '//' + window.location.hostname + ':3000/api';
+      window.__AL_ARNAB_API_BASE__ ||
+      (function () {
+        try {
+          return window.localStorage.getItem('al-arnab-api-base') || '';
+        } catch (error) {
+          return '';
+        }
+      })() ||
+      window.location.origin + '/api';
     var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
     var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
     var heroImage = document.querySelector('main .aspect-square img');

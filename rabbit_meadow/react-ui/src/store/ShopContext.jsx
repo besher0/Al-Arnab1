@@ -10,6 +10,7 @@ import {
 import { api } from '../lib/api'
 
 const TOKEN_STORAGE_KEY = 'al-arnab-token'
+const API_BASE_STORAGE_KEY = 'al-arnab-api-base'
 const DEFAULT_EXCHANGE_RATE = 15000
 const DEFAULT_STORE = {
   currency: 'SYP',
@@ -106,6 +107,16 @@ export function ShopProvider({ children }) {
     itemCount: 0,
     subtotal: 0,
   })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    try {
+      window.localStorage.setItem(API_BASE_STORAGE_KEY, api.baseUrl)
+    } catch {
+      // ignore storage restrictions
+    }
+  }, [])
 
   const refreshCatalog = useCallback(async () => {
     const bootstrap = await api.catalog.bootstrap()

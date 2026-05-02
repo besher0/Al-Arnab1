@@ -1,9 +1,27 @@
 ﻿const fallbackApiBase =
   typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000/api`
+    ? `${window.location.origin}/api`
     : 'http://localhost:3000/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || fallbackApiBase
+function normalizeApiBase(rawBase) {
+  const base = String(rawBase || '').trim().replace(/\/+$/, '')
+  if (!base) return ''
+
+  try {
+    const url = new URL(base)
+    if (url.pathname === '/api' || url.pathname.endsWith('/api')) {
+      return base
+    }
+    return `${base}/api`
+  } catch {
+    if (base === '/api' || base.endsWith('/api')) {
+      return base
+    }
+    return `${base}/api`
+  }
+}
+
+const API_BASE_URL = normalizeApiBase(import.meta.env.VITE_API_BASE_URL || fallbackApiBase)
 
 async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
   const headers = {
@@ -81,4 +99,7 @@ export const api = {
     mine: (token) => apiRequest('/cart/orders', { token }),
   },
 }
+
+
+
 
