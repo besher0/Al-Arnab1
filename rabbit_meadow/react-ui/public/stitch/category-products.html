@@ -105,6 +105,145 @@
       height: 0;
     }
   </style>
+<style>
+    :root {
+      --page-max-width: 720px;
+      --bottom-nav-gap: calc(96px + env(safe-area-inset-bottom));
+    }
+
+    body {
+      min-height: max(884px, 100dvh);
+      background:
+        radial-gradient(circle at 86% -10%, rgba(135, 206, 235, 0.36), transparent 42%),
+        radial-gradient(circle at -12% 28%, rgba(255, 196, 179, 0.28), transparent 46%),
+        #f0f8ff;
+    }
+
+    header.fixed {
+      width: min(var(--page-max-width), calc(100% - 20px));
+      left: 50%;
+      top: 8px;
+      transform: translateX(-50%);
+      border-radius: 24px;
+      padding-inline: clamp(14px, 2.6vw, 24px);
+      border: 1px solid rgba(198, 223, 242, 0.92);
+      box-shadow: 0 12px 28px rgba(26, 54, 93, 0.14);
+      backdrop-filter: blur(10px);
+    }
+
+    main.pt-24.pb-32.px-4 {
+      max-width: var(--page-max-width);
+      margin-inline: auto;
+      padding-inline: clamp(14px, 3vw, 24px);
+      padding-top: calc(94px + env(safe-area-inset-top));
+      padding-bottom: calc(var(--bottom-nav-gap) + 26px);
+    }
+
+    main .flex.items-center.justify-between.mb-6.px-2 {
+      margin-bottom: 14px;
+      padding: 13px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(158, 199, 232, 0.48);
+      box-shadow: 0 12px 22px rgba(26, 54, 93, 0.08);
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(8px);
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 {
+      gap: 12px;
+      padding-inline: 0;
+      align-items: stretch;
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div {
+      border: 1px solid rgba(158, 199, 232, 0.35);
+      border-radius: 18px;
+      box-shadow: 0 12px 20px rgba(26, 54, 93, 0.06);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div:active {
+      transform: scale(0.985);
+      box-shadow: 0 8px 16px rgba(26, 54, 93, 0.11);
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div img {
+      transition: transform 260ms ease;
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div:hover img {
+      transform: scale(1.04);
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div .h-32 {
+      height: 9.1rem;
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 > div .p-3 {
+      padding: 11px;
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 button[data-action="minus"],
+    .grid.grid-cols-2.gap-3.px-2 button[data-action="plus"] {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(158, 199, 232, 0.55);
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .grid.grid-cols-2.gap-3.px-2 button[data-action="add"] {
+      height: 36px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(155, 62, 32, 0.2);
+    }
+
+    .fixed.bottom-28.left-6.z-40 {
+      left: max(12px, calc((100vw - min(var(--page-max-width), 100vw)) / 2 + 12px));
+      bottom: calc(104px + env(safe-area-inset-bottom));
+    }
+
+    .fixed.bottom-28.left-6.z-40 > button {
+      width: 58px;
+      height: 58px;
+      box-shadow: 0 16px 26px rgba(26, 54, 93, 0.25);
+    }
+
+    nav.fixed.bottom-0 {
+      width: min(var(--page-max-width), 100%);
+      left: 50%;
+      transform: translateX(-50%);
+      border: 1px solid rgba(158, 199, 232, 0.42);
+      border-bottom: 0;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 520px) {
+      header.fixed {
+        width: 100%;
+        top: 0;
+        left: 0;
+        transform: none;
+        border-radius: 0;
+        border-inline: 0;
+        padding-inline: 18px;
+      }
+
+      main.pt-24.pb-32.px-4 {
+        padding-top: calc(90px + env(safe-area-inset-top));
+        padding-inline: 12px;
+      }
+
+      .fixed.bottom-28.left-6.z-40 {
+        left: 10px;
+      }
+
+      nav.fixed.bottom-0 {
+        border-inline: 0;
+      }
+    }
+  </style>
   <script src="/stitch/stitch-alert.js"></script>
 </head>
 <body class="bg-background text-on-background font-almarai selection:bg-primary-container selection:text-on-primary-container">
