@@ -62,14 +62,18 @@
           </div>
 
           <label>
-            <div class="label">سعر رأس المال (SAR)</div>
+            <div class="label">سعر رأس المال (USD)</div>
             <input id="product-cost-price" class="input-field" type="number" min="0" step="0.01" placeholder="0.00" />
+            <div id="product-cost-price-converted" class="tiny muted mt-8">≈ 0</div>
           </label>
 
           <label>
-            <div class="label">السعر (SAR)</div>
+            <div class="label">السعر (USD)</div>
             <input id="product-sell-price" class="input-field" type="number" min="0" step="0.01" placeholder="0.00" />
+            <div id="product-sell-price-converted" class="tiny muted mt-8">≈ 0</div>
           </label>
+
+          <div id="product-exchange-rate-label" class="tiny muted">سعر الصرف الحالي: 1 USD = 0</div>
 
           <div class="grid-2">
             <label>
@@ -136,11 +140,18 @@
         var imagePicker = document.getElementById('product-image-picker');
         var imagePreview = document.getElementById('product-image-preview');
         var imageFeedback = document.getElementById('product-image-feedback');
+        var costPriceInput = document.getElementById('product-cost-price');
+        var sellPriceInput = document.getElementById('product-sell-price');
+        var costPriceConverted = document.getElementById('product-cost-price-converted');
+        var sellPriceConverted = document.getElementById('product-sell-price-converted');
+        var exchangeRateLabel = document.getElementById('product-exchange-rate-label');
 
         if (!categorySelect || !saveButton) return;
 
         var uploadedImageUrl = '';
         var isUploading = false;
+        var storeCurrency = 'SYP';
+        var usdSarRate = 15000;
 
         function makeProductId(name) {
           var base = String(name || '')
@@ -175,6 +186,42 @@
           imageFeedback.textContent = message || '';
           imageFeedback.classList.toggle('is-error', Boolean(isError));
           imageFeedback.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function formatNumber(value) {
+          var number = Number(value || 0);
+          return number.toLocaleString('ar-SA', { maximumFractionDigits: 2 });
+        }
+
+        function currencyLabel(currency) {
+          if (currency === 'SAR') return 'ر.س';
+          if (currency === 'SYP') return 'ل.س';
+          return currency || '';
+        }
+
+        function formatMoney(value, currency) {
+          return formatNumber(value) + ' ' + currencyLabel(currency);
+        }
+
+        function renderExchangeRateText() {
+          if (!exchangeRateLabel) return;
+          exchangeRateLabel.textContent =
+            'سعر الصرف الحالي: 1 USD = ' + formatMoney(usdSarRate, storeCurrency);
+        }
+
+        function updateConvertedPrices() {
+          var costUsd = Number((costPriceInput && costPriceInput.value) || 0);
+          var sellUsd = Number((sellPriceInput && sellPriceInput.value) || 0);
+          var costLocal = Math.max(0, Number.isFinite(costUsd) ? costUsd : 0) * usdSarRate;
+          var sellLocal = Math.max(0, Number.isFinite(sellUsd) ? sellUsd : 0) * usdSarRate;
+
+          if (costPriceConverted) {
+            costPriceConverted.textContent = '≈ ' + formatMoney(costLocal, storeCurrency);
+          }
+
+          if (sellPriceConverted) {
+            sellPriceConverted.textContent = '≈ ' + formatMoney(sellLocal, storeCurrency);
+          }
         }
 
         async function uploadToCloudinary(file) {
@@ -262,6 +309,26 @@
           }
         }
 
+        async function loadStoreSettings() {
+          renderExchangeRateText();
+          updateConvertedPrices();
+
+          try {
+            var settings = await window.AdminBridge.apiRequest('/admin/settings/store');
+            var nextRate = Number(settings && settings.usdSarRate ? settings.usdSarRate : 0);
+            if (Number.isFinite(nextRate) && nextRate > 0) {
+              usdSarRate = nextRate;
+            }
+
+            storeCurrency = (settings && settings.currency ? String(settings.currency) : storeCurrency) || 'SYP';
+          } catch (error) {
+            // Use fallback local values when settings request fails.
+          }
+
+          renderExchangeRateText();
+          updateConvertedPrices();
+        }
+
         if (imagePicker && imageInput) {
           imagePicker.addEventListener('click', function () {
             imageInput.click();
@@ -273,11 +340,19 @@
           });
         }
 
+        if (costPriceInput) {
+          costPriceInput.addEventListener('input', updateConvertedPrices);
+        }
+
+        if (sellPriceInput) {
+          sellPriceInput.addEventListener('input', updateConvertedPrices);
+        }
+
         saveButton.addEventListener('click', async function () {
           var nameAr = (document.getElementById('product-name-ar') || {}).value || '';
           var description = (document.getElementById('product-description') || {}).value || '';
-          var costPrice = Number((document.getElementById('product-cost-price') || {}).value || 0);
-          var sellPrice = Number((document.getElementById('product-sell-price') || {}).value || 0);
+          var costPrice = Number((costPriceInput || {}).value || 0);
+          var sellPrice = Number((sellPriceInput || {}).value || 0);
           var categoryId = categorySelect.value || '';
           var unitLabel = ((document.getElementById('product-unit') || {}).value || '').trim();
           var isNew = Boolean((document.getElementById('product-is-new') || {}).checked);
@@ -328,6 +403,7 @@
         });
 
         loadCategories();
+        loadStoreSettings();
       })();
     </script>
   </body>

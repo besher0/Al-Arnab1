@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
 import { CheckoutCartDto } from './dto/checkout-cart.dto';
@@ -13,10 +14,14 @@ import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async getCart(userId: string) {
     const cart = await this.ensureActiveCart(userId);
+    const exchangeRate = await this.getExchangeRate();
 
     const fullCart = await this.prisma.cart.findUnique({
       where: { id: cart.id },
@@ -33,7 +38,7 @@ export class CartService {
     });
 
     const items = (fullCart?.items ?? []).map((item) => {
-      const price = decimalToNumber(item.unitPriceSnapshot);
+      const price = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
       const qty = decimalToNumber(item.qty);
       return {
         id: item.productId,
@@ -210,6 +215,13 @@ export class CartService {
     });
 
     if (!updated) throw new BadRequestException('تعذر تحديث حالة الطلب.');
+
+    await this.notificationsService.notifyOrderDeliveredForAdmins({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+    });
+
     return this.mapUserOrder(updated);
   }
 
@@ -245,11 +257,19 @@ export class CartService {
     });
 
     if (!updated) throw new BadRequestException('تعذر معالجة الإرجاع.');
+
+    await this.notificationsService.notifyOrderCancelledForAdmins({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+    });
+
     return this.mapUserOrder(updated);
   }
 
   async checkout(userId: string, payload: CheckoutCartDto) {
     return this.withDbRetry(async () => {
+      const exchangeRate = await this.getExchangeRate();
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { phone: true, isActive: true },
@@ -288,7 +308,7 @@ export class CartService {
 
       const subtotal = roundTo2(
         cartItems.reduce((sum, item) => {
-          const unitPrice = decimalToNumber(item.unitPriceSnapshot);
+          const unitPrice = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
           const qty = decimalToNumber(item.qty);
           return sum + roundTo2(unitPrice * qty);
         }, 0),
@@ -343,7 +363,7 @@ export class CartService {
 
         await tx.orderItem.createMany({
           data: cartItems.map((item) => {
-            const unitPrice = roundTo2(decimalToNumber(item.unitPriceSnapshot));
+            const unitPrice = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
             const qty = roundTo2(decimalToNumber(item.qty));
             const lineTotal = roundTo2(unitPrice * qty);
 
@@ -387,6 +407,21 @@ export class CartService {
       if (!createdOrder) {
         throw new BadRequestException('تعذر إنشاء الطلب. حاول مرة أخرى.');
       }
+
+      const orderTotal = decimalToNumber(createdOrder.total);
+
+      await this.notificationsService.notifyOrderCreatedForCustomer(userId, {
+        orderId: createdOrder.id,
+        orderNumber: createdOrder.orderNumber,
+        total: orderTotal,
+      });
+
+      await this.notificationsService.notifyOrderCreatedForAdmins({
+        orderId: createdOrder.id,
+        orderNumber: createdOrder.orderNumber,
+        userId,
+        total: orderTotal,
+      });
 
       return {
         order: this.mapUserOrder(createdOrder),
@@ -442,6 +477,16 @@ export class CartService {
         status: 'ACTIVE',
       },
     });
+  }
+
+  private async getExchangeRate() {
+    const settings = await this.prisma.storeSetting.findUnique({ where: { id: 1 } });
+    const rate = decimalToNumber(settings?.usdSarRate);
+    return rate > 0 ? rate : 15000;
+  }
+
+  private toDisplayPrice(price: unknown, exchangeRate: number) {
+    return roundTo2(decimalToNumber(price) * exchangeRate);
   }
 
   private async createOrderWithUniqueNumber(

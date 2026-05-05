@@ -116,6 +116,7 @@
         }
     </style>
   <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="bg-surface text-on-surface antialiased min-h-screen">
 <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -125,13 +126,10 @@
 </div>
 <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
 </div>
-<div class="flex items-center gap-4">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<div class="flex items-center gap-2">
+<button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
 <span class="material-symbols-outlined">notifications</span>
 </button>
-<div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden bg-white">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8-KCZD4q-h8glh373n4RV6NiMumNElo94iFIlFvR4snOGFDr-o2yu_8sSgJouJ3kBoq9ieH4mjmH_IF8OyeazWvYbhwehE__ingvwizVL0fcpMz1LwOPd64u83qS_NxnkZjNkj7Ud5Sivt5zit4inaKacNRKdph6eg_DxZ_MVMn2TBv0RLKB7FcSHrg-aQT8cCE2zdqF7gOOOX84G9cOfy5YhXhJX8KkfIvi7gVQQweIH6K9UIoPC08brjHtNChh1D99tXLJDxvH2"/>
-</div>
 </div>
 </header>
 <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
@@ -145,16 +143,6 @@
 </div>
 </div>
 <div class="grid grid-cols-2 gap-4">
-<div class="col-span-2 relative h-48 bg-surface-container-highest rounded-xl overflow-hidden group cursor-pointer transition-transform active:scale-[0.98]">
-<img alt="Fruits and Vegetables" class="w-full h-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-110" data-alt="Vibrant assortment of fresh organic fruits and leafy greens in a rustic wooden crate with soft natural sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMAYVDJbLy-Hu2H9XwY_FRKJrzmyhsYMlJK6Q00qYKYvpyt8dHMziCvi6dRpzC_RYXGMZzN1StziORBZuK_fI0J9vMEmeT5K_Dhah0ukrHHWd_HShyVvJoyy5T9Z7WzltddyF3uF5wj4of8gT9IdiPE6cv1cAmqwVvJgJRR7qAdgxORnZu8nfe5tRx7gZ3Yu2jJg6OKmsCBk17KBTZvLAefWyfWjoy-YKcWRkHjSc25F7UCkMatOf04ZPnrHodAPI5ooBQ7SIbaKnQ"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
-<h3 class="font-tajawal font-bold text-2xl text-white">الخضروات والفواكه</h3>
-<p class="text-white/80 text-sm">طازجة من المزرعة يومياً</p>
-</div>
-<div class="absolute top-4 left-4 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold">
-                    الأكثر طلبًا
-                </div>
-</div>
 <div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
 <div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
 <img alt="Dairy" class="w-full h-full object-cover" data-alt="Fresh cold milk being poured into a clear glass bottle with droplets of condensation on a light wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI_GWu33kB_jgJHbv_Kd5rCUhmJcEvFIhZ8X4UbuQCz7WJI8Xg8eZYQEhInjWtFWWFiaCNc_3EAPhNp1YfAMOPFIzEpoq4n-dAFVbeIBZY4JTHmFFL8thLRDYXs-eHYENfqKwATu9uaIptFYg6And6dCK6gEEQvA-qErda9-Y5Iqcdeg5igkDZcEENqGedWpXEveVkDsHgaKOI9pfXEqxZ3CRDKFLDtDUXizU4KlxRaF7f37K4uen0zWTsuXiZeLRkSRSbisySEM9w"/>
@@ -292,31 +280,7 @@
                 return;
             }
 
-            var first = categories[0];
-            var rest = categories.slice(1);
-
-            var featured =
-                '<div class="col-span-2 relative h-48 bg-surface-container-highest rounded-xl overflow-hidden group cursor-pointer transition-transform active:scale-[0.98]" data-category-id="' +
-                escapeHtml(first.id) +
-                '">' +
-                (first.imageUrl
-                    ? '<img class="w-full h-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-110" alt="' +
-                      escapeHtml(first.nameAr || 'تصنيف') +
-                      '" src="' +
-                      escapeHtml(first.imageUrl) +
-                      '"/>'
-                    : '<div class="w-full h-full bg-gradient-to-br from-primary/20 to-surface-container"></div>') +
-                '<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">' +
-                '<h3 class="font-tajawal font-bold text-2xl text-white">' +
-                escapeHtml(first.nameAr || 'تصنيف') +
-                '</h3>' +
-                '<p class="text-white/80 text-sm">' +
-                escapeHtml(first.description || 'تسوق أفضل المنتجات في هذا القسم') +
-                '</p>' +
-                '</div>' +
-                '</div>';
-
-            var cards = rest
+            var cards = categories
                 .map(function (category) {
                     return (
                         '<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm cursor-pointer" data-category-id="' +
@@ -339,7 +303,7 @@
                 })
                 .join('');
 
-            grid.innerHTML = featured + cards;
+            grid.innerHTML = cards;
         }
 
         function applySearch() {
@@ -405,6 +369,10 @@
                 state.categories = [];
                 renderCategories([]);
             });
+
+        if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
+            window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
+        }
 
         send('request-state');
     })();

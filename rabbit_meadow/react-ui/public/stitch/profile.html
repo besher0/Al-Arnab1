@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
@@ -53,6 +53,7 @@
   }
 </style>
   <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -62,9 +63,14 @@
       </div>
       <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">حسابي</h1>
     </div>
-    <button id="refresh-profile" class="text-on-surface-variant hover:text-primary transition-colors">
-      <span class="material-symbols-outlined">refresh</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button id="refresh-profile" class="text-on-surface-variant hover:text-primary transition-colors" type="button">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+    </div>
   </header>
 
   <main class="pt-24 px-4 max-w-2xl mx-auto space-y-6">
@@ -130,7 +136,11 @@
 
 <script>
   (function () {
-    var state = { waitingLogout: false };
+    var state = {
+      waitingLogout: false,
+    };
+
+    var notificationsButton = document.querySelector('[data-notification-button]');
 
     function toArabicNumber(value) {
       var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -218,6 +228,14 @@
       }
     });
 
+    if (
+      notificationsButton &&
+      window.AlArnabNotifications &&
+      typeof window.AlArnabNotifications.mountHeaderButton === 'function'
+    ) {
+      window.AlArnabNotifications.mountHeaderButton(notificationsButton);
+    }
+
     var refreshButton = document.getElementById('refresh-profile');
     if (refreshButton) {
       refreshButton.addEventListener('click', function () {
@@ -241,17 +259,29 @@
       if (event.origin !== window.location.origin) return;
       var payload = event.data;
       if (!payload || payload.source !== 'react-shell') return;
-      if (payload.type !== 'cart-state') return;
 
-      setFooterCartCount(payload.itemCount || 0);
-      setUserData(payload.user || null);
-      setLogoutLoading(false);
+      if (payload.type === 'cart-state') {
+        setFooterCartCount(payload.itemCount || 0);
+        setUserData(payload.user || null);
+        setLogoutLoading(false);
+        return;
+      }
+
+      if (payload.type === 'auth-error') {
+        setLogoutLoading(false);
+        alert(payload.message || 'تعذر إتمام العملية.');
+      }
     });
+
+    if (
+      window.AlArnabNotifications &&
+      typeof window.AlArnabNotifications.tryBindForegroundMessages === 'function'
+    ) {
+      window.AlArnabNotifications.tryBindForegroundMessages();
+    }
 
     send('request-state');
   })();
 </script>
 </body>
 </html>
-
-

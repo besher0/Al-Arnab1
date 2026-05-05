@@ -50,6 +50,13 @@ enum InventoryMovementType {
   RETURN
 }
 
+enum NotificationType {
+  GENERAL
+  ORDER_CREATED
+  ORDER_STATUS
+  ORDER_DELIVERED
+}
+
 model User {
   id                 String              @id @default(cuid())
   name               String
@@ -66,6 +73,8 @@ model User {
   statusLogs         OrderStatusLog[]    @relation("StatusLogChanger")
   inventoryMovements InventoryMovement[] @relation("InventoryMovementCreator")
   settingsUpdated    StoreSetting[]      @relation("StoreSettingUpdater")
+  notifications      AppNotification[]
+  deviceTokens       UserDeviceToken[]
 }
 
 model UserAddress {
@@ -263,4 +272,34 @@ model StoreSetting {
   updatedById String?
   updatedAt   DateTime @updatedAt
   updatedBy   User?    @relation("StoreSettingUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model AppNotification {
+  id          String           @id @default(cuid())
+  recipientId String
+  title       String
+  body        String
+  type        NotificationType @default(GENERAL)
+  metadata    Json?
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, createdAt])
+  @@index([recipientId, isRead])
+}
+
+model UserDeviceToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  platform   String?
+  deviceName String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
 }

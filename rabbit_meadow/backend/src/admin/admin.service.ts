@@ -10,12 +10,15 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { SalesReportQueryDto } from './dto/sales-report-query.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
+import { CreateAdminNotificationDto } from '../notifications/dto/create-admin-notification.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getDashboard() {
@@ -204,6 +207,8 @@ export class AdminService {
       }
     }
 
+    const statusChanged = existing.status !== payload.status;
+
     await this.prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: orderId },
@@ -225,7 +230,30 @@ export class AdminService {
       });
     });
 
+    if (statusChanged) {
+      const note = payload.note?.trim() || payload.rejectReason?.trim() || null;
+
+      await this.notificationsService.notifyOrderStatusChangedForCustomer(existing.userId, {
+        orderId: existing.id,
+        orderNumber: existing.orderNumber,
+        status: payload.status,
+        note,
+      });
+
+      if (payload.status === OrderStatus.DELIVERED) {
+        await this.notificationsService.notifyOrderDeliveredForAdmins({
+          orderId: existing.id,
+          orderNumber: existing.orderNumber,
+          userId: existing.userId,
+        });
+      }
+    }
+
     return this.getOrderDetail(orderId);
+  }
+
+  async createAdminNotification(payload: CreateAdminNotificationDto, adminId: string) {
+    return this.notificationsService.createAdminBroadcast(adminId, payload);
   }
 
   async listCategories() {
@@ -427,6 +455,13 @@ export class AdminService {
 
   async updateStoreSettings(payload: UpdateStoreSettingDto, updatedById: string) {
     await this.ensureStoreSettings();
+
+    if (payload.usdSarRate !== undefined) {
+      const nextRate = Number(payload.usdSarRate);
+      if (!Number.isFinite(nextRate) || nextRate <= 0) {
+        throw new BadRequestException('سعر الصرف يجب أن يكون أكبر من الصفر.');
+      }
+    }
 
     const settings = await this.prisma.storeSetting.update({
       where: { id: 1 },

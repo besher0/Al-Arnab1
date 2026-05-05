@@ -66,6 +66,7 @@
         }
     </style>
   <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="bg-background text-on-surface min-h-screen pb-32">
 <!-- TopAppBar -->
@@ -76,13 +77,10 @@
 </div>
 <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
 </div>
-<div class="flex items-center gap-4">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<div class="flex items-center gap-2">
+<button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
 <span class="material-symbols-outlined">notifications</span>
 </button>
-<div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden bg-white">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8-KCZD4q-h8glh373n4RV6NiMumNElo94iFIlFvR4snOGFDr-o2yu_8sSgJouJ3kBoq9ieH4mjmH_IF8OyeazWvYbhwehE__ingvwizVL0fcpMz1LwOPd64u83qS_NxnkZjNkj7Ud5Sivt5zit4inaKacNRKdph6eg_DxZ_MVMn2TBv0RLKB7FcSHrg-aQT8cCE2zdqF7gOOOX84G9cOfy5YhXhJX8KkfIvi7gVQQweIH6K9UIoPC08brjHtNChh1D99tXLJDxvH2"/>
-</div>
 </div>
 </header>
 <main class="pt-24 px-4 space-y-8">
@@ -286,6 +284,7 @@
         var state = {
             categories: [],
             products: [],
+            currency: 'SYP',
         };
 
         function toArabicNumber(value) {
@@ -295,9 +294,21 @@
             });
         }
 
+        function currencyLabel(currency) {
+            var code = String(currency || '').toUpperCase();
+            if (code === 'SAR') return 'ر.س';
+            if (code === 'SYP') return 'ل.س';
+            return code || 'ل.س';
+        }
+
+        function applyStore(storePayload) {
+            if (!storePayload || typeof storePayload !== 'object') return;
+            state.currency = String(storePayload.currency || state.currency || 'SYP').toUpperCase();
+        }
+
         function formatSar(value) {
             var numeric = Math.max(0, Number(value) || 0);
-            return numeric.toFixed(2) + ' ر.س';
+            return numeric.toFixed(2) + ' ' + currencyLabel(state.currency);
         }
 
         function escapeHtml(value) {
@@ -603,11 +614,13 @@
             var payload = event.data;
             if (!payload || payload.source !== 'react-shell') return;
             if (payload.type !== 'cart-state') return;
+            applyStore(payload.store || null);
             setFooterCartCount(payload.itemCount || 0);
         });
 
         fetchBootstrap()
             .then(function (payload) {
+                applyStore(payload && payload.store ? payload.store : null);
                 state.categories = Array.isArray(payload && payload.categories)
                     ? payload.categories
                     : [];
@@ -622,6 +635,10 @@
                 renderCategories([]);
                 renderPopular([]);
             });
+
+        if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
+            window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
+        }
 
         send('request-state');
     })();

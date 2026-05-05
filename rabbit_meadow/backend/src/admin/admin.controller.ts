@@ -22,6 +22,7 @@ import { SalesReportQueryDto } from './dto/sales-report-query.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateProductNewStatusDto } from './dto/update-product-new-status.dto';
 import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
+import { CreateAdminNotificationDto } from '../notifications/dto/create-admin-notification.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
@@ -94,6 +95,11 @@ export class AdminController {
   @Post('discounts')
   createDiscount(@Req() req: RequestWithUser, @Body() payload: CreateDiscountDto) {
     return this.adminService.createDiscount(payload, req.user.sub);
+  }
+
+  @Post('notifications')
+  createNotification(@Req() req: RequestWithUser, @Body() payload: CreateAdminNotificationDto) {
+    return this.adminService.createAdminNotification(payload, req.user.sub);
   }
 
   @Get('settings/store')

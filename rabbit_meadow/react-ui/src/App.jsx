@@ -37,7 +37,7 @@ function PublicOnlyRoute({ children }) {
   const location = useLocation()
 
   if (isBootstrapping) {
-    return <LoadingShell />
+    return children
   }
 
   // Allow opening /login even when already authenticated to switch accounts.
@@ -443,6 +443,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <FramePage src="/stitch/notifications.html" title="notifications" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <ProtectedRoute>
@@ -540,6 +548,14 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <FramePage src="/admin/sales-report.html" title="admin-sales-report" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/notifications"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/notifications.html" title="admin-notifications" />
             </AdminRoute>
           }
         />

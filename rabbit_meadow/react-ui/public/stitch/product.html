@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
@@ -220,6 +220,7 @@
         }
       </style>
   <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="text-on-surface bg-background min-h-screen">
 <!-- Top AppBar -->
@@ -230,13 +231,10 @@
 </div>
 <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">ط§ظ„ط£ط±ظ†ط¨</h1>
 </div>
-<div class="flex items-center gap-4">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<div class="flex items-center gap-2">
+<button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
 <span class="material-symbols-outlined">notifications</span>
 </button>
-<div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden bg-white">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8-KCZD4q-h8glh373n4RV6NiMumNElo94iFIlFvR4snOGFDr-o2yu_8sSgJouJ3kBoq9ieH4mjmH_IF8OyeazWvYbhwehE__ingvwizVL0fcpMz1LwOPd64u83qS_NxnkZjNkj7Ud5Sivt5zit4inaKacNRKdph6eg_DxZ_MVMn2TBv0RLKB7FcSHrg-aQT8cCE2zdqF7gOOOX84G9cOfy5YhXhJX8KkfIvi7gVQQweIH6K9UIoPC08brjHtNChh1D99tXLJDxvH2"/>
-</div>
 </div>
 </header>
 <main class="pt-24 pb-64">
@@ -324,6 +322,7 @@
       selectedProductId: '',
       qty: 1,
       cartById: {},
+      currency: 'SYP',
     };
 
     function toArabicNumber(value) {
@@ -341,11 +340,21 @@
       var parsed = parseInt(normalized, 10);
       return Number.isNaN(parsed) ? 1 : parsed;
     }
-
-    function formatSar(value) {
-      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ط±.ط³';
+    function currencyLabel(currency) {
+      var code = String(currency || '').toUpperCase();
+      if (code === 'SAR') return '?.?';
+      if (code === 'SYP') return '?.?';
+      return code || '?.?';
     }
 
+    function applyStore(storePayload) {
+      if (!storePayload || typeof storePayload !== 'object') return;
+      state.currency = String(storePayload.currency || state.currency || 'SYP').toUpperCase();
+    }
+
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ' + currencyLabel(state.currency);
+    }
     function setFooterCartCount(count) {
       var next = Math.max(0, Number(count) || 0);
       var badges = document.querySelectorAll('.cart-badge');
@@ -510,7 +519,9 @@
       if (!payload || payload.source !== 'react-shell') return;
       if (payload.type !== 'cart-state') return;
 
+      applyStore(payload.store || null);
       applyCartState(payload);
+      renderProductDetails();
     });
 
     fetch(API_BASE + '/catalog/products')
@@ -538,9 +549,15 @@
         renderProductDetails();
       });
 
+    if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
+      window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
+    }
+
     send('request-state');
   })();
 </script>
 </body></html>
+
+
 
 

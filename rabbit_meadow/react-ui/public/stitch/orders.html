@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="utf-8" />
@@ -53,6 +53,7 @@
     }
   </style>
   <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="bg-background font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
@@ -62,13 +63,10 @@
       </div>
       <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
     </div>
-    <div class="flex items-center gap-4">
-      <button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
+    <div class="flex items-center gap-2">
+      <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
         <span class="material-symbols-outlined">notifications</span>
       </button>
-      <div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden bg-white">
-        <img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8-KCZD4q-h8glh373n4RV6NiMumNElo94iFIlFvR4snOGFDr-o2yu_8sSgJouJ3kBoq9ieH4mjmH_IF8OyeazWvYbhwehE__ingvwizVL0fcpMz1LwOPd64u83qS_NxnkZjNkj7Ud5Sivt5zit4inaKacNRKdph6eg_DxZ_MVMn2TBv0RLKB7FcSHrg-aQT8cCE2zdqF7gOOOX84G9cOfy5YhXhJX8KkfIvi7gVQQweIH6K9UIoPC08brjHtNChh1D99tXLJDxvH2" />
-      </div>
     </div>
   </header>
 
@@ -150,6 +148,7 @@
       var state = {
         cartCount: 0,
         orders: [],
+        currency: 'SYP',
       };
 
       function send(type, payload) {
@@ -165,11 +164,21 @@
           return map[Number(digit)] || digit;
         });
       }
+      function currencyLabel(currency) {
+      var code = String(currency || '').toUpperCase();
+      if (code === 'SAR') return '?.?';
+      if (code === 'SYP') return '?.?';
+      return code || '?.?';
+    }
 
-      function formatSar(value) {
-        return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ر.س';
-      }
+    function applyStore(storePayload) {
+      if (!storePayload || typeof storePayload !== 'object') return;
+      state.currency = String(storePayload.currency || state.currency || 'SYP').toUpperCase();
+    }
 
+    function formatSar(value) {
+      return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ' + currencyLabel(state.currency);
+    }
       function formatDate(value) {
         if (!value) return '-';
         var date = new Date(value);
@@ -535,8 +544,12 @@
         if (!payload || payload.source !== 'react-shell') return;
 
         if (payload.type === 'cart-state') {
+          applyStore(payload.store || null);
           state.cartCount = Math.max(0, Number(payload.itemCount) || 0);
           setFooterCartCount(state.cartCount);
+          if (state.orders.length) {
+            renderOrders();
+          }
           return;
         }
 
@@ -553,6 +566,10 @@
         }
       });
 
+      if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
+        window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
+      }
+
       renderEmptyState();
       send('request-state');
       requestOrders();
@@ -560,5 +577,7 @@
   </script>
 </body>
 </html>
+
+
 
 

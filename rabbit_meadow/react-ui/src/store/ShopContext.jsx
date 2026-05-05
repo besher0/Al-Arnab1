@@ -11,6 +11,7 @@ import { api } from '../lib/api'
 
 const TOKEN_STORAGE_KEY = 'al-arnab-token'
 const API_BASE_STORAGE_KEY = 'al-arnab-api-base'
+const FIREBASE_CONFIG_STORAGE_KEY = 'al-arnab-firebase-config'
 const DEFAULT_EXCHANGE_RATE = 15000
 const DEFAULT_STORE = {
   currency: 'SYP',
@@ -19,6 +20,28 @@ const DEFAULT_STORE = {
 }
 
 const ShopContext = createContext(null)
+
+function firebaseConfigFromEnv() {
+  const projectId = String(import.meta.env.VITE_FIREBASE_PROJECT_ID || '').trim()
+  const messagingSenderId = String(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '').trim()
+  const appId = String(import.meta.env.VITE_FIREBASE_APP_ID || '').trim()
+  const apiKey = String(import.meta.env.VITE_FIREBASE_API_KEY || '').trim()
+
+  if (!projectId || !messagingSenderId || !appId || !apiKey) {
+    return null
+  }
+
+  return {
+    apiKey,
+    authDomain: String(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '').trim() || undefined,
+    projectId,
+    storageBucket: String(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '').trim() || undefined,
+    messagingSenderId,
+    appId,
+    measurementId: String(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '').trim() || undefined,
+    vapidKey: String(import.meta.env.VITE_FIREBASE_VAPID_KEY || '').trim() || undefined,
+  }
+}
 
 function numberValue(value, fallback = 0) {
   const parsed = Number(value)
@@ -113,6 +136,12 @@ export function ShopProvider({ children }) {
 
     try {
       window.localStorage.setItem(API_BASE_STORAGE_KEY, api.baseUrl)
+      const config = firebaseConfigFromEnv()
+      if (config) {
+        window.localStorage.setItem(FIREBASE_CONFIG_STORAGE_KEY, JSON.stringify(config))
+      } else {
+        window.localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY)
+      }
     } catch {
       // ignore storage restrictions
     }
@@ -127,7 +156,7 @@ export function ShopProvider({ children }) {
     return nextProducts
   }, [])
 
-  const applyAuthState = useCallback(async (authPayload) => {
+  const applyAuthState = useCallback((authPayload) => {
     const nextToken = String(authPayload?.accessToken || '')
     if (!nextToken) {
       throw new Error('لم يتم استلام صلاحية الدخول من الخادم.')
@@ -138,19 +167,23 @@ export function ShopProvider({ children }) {
     setAuthenticated(true)
     setUser(authPayload.user || null)
 
-    const cartResponse = await api.cart.get(nextToken)
-    setCart(normalizeCartResponse(cartResponse))
+    void api.cart
+      .get(nextToken)
+      .then((cartResponse) => {
+        setCart(normalizeCartResponse(cartResponse))
+      })
+      .catch(() => {
+        setCart({ items: [], itemCount: 0, subtotal: 0 })
+      })
   }, [])
 
   const bootstrapSession = useCallback(async () => {
     setBootstrapping(true)
 
-    try {
-      await refreshCatalog()
-    } catch {
+    const catalogPromise = refreshCatalog().catch(() => {
       setProducts({})
       setStore(DEFAULT_STORE)
-    }
+    })
 
     const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY)
     if (!storedToken) {
@@ -159,6 +192,7 @@ export function ShopProvider({ children }) {
       setToken(null)
       setCart({ items: [], itemCount: 0, subtotal: 0 })
       setBootstrapping(false)
+      await catalogPromise
       return
     }
 
@@ -180,6 +214,7 @@ export function ShopProvider({ children }) {
       setCart({ items: [], itemCount: 0, subtotal: 0 })
     } finally {
       setBootstrapping(false)
+      await catalogPromise
     }
   }, [refreshCatalog])
 
@@ -200,7 +235,7 @@ export function ShopProvider({ children }) {
       }
 
       const authPayload = await api.auth.login({ phone: cleanPhone })
-      await applyAuthState(authPayload)
+      applyAuthState(authPayload)
       return authPayload
     },
     [applyAuthState],
@@ -223,7 +258,7 @@ export function ShopProvider({ children }) {
         name: cleanName,
         phone: cleanPhone,
       })
-      await applyAuthState(authPayload)
+      applyAuthState(authPayload)
       return authPayload
     },
     [applyAuthState],
@@ -234,7 +269,7 @@ export function ShopProvider({ children }) {
       const authPayload = await api.auth.guest({
         name: name ? String(name).trim() : undefined,
       })
-      await applyAuthState(authPayload)
+      applyAuthState(authPayload)
       return authPayload
     },
     [applyAuthState],

@@ -1,0 +1,406 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#87CEEB',
+            'on-primary': '#ffffff',
+            'on-background': '#1A365D',
+            'on-surface': '#1A365D',
+            'on-surface-variant': '#718096',
+            'surface-container': '#E0F2FF',
+            'surface-container-low': '#EAF5FF',
+            'surface-container-lowest': '#ffffff',
+            background: '#F0F8FF',
+          },
+          borderRadius: {
+            DEFAULT: '1rem',
+            lg: '2rem',
+            xl: '3rem',
+            full: '9999px',
+          },
+          fontFamily: {
+            headline: ['Tajawal', 'sans-serif'],
+            body: ['Almarai', 'sans-serif'],
+            label: ['Almarai', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    html,
+    body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  </style>
+  <script src="/stitch/stitch-alert.js"></script>
+  <script src="/stitch/stitch-notifications.js"></script>
+</head>
+<body class="bg-background font-body text-on-surface antialiased pb-32">
+  <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+      </div>
+      <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الإشعارات</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="back-to-profile" class="text-on-surface-variant hover:text-primary transition-colors" type="button" aria-label="الذهاب إلى الحساب">
+        <span class="material-symbols-outlined">person</span>
+      </button>
+      <button id="refresh-notifications" class="text-on-surface-variant hover:text-primary transition-colors" type="button" aria-label="تحديث الإشعارات">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="pt-24 px-4 max-w-2xl mx-auto space-y-5">
+    <section class="bg-surface-container-lowest rounded-3xl p-5 border border-primary/10 shadow-[0_10px_28px_rgba(26,54,93,0.06)]">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="font-headline font-black text-xl text-on-background">مركز الإشعارات</h2>
+          <p class="text-xs text-on-surface-variant mt-1">ستظهر تحديثات الطلبات والتنبيهات العامة هنا.</p>
+        </div>
+        <button id="enable-push-btn" type="button" class="px-3 py-2 rounded-full bg-primary text-white text-xs font-bold whitespace-nowrap">تفعيل إشعارات الجهاز</button>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 mt-4">
+        <p id="notifications-status" class="text-xs text-on-surface-variant">جاري تحميل الإشعارات...</p>
+        <button id="mark-all-read-btn" type="button" class="text-xs font-bold text-primary hover:opacity-80 transition-opacity">تعيين الكل كمقروء</button>
+      </div>
+
+      <div id="notifications-list" class="space-y-2 mt-3"></div>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="home">home</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+      <span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <div class="relative">
+        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+        <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+      </div>
+      <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="person">person</span>
+      <span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
+    </a>
+  </nav>
+
+  <script>
+    (function () {
+      var state = {
+        notificationsLoading: false,
+      };
+
+      var notificationsStatus = document.getElementById('notifications-status');
+      var notificationsList = document.getElementById('notifications-list');
+      var enablePushButton = document.getElementById('enable-push-btn');
+      var markAllReadButton = document.getElementById('mark-all-read-btn');
+
+      function send(type, payload) {
+        window.parent.postMessage(
+          Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+          window.location.origin,
+        );
+      }
+
+      function bindLink(link, to) {
+        if (!link) return;
+        link.href = to;
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          send('navigate', { to: to });
+        });
+      }
+
+      function toArabicNumber(value) {
+        var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(value).replace(/[0-9]/g, function (digit) {
+          return map[Number(digit)] || digit;
+        });
+      }
+
+      function setFooterCartCount(count) {
+        var next = Math.max(0, Number(count) || 0);
+        var badges = document.querySelectorAll('.cart-badge');
+        badges.forEach(function (badge) {
+          badge.textContent = toArabicNumber(next);
+          badge.style.display = next > 0 ? 'flex' : 'none';
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatRelativeTime(dateValue) {
+        if (!dateValue) return 'الآن';
+        var date = new Date(dateValue);
+        if (Number.isNaN(date.getTime())) return 'الآن';
+
+        var diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+        if (diffMinutes < 1) return 'الآن';
+        if (diffMinutes < 60) return 'منذ ' + toArabicNumber(diffMinutes) + ' دقيقة';
+
+        var hours = Math.floor(diffMinutes / 60);
+        if (hours < 24) return 'منذ ' + toArabicNumber(hours) + ' ساعة';
+
+        var days = Math.floor(hours / 24);
+        return 'منذ ' + toArabicNumber(days) + ' يوم';
+      }
+
+      function setNotificationsStatus(message, isError) {
+        if (!notificationsStatus) return;
+        notificationsStatus.textContent = message || '';
+        notificationsStatus.classList.toggle('text-red-600', Boolean(isError));
+        notificationsStatus.classList.toggle('text-emerald-600', Boolean(message) && !isError);
+      }
+
+      function setNotificationsLoading(isLoading) {
+        state.notificationsLoading = Boolean(isLoading);
+        if (markAllReadButton) {
+          markAllReadButton.disabled = state.notificationsLoading;
+          markAllReadButton.classList.toggle('opacity-60', state.notificationsLoading);
+        }
+        if (enablePushButton) {
+          enablePushButton.disabled = state.notificationsLoading;
+          enablePushButton.classList.toggle('opacity-70', state.notificationsLoading);
+        }
+      }
+
+      function renderNotifications(items) {
+        if (!notificationsList) return;
+        var list = Array.isArray(items) ? items : [];
+
+        if (!list.length) {
+          notificationsList.innerHTML =
+            '<div class="bg-surface-container rounded-xl p-4 text-sm text-on-surface-variant text-center">لا يوجد إشعارات حالياً.</div>';
+          return;
+        }
+
+        notificationsList.innerHTML = list
+          .map(function (item) {
+            var isRead = Boolean(item && item.isRead);
+            var id = item && item.id ? String(item.id) : '';
+            return (
+              '<article class="rounded-xl border border-primary/10 px-3 py-3 ' +
+              (isRead ? 'bg-white' : 'bg-primary/5 border-primary/30') +
+              '" data-notification-id="' +
+              escapeHtml(id) +
+              '">' +
+              '<div class="flex items-start justify-between gap-2">' +
+              '<h3 class="font-bold text-sm">' +
+              escapeHtml(item && item.title ? item.title : 'إشعار') +
+              '</h3>' +
+              (isRead
+                ? '<span class="text-[10px] text-on-surface-variant font-bold">مقروء</span>'
+                : '<button type="button" class="text-[10px] text-primary font-bold" data-mark-read="' +
+                  escapeHtml(id) +
+                  '">تعليم كمقروء</button>') +
+              '</div>' +
+              '<p class="text-xs text-on-surface-variant mt-1 leading-6">' +
+              escapeHtml(item && item.body ? item.body : '') +
+              '</p>' +
+              '<p class="text-[10px] text-on-surface-variant mt-2">' +
+              escapeHtml(formatRelativeTime(item && item.createdAt ? item.createdAt : null)) +
+              '</p>' +
+              '</article>'
+            );
+          })
+          .join('');
+      }
+
+      async function loadNotifications() {
+        if (!window.AlArnabNotifications) {
+          setNotificationsStatus('ميزة الإشعارات غير متاحة حالياً.', true);
+          renderNotifications([]);
+          return;
+        }
+
+        setNotificationsLoading(true);
+        setNotificationsStatus('جاري تحميل الإشعارات...', false);
+
+        try {
+          var items = await window.AlArnabNotifications.fetchMyNotifications(40, false);
+          var unreadPayload = await window.AlArnabNotifications.fetchUnreadCount();
+          var unreadCount = unreadPayload && unreadPayload.unreadCount ? unreadPayload.unreadCount : 0;
+
+          renderNotifications(items);
+          setNotificationsStatus(
+            unreadCount > 0
+              ? 'لديك ' + toArabicNumber(unreadCount) + ' إشعارات غير مقروءة.'
+              : 'كل الإشعارات مقروءة.',
+            false,
+          );
+        } catch (_error) {
+          renderNotifications([]);
+          setNotificationsStatus('تعذر تحميل الإشعارات. تأكد من تسجيل الدخول.', true);
+        } finally {
+          setNotificationsLoading(false);
+        }
+      }
+
+      async function activatePushNotifications() {
+        if (!window.AlArnabNotifications) {
+          alert('خدمة الإشعارات غير مفعلة حالياً.');
+          return;
+        }
+
+        setNotificationsLoading(true);
+
+        try {
+          var result = await window.AlArnabNotifications.registerPushNotifications();
+          if (result && result.success) {
+            setNotificationsStatus('تم تفعيل إشعارات الجهاز بنجاح.', false);
+            alert('تم تفعيل إشعارات الجهاز بنجاح.');
+          } else {
+            var reason = result && result.reason ? result.reason : 'unknown';
+            if (reason === 'permission-denied') {
+              setNotificationsStatus('تم رفض إذن الإشعارات من المتصفح.', true);
+              alert('يرجى السماح بالإشعارات من إعدادات المتصفح.');
+            } else if (reason === 'missing-vapid-key' || reason === 'missing-config') {
+              setNotificationsStatus('إعدادات Firebase غير مكتملة.', true);
+              alert('إعدادات Firebase غير مكتملة.');
+            } else if (reason === 'insecure-context') {
+              setNotificationsStatus('الإشعارات تحتاج HTTPS أو localhost.', true);
+              alert('الإشعارات تعمل فقط على HTTPS أو localhost.');
+            } else {
+              setNotificationsStatus('تعذر تفعيل الإشعارات حالياً.', true);
+              alert('تعذر تفعيل الإشعارات حالياً.');
+            }
+          }
+        } catch (_error) {
+          setNotificationsStatus('حدث خطأ أثناء تفعيل الإشعارات.', true);
+          alert('حدث خطأ أثناء تفعيل الإشعارات.');
+        } finally {
+          setNotificationsLoading(false);
+        }
+      }
+
+      async function markAllNotificationsAsRead() {
+        if (!window.AlArnabNotifications) return;
+        setNotificationsLoading(true);
+        setNotificationsStatus('جاري تحديث حالة الإشعارات...', false);
+        try {
+          await window.AlArnabNotifications.markAllAsRead();
+          await loadNotifications();
+        } catch (_error) {
+          setNotificationsStatus('تعذر تحديث الإشعارات.', true);
+          setNotificationsLoading(false);
+        }
+      }
+
+      async function markNotificationAsRead(notificationId) {
+        if (!window.AlArnabNotifications || !notificationId) return;
+        try {
+          await window.AlArnabNotifications.markNotificationAsRead(notificationId);
+          await loadNotifications();
+        } catch (_error) {
+          setNotificationsStatus('تعذر تحديث الإشعار.', true);
+        }
+      }
+
+      var navLinks = document.querySelectorAll('nav a');
+      var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
+      navLinks.forEach(function (link, index) {
+        if (navRoutes[index]) {
+          bindLink(link, navRoutes[index]);
+        }
+      });
+
+      var backToProfileButton = document.getElementById('back-to-profile');
+      if (backToProfileButton) {
+        backToProfileButton.addEventListener('click', function () {
+          send('navigate', { to: '/profile' });
+        });
+      }
+
+      var refreshButton = document.getElementById('refresh-notifications');
+      if (refreshButton) {
+        refreshButton.addEventListener('click', function () {
+          loadNotifications();
+        });
+      }
+
+      if (enablePushButton) {
+        enablePushButton.addEventListener('click', function () {
+          activatePushNotifications();
+        });
+      }
+
+      if (markAllReadButton) {
+        markAllReadButton.addEventListener('click', function () {
+          markAllNotificationsAsRead();
+        });
+      }
+
+      if (notificationsList) {
+        notificationsList.addEventListener('click', function (event) {
+          var action = event.target.closest('[data-mark-read]');
+          if (!action) return;
+          event.preventDefault();
+          var notificationId = action.getAttribute('data-mark-read') || '';
+          markNotificationAsRead(notificationId);
+        });
+      }
+
+      window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin) return;
+        var payload = event.data;
+        if (!payload || payload.source !== 'react-shell') return;
+
+        if (payload.type === 'cart-state') {
+          setFooterCartCount(payload.itemCount || 0);
+        }
+      });
+
+      if (
+        window.AlArnabNotifications &&
+        typeof window.AlArnabNotifications.tryBindForegroundMessages === 'function'
+      ) {
+        window.AlArnabNotifications.tryBindForegroundMessages();
+      }
+
+      send('request-state');
+      loadNotifications();
+    })();
+  </script>
+</body>
+</html>

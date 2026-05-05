@@ -85,12 +85,7 @@ select {
 }
 
 .avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 2px solid #d2ebfa;
-  object-fit: cover;
-  background: #c5e6fa;
+  display: none;
 }
 
 .page-title {
@@ -525,6 +520,10 @@ select {
 
 .bottom-nav.five {
   grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.bottom-nav.six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .nav-item {
