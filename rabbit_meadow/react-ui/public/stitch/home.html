@@ -95,9 +95,9 @@
 <section>
 <div class="flex justify-between items-end mb-4 px-2">
 <h2 class="text-xl font-black text-on-surface flex items-center gap-2">أفضل العروض 🔥</h2>
-<button class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-                عرض الكل
-                <span class="material-symbols-outlined text-xs">arrow_back_ios</span>
+<button type="button" data-offers-toggle class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                <span data-offers-toggle-label>عرض الكل</span>
+                <span class="material-symbols-outlined text-xs" data-offers-toggle-icon>arrow_back_ios</span>
 </button>
 </div>
 <div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4" data-offers-list>
@@ -150,39 +150,7 @@
 </div>
 </div>
 </section>
-<!-- Section 2: Categories Section (الفئات) -->
-<section>
-<div class="flex justify-between items-end mb-4 px-2">
-<h2 class="text-xl font-black text-on-surface">تسوّق حسب الأقسام 🥕</h2>
-</div>
-<div class="grid grid-cols-4 gap-4">
-<div class="flex flex-col items-center gap-2 group cursor-pointer">
-<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
-<img class="w-4/5 h-4/5 object-contain" data-alt="vegetables icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlzBWVAr7NZQ6l6EmNuzuAjNWSqRaqDQN2T7K8962Xt7NWdSTTmsCVgQ3o4rCWodZx2J0SUFPkTfYrwp7JDOtvpa3OsmyGlC3_XtmHkdqRNOrQp_OhwhLof8iBvEQvgKio2BkyeH9uHQLMFuizX2DMqplH0eyswj8MeTrxc38U4GuE9s7ZrRsp6GhzDSk8d_z_NA-qrSZ6STG9XjevChEEGWxEkmGo_MNFRTPHjYb1AywfD5Vb0PPwIElFXSphM-zcCjD1UjHlzMdD"/>
-</div>
-<span class="text-[12px] font-bold text-on-surface">خضروات</span>
-</div>
-<div class="flex flex-col items-center gap-2 group cursor-pointer">
-<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
-<img class="w-4/5 h-4/5 object-contain" data-alt="fruits icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlOMRbzZMDa0rrk9FcUbK3_D_kBaCi46HT-RELayBDPbXHox1wTUCVJP9-hytLV-9RUSSACNshnvNQ-uvdrm-i8fgJ-ZgJyPPBMwa3hWM8CH61AXa2LIAG25ULV51hnHjcPqCJqj_93TPkTCL597cKFCdnYkEweQ8MMZMQChyUuTyo0oMV6aatKe_-9WYyQYIE32pJVngdiryjORUokuNN2T5fp_LORTWUEMR-9Zgr-MsvTbZ8CZQJ2BSo6U8jYzyfpTAQbNYHQgI8"/>
-</div>
-<span class="text-[12px] font-bold text-on-surface">فواكه</span>
-</div>
-<div class="flex flex-col items-center gap-2 group cursor-pointer">
-<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
-<img class="w-4/5 h-4/5 object-contain" data-alt="dairy icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfd32cHjUzznYlN6tpFZTIcCm8jxw3m7lNIKW-R3kcZxNuea538REaHZZvX3CW4j7NNvmbpckDSOrfkHgnU70_Toue9aG5hIKBO9VBJ_q8HmCGJIVUKFz9jWxfLAr_Jj6Hx88q54TN5aC0qCcire2Qi6dB-VnnuG5vtjSv7sWYD-VCo1RpYt-dOJi5LAKsY0ffZM8WXOqxkaMhFaQxRMftlcEEbTcEDL4PDhoHdYe0Dawn5ntl9H7GCTECDk0GO-VXrsgLOt0Itaxn"/>
-</div>
-<span class="text-[12px] font-bold text-on-surface">ألبان</span>
-</div>
-<div class="flex flex-col items-center gap-2 group cursor-pointer">
-<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
-<img class="w-4/5 h-4/5 object-contain" data-alt="bakery icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbv9rlb7_MpTTFBazVvKSQ4k9oRbsB6-aiSzvDKQ4nLIgJfl5K8bT1ZG_IDoCf7nhuZbQcA_fdLyvULEzknR7RMqdzJ7nVYOtvTVf4sxxMzQt_429yZKDAIiLisTQt46oNbOWil0fkfSyGto16HG4TTdV8LpZ6lmcyxHk_v3E8f1CnHy60veWyl29nbdZbVoq1qgrjvQu7ALq-m5SE6XA1OsfybJEtq37pJqxB-xtzjJgW0peJUBuqfTrhKKJ3soOfC2opEugqs4mO"/>
-</div>
-<span class="text-[12px] font-bold text-on-surface">مخبوزات</span>
-</div>
-</div>
-</section>
-<!-- Section 3: Latest/Most Ordered Section (الأكثر طلباً) -->
+<!-- Section 2: Latest/Most Ordered Section (الأكثر طلباً) -->
 <section>
 <div class="flex justify-between items-end mb-4 px-2">
 <h2 class="text-xl font-black text-on-surface flex items-center gap-2">المنتجات الجديدة</h2>
@@ -235,6 +203,38 @@
 </div>
 </div>
 </section>
+<!-- Section 4: Categories Section (الفئات) -->
+<section>
+<div class="flex justify-between items-end mb-4 px-2">
+<h2 class="text-xl font-black text-on-surface">تسوّق حسب الأقسام 🥕</h2>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
+<img class="w-4/5 h-4/5 object-contain" data-alt="vegetables icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlzBWVAr7NZQ6l6EmNuzuAjNWSqRaqDQN2T7K8962Xt7NWdSTTmsCVgQ3o4rCWodZx2J0SUFPkTfYrwp7JDOtvpa3OsmyGlC3_XtmHkdqRNOrQp_OhwhLof8iBvEQvgKio2BkyeH9uHQLMFuizX2DMqplH0eyswj8MeTrxc38U4GuE9s7ZrRsp6GhzDSk8d_z_NA-qrSZ6STG9XjevChEEGWxEkmGo_MNFRTPHjYb1AywfD5Vb0PPwIElFXSphM-zcCjD1UjHlzMdD"/>
+</div>
+<span class="text-[12px] font-bold text-on-surface">خضروات</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
+<img class="w-4/5 h-4/5 object-contain" data-alt="fruits icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlOMRbzZMDa0rrk9FcUbK3_D_kBaCi46HT-RELayBDPbXHox1wTUCVJP9-hytLV-9RUSSACNshnvNQ-uvdrm-i8fgJ-ZgJyPPBMwa3hWM8CH61AXa2LIAG25ULV51hnHjcPqCJqj_93TPkTCL597cKFCdnYkEweQ8MMZMQChyUuTyo0oMV6aatKe_-9WYyQYIE32pJVngdiryjORUokuNN2T5fp_LORTWUEMR-9Zgr-MsvTbZ8CZQJ2BSo6U8jYzyfpTAQbNYHQgI8"/>
+</div>
+<span class="text-[12px] font-bold text-on-surface">فواكه</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
+<img class="w-4/5 h-4/5 object-contain" data-alt="dairy icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfd32cHjUzznYlN6tpFZTIcCm8jxw3m7lNIKW-R3kcZxNuea538REaHZZvX3CW4j7NNvmbpckDSOrfkHgnU70_Toue9aG5hIKBO9VBJ_q8HmCGJIVUKFz9jWxfLAr_Jj6Hx88q54TN5aC0qCcire2Qi6dB-VnnuG5vtjSv7sWYD-VCo1RpYt-dOJi5LAKsY0ffZM8WXOqxkaMhFaQxRMftlcEEbTcEDL4PDhoHdYe0Dawn5ntl9H7GCTECDk0GO-VXrsgLOt0Itaxn"/>
+</div>
+<span class="text-[12px] font-bold text-on-surface">ألبان</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-sm border border-primary/5 transition-transform group-active:scale-95 overflow-hidden">
+<img class="w-4/5 h-4/5 object-contain" data-alt="bakery icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbv9rlb7_MpTTFBazVvKSQ4k9oRbsB6-aiSzvDKQ4nLIgJfl5K8bT1ZG_IDoCf7nhuZbQcA_fdLyvULEzknR7RMqdzJ7nVYOtvTVf4sxxMzQt_429yZKDAIiLisTQt46oNbOWil0fkfSyGto16HG4TTdV8LpZ6lmcyxHk_v3E8f1CnHy60veWyl29nbdZbVoq1qgrjvQu7ALq-m5SE6XA1OsfybJEtq37pJqxB-xtzjJgW0peJUBuqfTrhKKJ3soOfC2opEugqs4mO"/>
+</div>
+<span class="text-[12px] font-bold text-on-surface">مخبوزات</span>
+</div>
+</div>
+</section>
 </main>
 <!-- BottomNavBar -->
 <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
@@ -277,14 +277,20 @@
         var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
         var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
         var offersContainer = document.querySelector('[data-offers-list]');
+        var offersToggleButton = document.querySelector('[data-offers-toggle]');
+        var offersToggleLabel = document.querySelector('[data-offers-toggle-label]');
+        var offersToggleIcon = document.querySelector('[data-offers-toggle-icon]');
         var newProductsContainer = document.querySelector('[data-new-products-list]');
         var categoriesContainer = document.querySelector('.grid.grid-cols-4.gap-4');
         var popularContainer = document.querySelector('.space-y-4');
         var searchInput = document.querySelector('input[type="text"]');
+        var offersCollapsedClasses = ['flex', 'overflow-x-auto', 'no-scrollbar', 'pb-4', '-mx-4', 'px-4'];
+        var offersExpandedClasses = ['grid', 'grid-cols-2', 'gap-4'];
         var state = {
             categories: [],
             products: [],
             currency: 'SYP',
+            showAllOffers: false,
         };
 
         function toArabicNumber(value) {
@@ -353,21 +359,70 @@
             return response.json();
         }
 
+        function hasActiveOffer(product) {
+            if (!product || typeof product !== 'object') return false;
+            var hasDiscount = product.hasDiscount;
+            if (hasDiscount === true || hasDiscount === 1 || hasDiscount === 'true') {
+                return true;
+            }
+
+            var originalPrice = Number(product.originalPrice || 0);
+            var currentPrice = Number(product.price || 0);
+            return originalPrice > 0 && currentPrice > 0 && currentPrice < originalPrice;
+        }
+
+        function offerBadgeLabel(product) {
+            var discount = product && product.discount ? product.discount : null;
+            if (!discount) {
+                return 'عرض';
+            }
+
+            var type = String(discount.type || '').toUpperCase();
+            var value = Number(discount.value || 0);
+            if (type === 'PERCENT') {
+                return 'خصم ' + value + '%';
+            }
+
+            return 'خصم ' + formatSar(value);
+        }
+
         function renderOffers(products) {
             if (!offersContainer) return;
-            if (!products.length) {
+            var offers = (Array.isArray(products) ? products : []).filter(hasActiveOffer);
+
+            if (offers.length <= 8) {
+                state.showAllOffers = false;
+            }
+
+            setOffersContainerMode(state.showAllOffers);
+            updateOffersToggle(offers.length);
+
+            if (!offers.length) {
                 offersContainer.innerHTML =
-                    '<div class="w-full bg-white rabbit-card-shape p-4 text-center text-sm text-on-surface-variant">لا توجد منتجات مفعّلة حالياً.</div>';
+                    '<div class="w-full bg-white rabbit-card-shape p-4 text-center text-sm text-on-surface-variant">لا توجد عروض مفعّلة حالياً.</div>';
                 return;
             }
 
-            offersContainer.innerHTML = products
-                .slice(0, 8)
+            var visibleOffers = offers.slice(0, state.showAllOffers ? offers.length : 8);
+            var offerCardClass = state.showAllOffers
+                ? 'bg-white rabbit-card-shape p-3 shadow-sm relative border border-primary/5'
+                : 'min-w-[170px] bg-white rabbit-card-shape p-3 shadow-sm flex-shrink-0 relative border border-primary/5';
+
+            offersContainer.innerHTML = visibleOffers
                 .map(function (product) {
+                    var finalPrice = Math.max(0, Number(product && product.price ? product.price : 0));
+                    var originalPrice = Math.max(0, Number(product && product.originalPrice ? product.originalPrice : 0));
+                    var showOriginalPrice = originalPrice > finalPrice && finalPrice > 0;
+
                     return (
-                        '<div class="min-w-[170px] bg-white rabbit-card-shape p-3 shadow-sm flex-shrink-0 relative border border-primary/5" data-open-product="' +
+                        '<div class="' +
+                        offerCardClass +
+                        '" data-open-product="' +
                         escapeHtml(product.id) +
                         '">' +
+                        '<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">' +
+                        escapeHtml(offerBadgeLabel(product)) +
+                        '</div>' +
                         '<div class="h-32 w-full rounded-xl overflow-hidden mb-3 bg-surface-container">' +
                         (product.imageUrl
                             ? '<img class="w-full h-full object-cover" alt="' +
@@ -382,11 +437,14 @@
                         '</h3>' +
                         '<div class="flex items-center gap-2 mb-3">' +
                         '<span class="text-primary font-black text-base">' +
-                        formatSar(product.price) +
+                        formatSar(finalPrice) +
                         '</span>' +
-                        '<span class="text-on-surface-variant text-xs truncate">' +
-                        escapeHtml(product.unit || '') +
-                        '</span>' +
+                        (showOriginalPrice
+                            ? '<span class="text-on-surface-variant text-xs line-through">' +
+                              formatSar(originalPrice) +
+                              '</span>'
+                            : '') +
+                        '<span class="text-on-surface-variant text-xs truncate">' + escapeHtml(product.unit || '') + '</span>' +
                         '</div>' +
                         '<button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2" data-add-product="' +
                         escapeHtml(product.id) +
@@ -396,6 +454,34 @@
                     );
                 })
                 .join('');
+        }
+
+        function setOffersContainerMode(expanded) {
+            if (!offersContainer) return;
+            offersContainer.classList.remove.apply(offersContainer.classList, offersCollapsedClasses);
+            offersContainer.classList.remove.apply(offersContainer.classList, offersExpandedClasses);
+            if (expanded) {
+                offersContainer.classList.add.apply(offersContainer.classList, offersExpandedClasses);
+            } else {
+                offersContainer.classList.add.apply(offersContainer.classList, offersCollapsedClasses);
+            }
+        }
+
+        function updateOffersToggle(totalOffers) {
+            if (!offersToggleButton) return;
+
+            if (!totalOffers || totalOffers <= 8) {
+                offersToggleButton.style.display = 'none';
+                return;
+            }
+
+            offersToggleButton.style.display = 'inline-flex';
+            if (offersToggleLabel) {
+                offersToggleLabel.textContent = state.showAllOffers ? 'عرض أقل' : 'عرض الكل';
+            }
+            if (offersToggleIcon) {
+                offersToggleIcon.textContent = state.showAllOffers ? 'expand_less' : 'arrow_back_ios';
+            }
         }
 
         function renderNewProducts(products) {
@@ -600,6 +686,14 @@
 
         bindDynamicActions();
 
+        if (offersToggleButton) {
+            offersToggleButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                state.showAllOffers = !state.showAllOffers;
+                applySearch();
+            });
+        }
+
         if (searchInput) {
             searchInput.addEventListener('input', applySearch);
         }
@@ -644,5 +738,4 @@
     })();
 </script>
 </body></html>
-
 

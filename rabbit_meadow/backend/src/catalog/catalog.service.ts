@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
+import {
+  buildDiscountIndex,
+  resolveBestDiscount,
+} from '../common/utils/discount.util';
 import { ListProductsQueryDto } from './dto/list-products-query.dto';
 
 type CacheEntry<T> = {
@@ -43,31 +47,70 @@ export class CatalogService {
       : `products:${activeOnly ? 'active' : 'all'}:${exchangeRate}`;
 
     return this.cached(key, async () => {
-      const products = await this.prisma.product.findMany({
-        where: {
-          ...(query.categoryId ? { categoryId: query.categoryId } : {}),
-          ...(activeOnly ? { isActive: true } : {}),
-        },
-        include: {
-          category: true,
-        },
-        orderBy: [{ category: { sortOrder: 'asc' } }, { nameAr: 'asc' }],
-      });
+      const now = new Date();
+      const [products, activeDiscounts] = await Promise.all([
+        this.prisma.product.findMany({
+          where: {
+            ...(query.categoryId ? { categoryId: query.categoryId } : {}),
+            ...(activeOnly ? { isActive: true } : {}),
+          },
+          include: {
+            category: true,
+          },
+          orderBy: [{ category: { sortOrder: 'asc' } }, { nameAr: 'asc' }],
+        }),
+        this.prisma.discount.findMany({
+          where: {
+            isActive: true,
+            startAt: { lte: now },
+            endAt: { gte: now },
+          },
+          include: {
+            targets: true,
+          },
+        }),
+      ]);
 
-      return products.map((product) => ({
-        id: product.id,
-        categoryId: product.categoryId,
-        categoryName: product.category.nameAr,
-        name: product.nameAr,
-        nameEn: product.nameEn,
-        description: product.description,
-        unit: product.unit,
-        price: this.toDisplayPrice(product.sellPrice, exchangeRate),
-        costPrice: decimalToNumber(product.costPrice),
-        imageUrl: product.imageUrl,
-        isActive: product.isActive,
-        isNew: product.isNew,
-      }));
+      const discountIndex = buildDiscountIndex(activeDiscounts);
+
+      return products.map((product) => {
+        const originalPrice = this.toDisplayPrice(product.sellPrice, exchangeRate);
+        const resolvedDiscount = resolveBestDiscount(
+          originalPrice,
+          product.id,
+          product.categoryId,
+          discountIndex,
+        );
+        const finalPrice = resolvedDiscount ? resolvedDiscount.finalPrice : originalPrice;
+        const discountAmount = resolvedDiscount ? resolvedDiscount.discountAmount : 0;
+
+        return {
+          id: product.id,
+          categoryId: product.categoryId,
+          categoryName: product.category.nameAr,
+          name: product.nameAr,
+          nameEn: product.nameEn,
+          description: product.description,
+          unit: product.unit,
+          price: finalPrice,
+          originalPrice,
+          hasDiscount: Boolean(resolvedDiscount),
+          discountAmount,
+          discount: resolvedDiscount
+            ? {
+                id: resolvedDiscount.discount.id,
+                title: resolvedDiscount.discount.title,
+                type: resolvedDiscount.discount.type,
+                value: resolvedDiscount.discount.value,
+                targetType: resolvedDiscount.discount.targetType,
+              }
+            : null,
+          costPrice: decimalToNumber(product.costPrice),
+          imageUrl: product.imageUrl,
+          isActive: product.isActive,
+          isNew: product.isNew,
+        };
+      });
     });
   }
 

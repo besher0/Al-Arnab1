@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>كل المنتجات</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+    <style>
+      .products-table-wrap {
+        overflow-x: auto;
+      }
+
+      .products-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 620px;
+      }
+
+      .products-table th,
+      .products-table td {
+        text-align: right;
+        padding: 10px 8px;
+        border-bottom: 1px solid #ebf1f7;
+        font-size: 12px;
+        vertical-align: middle;
+      }
+
+      .products-table th {
+        color: var(--admin-primary-deep);
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .products-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .product-name {
+        font-weight: 800;
+        color: var(--admin-primary-deep);
+      }
+
+      .status-pill {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .status-pill.new {
+        background: rgba(33, 182, 109, 0.18);
+        color: #168e56;
+      }
+
+      .status-pill.normal {
+        background: rgba(125, 145, 171, 0.18);
+        color: #6b7f99;
+      }
+
+      .status-pill.off {
+        background: rgba(239, 78, 79, 0.14);
+        color: #cf3c3c;
+      }
+
+      .tiny-action {
+        border: 0;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+        background: #e8f4fd;
+        color: var(--admin-primary-deep);
+      }
+
+      .products-feedback {
+        min-height: 16px;
+      }
+
+      .products-feedback.is-error {
+        color: var(--admin-danger);
+      }
+
+      .products-feedback.is-success {
+        color: var(--admin-success);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="admin-shell admin-compact">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 26px">كل المنتجات</h1>
+            <p class="page-subtitle">عرض وفرز المنتجات الموجودة في المتجر</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="container stack">
+        <section class="hero">
+          <h2>مخزونك الحالي</h2>
+          <p>من هنا تستطيع رؤية كل المنتجات، حالة المنتج، وسعره الحالي بسرعة.</p>
+        </section>
+
+        <section class="card stack">
+          <div class="grid-2">
+            <label>
+              <div class="label">بحث</div>
+              <input id="products-search" class="input-field" type="text" placeholder="ابحث بالاسم أو المعرف..." />
+            </label>
+            <label>
+              <div class="label">التصنيف</div>
+              <select id="products-category-filter" class="select-field">
+                <option value="">كل التصنيفات</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label>
+              <div class="label">حالة قسم الجديد</div>
+              <select id="products-new-filter" class="select-field">
+                <option value="all">الكل</option>
+                <option value="new">ضمن المنتجات الجديدة</option>
+                <option value="normal">غير مضاف للجديد</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">الحالة العامة</div>
+              <select id="products-active-filter" class="select-field">
+                <option value="all">الكل</option>
+                <option value="active">فعّال</option>
+                <option value="inactive">غير فعّال</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="row">
+            <button id="products-refresh" class="pill" type="button">تحديث</button>
+            <button class="pill active" data-route="/admin/products/new" type="button">إضافة منتج</button>
+          </div>
+
+          <div id="products-feedback" class="tiny muted products-feedback"></div>
+        </section>
+
+        <section class="new-products-table-card">
+          <div class="products-table-wrap">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>المنتج</th>
+                  <th>المعرف</th>
+                  <th>التصنيف</th>
+                  <th>السعر</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="products-list-body">
+                <tr>
+                  <td colspan="6" class="muted text-center">جاري تحميل المنتجات...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge) return;
+
+        var searchInput = document.getElementById('products-search');
+        var categoryFilter = document.getElementById('products-category-filter');
+        var newFilter = document.getElementById('products-new-filter');
+        var activeFilter = document.getElementById('products-active-filter');
+        var refreshButton = document.getElementById('products-refresh');
+        var tableBody = document.getElementById('products-list-body');
+        var feedbackNode = document.getElementById('products-feedback');
+
+        var state = {
+          products: [],
+          currency: 'SYP',
+        };
+
+        function setFeedback(message, isError) {
+          if (!feedbackNode) return;
+          feedbackNode.textContent = message || '';
+          feedbackNode.classList.toggle('is-error', Boolean(isError));
+          feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatNumber(value) {
+          var number = Number(value || 0);
+          return number.toLocaleString('ar-SA', { maximumFractionDigits: 2 });
+        }
+
+        function currencyLabel(currency) {
+          var code = String(currency || '').toUpperCase();
+          if (code === 'SAR') return 'ر.س';
+          if (code === 'SYP') return 'ل.س';
+          return code || 'ل.س';
+        }
+
+        function formatMoney(value) {
+          return formatNumber(value) + ' ' + currencyLabel(state.currency);
+        }
+
+        function populateCategoryFilter(products) {
+          if (!categoryFilter) return;
+
+          var selected = String(categoryFilter.value || '');
+          var seen = {};
+          var categories = [];
+
+          (products || []).forEach(function (product) {
+            var id = String(product && product.categoryId ? product.categoryId : '');
+            if (!id || seen[id]) return;
+            seen[id] = true;
+            categories.push({
+              id: id,
+              name: String(product && product.categoryName ? product.categoryName : id),
+            });
+          });
+
+          categories.sort(function (left, right) {
+            return left.name.localeCompare(right.name, 'ar');
+          });
+
+          categoryFilter.innerHTML = '<option value="">كل التصنيفات</option>';
+          categories.forEach(function (category) {
+            var option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categoryFilter.appendChild(option);
+          });
+
+          categoryFilter.value = selected;
+        }
+
+        function getFilteredProducts() {
+          var query = String((searchInput && searchInput.value) || '').trim().toLowerCase();
+          var categoryId = String((categoryFilter && categoryFilter.value) || '');
+          var newState = String((newFilter && newFilter.value) || 'all');
+          var activeState = String((activeFilter && activeFilter.value) || 'all');
+
+          return state.products.filter(function (product) {
+            var name = String(product && product.nameAr ? product.nameAr : '').toLowerCase();
+            var id = String(product && product.id ? product.id : '').toLowerCase();
+            var categoryName = String(product && product.categoryName ? product.categoryName : '').toLowerCase();
+
+            if (query && name.indexOf(query) === -1 && id.indexOf(query) === -1 && categoryName.indexOf(query) === -1) {
+              return false;
+            }
+
+            if (categoryId && String(product.categoryId || '') !== categoryId) {
+              return false;
+            }
+
+            if (newState === 'new' && !product.isNew) {
+              return false;
+            }
+
+            if (newState === 'normal' && product.isNew) {
+              return false;
+            }
+
+            if (activeState === 'active' && !product.isActive) {
+              return false;
+            }
+
+            if (activeState === 'inactive' && product.isActive) {
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        function renderProducts() {
+          if (!tableBody) return;
+
+          var products = getFilteredProducts();
+          if (!products.length) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="muted text-center">لا توجد منتجات مطابقة للفلاتر.</td></tr>';
+            return;
+          }
+
+          tableBody.innerHTML = products
+            .map(function (product) {
+              var isNew = Boolean(product && product.isNew);
+              var isActive = Boolean(product && product.isActive);
+              var statusClass = !isActive ? 'off' : isNew ? 'new' : 'normal';
+              var statusText = !isActive ? 'غير فعّال' : isNew ? 'ضمن الجديد' : 'فعّال';
+              var offerRoute = '/admin/discounts/new?productId=' + encodeURIComponent(String(product.id || ''));
+
+              return [
+                '<tr>',
+                '<td><div class="product-name">' + escapeHtml(product.nameAr || '-') + '</div></td>',
+                '<td><code>' + escapeHtml(product.id || '-') + '</code></td>',
+                '<td>' + escapeHtml(product.categoryName || '-') + '</td>',
+                '<td>' + escapeHtml(formatMoney(product.sellPrice || 0)) + '</td>',
+                '<td><span class="status-pill ' + statusClass + '">' + statusText + '</span></td>',
+                '<td>',
+                '<button class="tiny-action" data-open-offer-route="' + escapeHtml(offerRoute) + '">إضافة عرض</button>',
+                '</td>',
+                '</tr>',
+              ].join('');
+            })
+            .join('');
+        }
+
+        async function loadStoreSettings() {
+          try {
+            var settings = await window.AdminBridge.apiRequest('/admin/settings/store');
+            state.currency = settings && settings.currency ? String(settings.currency) : state.currency;
+          } catch (error) {
+            // Keep default currency
+          }
+        }
+
+        async function loadProducts() {
+          setFeedback('جاري تحميل المنتجات...', false);
+          if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="muted text-center">جاري تحميل المنتجات...</td></tr>';
+          }
+
+          try {
+            var products = await window.AdminBridge.apiRequest('/admin/products');
+            state.products = Array.isArray(products) ? products : [];
+            populateCategoryFilter(state.products);
+            renderProducts();
+            setFeedback('تم تحميل ' + state.products.length + ' منتج.', false);
+          } catch (error) {
+            state.products = [];
+            renderProducts();
+            setFeedback('تعذر تحميل المنتجات. تأكد من تسجيل الدخول بحساب أدمن.', true);
+          }
+        }
+
+        document.addEventListener('click', function (event) {
+          var button = event.target.closest('[data-open-offer-route]');
+          if (!button) return;
+
+          event.preventDefault();
+          var route = button.getAttribute('data-open-offer-route') || '/admin/discounts/new';
+          window.AdminBridge.go(route);
+        });
+
+        [searchInput, categoryFilter, newFilter, activeFilter].forEach(function (node) {
+          if (!node) return;
+          node.addEventListener('input', renderProducts);
+          node.addEventListener('change', renderProducts);
+        });
+
+        if (refreshButton) {
+          refreshButton.addEventListener('click', loadProducts);
+        }
+
+        Promise.resolve()
+          .then(loadStoreSettings)
+          .then(loadProducts);
+      })();
+    </script>
+  </body>
+</html>

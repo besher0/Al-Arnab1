@@ -97,6 +97,11 @@ export class AdminController {
     return this.adminService.createDiscount(payload, req.user.sub);
   }
 
+  @Get('discounts')
+  discounts() {
+    return this.adminService.listDiscounts();
+  }
+
   @Post('notifications')
   createNotification(@Req() req: RequestWithUser, @Body() payload: CreateAdminNotificationDto) {
     return this.adminService.createAdminNotification(payload, req.user.sub);

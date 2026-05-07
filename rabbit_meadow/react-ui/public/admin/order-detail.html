@@ -60,6 +60,13 @@
           </article>
         </section>
 
+        <section id="order-notes-card" style="display: none">
+          <h3 class="section-title" style="margin-bottom: 8px">ملاحظات الطلب</h3>
+          <article class="card">
+            <p id="order-notes" class="muted" style="white-space: pre-line; line-height: 1.7">-</p>
+          </article>
+        </section>
+
         <section id="accept-section" class="soft-card stack">
           <h3>قبول الطلب وتحديد وقت التجهيز</h3>
           <div class="row orders-filter-row" id="prep-options">
@@ -131,6 +138,8 @@
         var totalNode = document.getElementById('order-total');
         var itemsNode = document.getElementById('order-items');
         var addressNode = document.getElementById('order-address');
+        var notesCard = document.getElementById('order-notes-card');
+        var notesNode = document.getElementById('order-notes');
         var feedbackNode = document.getElementById('order-feedback');
 
         var acceptButton = document.getElementById('accept-order');
@@ -271,6 +280,16 @@
             totalNode.textContent = formatMoney(order.totals && order.totals.total ? order.totals.total : 0);
             addressNode.textContent = formatAddress(order.address);
             renderItems(order.items || []);
+            if (notesCard && notesNode) {
+              var notes = String(order.notes || '').trim();
+              if (notes) {
+                notesCard.style.display = '';
+                notesNode.textContent = notes;
+              } else {
+                notesCard.style.display = 'none';
+                notesNode.textContent = '-';
+              }
+            }
 
             if (isStatusLocked) {
               setFeedback('هذا الطلب مغلق ولا يمكن تعديل حالته.', true);

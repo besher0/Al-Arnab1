@@ -134,6 +134,7 @@ function BridgeListener() {
             total: item.total,
             imageUrl: item.imageUrl,
             nameEn: item.nameEn,
+            unit: item.unit,
           })),
           store: {
             currency: store?.currency || 'SYP',
@@ -236,7 +237,11 @@ function BridgeListener() {
       if (payload.type === 'add-item' && typeof payload.id === 'string') {
         try {
           const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 1
-          await addItem(payload.id, Math.max(1, qty))
+          await addItem(payload.id, Math.max(0.01, qty))
+          if (payload.openCart !== false && location.pathname !== '/cart') {
+            const fromPath = `${location.pathname}${location.search || ''}` || '/home'
+            navigate(`/cart?sheet=1&from=${encodeURIComponent(fromPath)}`)
+          }
         } catch (error) {
           sendAuthError(event.source, error?.message)
         }
@@ -258,6 +263,7 @@ function BridgeListener() {
           const checkoutResponse = await checkoutOrder({
             latitude: payload.latitude,
             longitude: payload.longitude,
+            itemNotes: payload.itemNotes,
           })
 
           sendFrameMessage(event.source, 'checkout-result', {
@@ -430,7 +436,7 @@ function AppRoutes() {
           path="/cart"
           element={
             <ProtectedRoute>
-              <FramePage src="/stitch/cart.html" title="cart" />
+              <FramePage src="/stitch/cart.html" title="cart" forwardSearch />
             </ProtectedRoute>
           }
         />
@@ -515,7 +521,31 @@ function AppRoutes() {
           path="/admin/products"
           element={
             <AdminRoute>
-              <Navigate to="/admin/products/new" replace />
+              <Navigate to="/admin/products/list" replace />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/products/list"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/products-list.html" title="admin-products-list" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/products-list"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/products-list.html" title="admin-products-list" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/products-list.html"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/products-list.html" title="admin-products-list" />
             </AdminRoute>
           }
         />
@@ -524,6 +554,38 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <FramePage src="/admin/add-product.html" title="admin-add-product" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/discounts"
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/discounts/list" replace />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/discounts/list"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/discounts-list.html" title="admin-discounts-list" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/discounts-list"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/discounts-list.html" title="admin-discounts-list" />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/discounts-list.html"
+          element={
+            <AdminRoute>
+              <FramePage src="/admin/discounts-list.html" title="admin-discounts-list" />
             </AdminRoute>
           }
         />
@@ -539,7 +601,11 @@ function AppRoutes() {
           path="/admin/discounts/new"
           element={
             <AdminRoute>
-              <FramePage src="/admin/new-discount.html" title="admin-new-discount" />
+              <FramePage
+                src="/admin/new-discount.html"
+                title="admin-new-discount"
+                forwardSearch
+              />
             </AdminRoute>
           }
         />

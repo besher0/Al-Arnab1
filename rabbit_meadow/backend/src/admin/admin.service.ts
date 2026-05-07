@@ -441,6 +441,48 @@ export class AdminService {
     };
   }
 
+  async listDiscounts() {
+    const discounts = await this.prisma.discount.findMany({
+      include: {
+        targets: {
+          include: {
+            product: true,
+            category: true,
+          },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+
+    return discounts.map((discount) => {
+      const targets = discount.targets.map((target) => ({
+        id: target.id,
+        targetType: target.targetType,
+        productId: target.productId,
+        productName: target.product?.nameAr || null,
+        categoryId: target.categoryId,
+        categoryName: target.category?.nameAr || null,
+      }));
+
+      return {
+        id: discount.id,
+        title: discount.title,
+        description: discount.description,
+        type: discount.type,
+        value: decimalToNumber(discount.value),
+        startAt: discount.startAt,
+        endAt: discount.endAt,
+        isActive: discount.isActive,
+        createdAt: discount.createdAt,
+        targetType: targets.length ? targets[0].targetType : null,
+        targetIds: targets
+          .map((target) => target.productId || target.categoryId || '')
+          .filter((value) => Boolean(value)),
+        targets,
+      };
+    });
+  }
+
   async getStoreSettings() {
     const settings = await this.ensureStoreSettings();
 

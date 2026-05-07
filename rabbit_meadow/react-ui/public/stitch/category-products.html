@@ -149,54 +149,117 @@
       backdrop-filter: blur(8px);
     }
 
-    .grid.grid-cols-2.gap-3.px-2 {
+    [data-category-products-grid] {
       gap: 12px;
       padding-inline: 0;
       align-items: stretch;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div {
+    [data-category-products-grid] > .product-card {
       border: 1px solid rgba(158, 199, 232, 0.35);
       border-radius: 18px;
       box-shadow: 0 12px 20px rgba(26, 54, 93, 0.06);
       transition: transform 160ms ease, box-shadow 160ms ease;
       overflow: hidden;
       background: rgba(255, 255, 255, 0.96);
+      display: flex;
+      flex-direction: column;
+      min-height: 292px;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div:active {
+    [data-category-products-grid] > .product-card:active {
       transform: scale(0.985);
       box-shadow: 0 8px 16px rgba(26, 54, 93, 0.11);
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div img {
+    [data-category-products-grid] > .product-card img {
       transition: transform 260ms ease;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div:hover img {
+    [data-category-products-grid] > .product-card:hover img {
       transform: scale(1.04);
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div .h-32 {
+    [data-category-products-grid] > .product-card .h-32 {
       height: 9.1rem;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 > div .p-3 {
+    [data-category-products-grid] > .product-card .p-3 {
       padding: 11px;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 button[data-action="minus"],
-    .grid.grid-cols-2.gap-3.px-2 button[data-action="plus"] {
+    [data-category-products-grid] .qty-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #eef7ff;
+      border: 1px solid rgba(158, 199, 232, 0.45);
+      border-radius: 12px;
+      padding: 5px 7px;
+      min-height: 40px;
+    }
+
+    [data-category-products-grid] .qty-btn {
       width: 30px;
       height: 30px;
       border: 1px solid rgba(158, 199, 232, 0.55);
       background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
     }
 
-    .grid.grid-cols-2.gap-3.px-2 button[data-action="add"] {
-      height: 36px;
+    [data-category-products-grid] .qty-value {
+      min-width: 46px;
+      text-align: center;
+      font-weight: 800;
+      color: #183e66;
+      line-height: 1.2;
+      flex: 1 1 auto;
+    }
+
+    [data-category-products-grid] .add-btn {
+      height: 38px;
       border-radius: 12px;
       box-shadow: 0 6px 14px rgba(155, 62, 32, 0.2);
+      margin-top: 2px;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+
+    .price-before {
+      font-size: 11px;
+      color: #7b8ea6;
+      text-decoration: line-through;
+    }
+
+    .offer-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(239, 68, 68, 0.14);
+      color: #c12b2b;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 390px) {
+      [data-category-products-grid] {
+        grid-template-columns: 1fr;
+      }
     }
 
     .fixed.bottom-28.left-6.z-40 {
@@ -254,7 +317,7 @@
 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
 </div>
-<h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">ط§ظ„ط£ط±ظ†ط¨</h1>
+<h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
 </div>
 <div class="flex items-center gap-2">
 <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
@@ -268,193 +331,52 @@
 <div class="flex items-center justify-between mb-6 px-2">
 <div>
 <nav class="flex gap-2 text-xs text-on-surface-variant mb-1">
-<span>ط§ظ„ط±ط¦ظٹط³ظٹط©</span>
+<span>الرئيسية</span>
 <span>/</span>
-<span class="font-bold text-primary">ط§ظ„ط£ظ„ط¨ط§ظ†</span>
+<span class="font-bold text-primary">الألبان</span>
 </nav>
-<h2 class="font-tajawal font-extrabold text-2xl text-on-background">ط§ظ„ط£ظ„ط¨ط§ظ† ظˆط§ظ„ط£ط¬ط¨ط§ظ†</h2>
+<h2 class="font-tajawal font-extrabold text-2xl text-on-background">الألبان والأجبان</h2>
 </div>
 <div class="bg-surface-container-highest p-2 rounded-lg">
 <span class="material-symbols-outlined text-primary text-xl" data-icon="filter_list">filter_list</span>
 </div>
 </div>
 <!-- 2-Column Grid Products -->
-<div class="grid grid-cols-2 gap-3 px-2">
-<!-- Product Card 1: Milk -->
-<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5">
-<div class="h-32 overflow-hidden relative">
-<img class="w-full h-full object-cover" data-alt="glass bottle of fresh organic milk on a wooden table in a sunlit farmhouse kitchen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdIMWIoV0O8q9Y1fskzxNprDRcUPg9pxH6YhcIUqLCXc-jUYTKIVpwzSrgRowl4BRDMTIvB3psuNQj6DpcjHzM2_rWS4YRk-PrnFb7cXNlc-3Dijr-YsiEFYQbgzQ5P1DbIr_dp8_c_lquRRYpHDn850zBa_Z63OWxeYhvXh0vysdLGHp90taWORq4U0laXWmNnwKd-9337foH-X7clo84746m6LEibO7XjT8WwE2SDmWhM8u5XTlEhn-dEfh5uT3plHVmr09ocnkk"/>
-<div class="absolute top-2 right-2 bg-primary text-on-primary text-[8px] font-bold px-2 py-0.5 rounded-full">ط·ط§ط²ط¬</div>
-</div>
-<div class="p-3 flex flex-col flex-grow">
-<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">ط­ظ„ظٹط¨ ظƒط§ظ…ظ„ ط§ظ„ط¯ط³ظ… ط¹ط¶ظˆظٹ</h3>
-<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">ظ، ظ„طھط±</span>
-<div class="mt-2 mb-3">
-<span class="text-lg font-black text-primary block">ظ،ظ¢.ظ¥ظ  ط±.ط³</span>
-</div>
-<div class="mt-auto space-y-2">
-<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-</button>
-<span class="text-xs font-bold">ظ،</span>
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-</button>
-</div>
-<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-base" data-icon="shopping_basket">shopping_basket</span>
-                        ط£ط¶ظپ
-                    </button>
-</div>
-</div>
-</div>
-<!-- Product Card 2: Cheese -->
-<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5">
-<div class="h-32 overflow-hidden relative">
-<img class="w-full h-full object-cover" data-alt="assorted artisan cheeses on a slate board" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ91-GHxUmQevibazZywxhq1ArNlv_TOuGvWRWpbUjzosm4NQb6mgeNzWez1-iyoctvKABRx3cIP7heTA5kMImx4QO-CNQj_YyBHNQuBon3FCXGet9t0qhgBhIGB-MA7A9Q00ZNXyYRnEg0MtfaUfDUc0lyXodjXSckEs7NgjNFnKW_jZaO-KjlMpfgtNo7Mzn9CyW7pqK6Umsl88zd_N7bEg7EtU9jJaKg13L1e9rg7xUT9g2Kl9FYZA-1dOGFmMurZnT0J8Rbqqf"/>
-</div>
-<div class="p-3 flex flex-col flex-grow">
-<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">ط¬ط¨ظ†ط© ظپظٹطھط§ ظٹظˆظ†ط§ظ†ظٹط© ط£طµظٹظ„ط©</h3>
-<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">ظ¥ظ ظ  ط¬ظ…</span>
-<div class="mt-2 mb-3">
-<span class="text-lg font-black text-primary block">ظ¢ظ¤.ظ ظ  ط±.ط³</span>
-</div>
-<div class="mt-auto space-y-2">
-<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-</button>
-<span class="text-xs font-bold">ظ </span>
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-</button>
-</div>
-<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-base" data-icon="shopping_basket">shopping_basket</span>
-                        ط£ط¶ظپ
-                    </button>
-</div>
-</div>
-</div>
-<!-- Product Card 3: Yogurt -->
-<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5">
-<div class="h-32 overflow-hidden relative">
-<img class="w-full h-full object-cover" data-alt="creamy greek yogurt in a ceramic bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_Sqm4XJMaZK_JZcapqEhbSiLPksj6ss6RC4D6KqrTG9QDSEb2m5WAVaF-VFn45Jr_H-5Y52DaEdmOUiA8AR1-HCRnNXDC_3vq08G1DRCj5BAQyCS6qEyiC_tuFzrvFM8J_xFfRsBLB2iLhiLVfGNiB-uofdMcOOHwUclrJu6GkPQvkQKv0--8uD4_zjJBQFLX-w2xi1qc5YIp1xmN8qdW3K-_8UbdyzcAZ3S2Pyummr2PpCqIMpKHz2NLfvLLArMVJFJDa1JoMjOw"/>
-<div class="absolute top-2 right-2 bg-tertiary text-on-tertiary text-[8px] font-bold px-2 py-0.5 rounded-full">ط§ظ„ط£ظƒط«ط± ظ…ط¨ظٹط¹ط§ظ‹</div>
-</div>
-<div class="p-3 flex flex-col flex-grow">
-<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">ط²ط¨ط§ط¯ظٹ ظٹظˆظ†ط§ظ†ظٹ ط³ط§ط¯ط©</h3>
-<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">ظ،ظ§ظ  ط¬ظ…</span>
-<div class="mt-2 mb-3">
-<span class="text-lg font-black text-primary block">ظ¥.ظ§ظ¥ ط±.ط³</span>
-</div>
-<div class="mt-auto space-y-2">
-<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-</button>
-<span class="text-xs font-bold">ظ¢</span>
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-</button>
-</div>
-<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-base" data-icon="shopping_basket">shopping_basket</span>
-                        ط£ط¶ظپ
-                    </button>
-</div>
-</div>
-</div>
-<!-- Product Card 4: Butter -->
-<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5">
-<div class="h-32 overflow-hidden relative">
-<img class="w-full h-full object-cover" data-alt="block of farm fresh golden butter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSwnVC0_zhGsc1gqKwH231ArdUb1HsXiKpC0GUugaTeIIrou5lqSR-quRMdDpUCp-Dr5q0KCg1LAWFPFxrN3VCD-pC6Duq8TbFsicr0OgF-tI9_DYJgfTvxNiF2tgQeQWvpu6Jky_kgkIKp8Xdy-WKB-xx3md9hF4sekwRMsR4fhjVQwtET62C8o1mPE9DM0kteXt3_-K6yvLidcaGtWlm8zOfqK1dL_PRc1NcFxc70Be7eCkNbDRP8J6IIzM7UfPNFrGwelOhdVvF"/>
-</div>
-<div class="p-3 flex flex-col flex-grow">
-<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">ط²ط¨ط¯ط© ط·ط¨ظٹط¹ظٹط© ط؛ظٹط± ظ…ظ…ظ„ط­ط©</h3>
-<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">ظ¢ظ ظ  ط¬ظ…</span>
-<div class="mt-2 mb-3">
-<span class="text-lg font-black text-primary block">ظ،ظ¨.ظ¥ظ  ط±.ط³</span>
-</div>
-<div class="mt-auto space-y-2">
-<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-</button>
-<span class="text-xs font-bold">ظ،</span>
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-</button>
-</div>
-<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-base" data-icon="shopping_basket">shopping_basket</span>
-                        ط£ط¶ظپ
-                    </button>
-</div>
-</div>
-</div>
-<!-- Product Card 5: Labneh -->
-<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5">
-<div class="h-32 overflow-hidden relative">
-<img class="w-full h-full object-cover" data-alt="traditional labneh bowl drizzled with olive oil" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsJcipeAFAqHkhFKgZ46__q-aDzrqIHcohcPJfzq01gqHWdkWqaA3TeFOgGbecIVjSTNvjXknxRWMUT1XT0CTfMZpzEOexYJtFSzRmmIgfQkpF6LZylx40Em0yewAxsFMyQGIBK-P-idemTc11JSNezN-GC5rqTMtoNRdAhWQhCePlBptg0emgW0-E6mKBR_xZn4jY1wqaqgMYkUqnpUxfzhr_iECeyfW9Irr73fwl3IXLmFSnbBlj0GWdVGWR-7ySW5dQPKdok40G"/>
-</div>
-<div class="p-3 flex flex-col flex-grow">
-<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">ظ„ط¨ظ†ط© ط¨ظ„ط¯ظٹط© ط·ط§ط²ط¬ط©</h3>
-<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">ظ¤ظ ظ  ط¬ظ…</span>
-<div class="mt-2 mb-3">
-<span class="text-lg font-black text-primary block">ظ،ظ¥.ظ ظ  ط±.ط³</span>
-</div>
-<div class="mt-auto space-y-2">
-<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-</button>
-<span class="text-xs font-bold">ظ </span>
-<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-</button>
-</div>
-<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-base" data-icon="shopping_basket">shopping_basket</span>
-                        ط£ط¶ظپ
-                    </button>
-</div>
-</div>
-</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 px-2" data-category-products-grid>
+<div class="col-span-full bg-surface-container-lowest rounded-2xl p-6 text-center text-sm text-on-surface-variant border border-outline/10">???? ????? ?????? ?????...</div>
 </div>
 </main>
 <!-- Floating Action Button (Cart Quick View) -->
 <div class="fixed bottom-28 left-6 z-40">
 <button class="bg-primary text-on-primary w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform animate-bounce-short">
 <span class="material-symbols-outlined text-2xl" data-icon="shopping_bag">shopping_bag</span>
-<span class="absolute -top-1 -right-1 bg-secondary text-on-secondary text-[10px] w-6 h-6 rounded-full flex items-center justify-center border-2 border-surface">ظ¤</span>
+<span class="absolute -top-1 -right-1 bg-secondary text-on-secondary text-[10px] w-6 h-6 rounded-full hidden items-center justify-center border-2 border-surface">٠</span>
 </button>
 </div>
 <!-- Bottom Navigation Bar -->
 <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط±ط¦ظٹط³ظٹط©</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
 </a>
 <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
 <span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط£ظ‚ط³ط§ظ…</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط·ظ„ط¨ط§طھظٹ</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <div class="relative">
 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">ظ </span>
+<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
 </div>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط³ظ„ط©</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط­ط³ط§ط¨ظٹ</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
 </a>
 </nav>
 <script>
@@ -473,7 +395,7 @@
     var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
     var categoryNameNode = document.querySelector('nav .font-bold.text-primary');
     var headerTitleNode = document.querySelector('h2.font-tajawal.font-extrabold');
-    var productsGrid = document.querySelector('.grid.grid-cols-2.gap-3.px-2');
+    var productsGrid = document.querySelector('[data-category-products-grid]');
     var quickCartBadge = document.querySelector('.fixed.bottom-28 .absolute');
     var state = {
       categories: [],
@@ -485,7 +407,7 @@
     var routeSelectedCategoryId = '';
 
     function toArabicNumber(value) {
-      var map = ['ظ ', 'ظ،', 'ظ¢', 'ظ£', 'ظ¤', 'ظ¥', 'ظ¦', 'ظ§', 'ظ¨', 'ظ©'];
+      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
       return String(value).replace(/[0-9]/g, function (digit) {
         return map[Number(digit)] || digit;
       });
@@ -530,9 +452,9 @@
     }
     function currencyLabel(currency) {
       var code = String(currency || '').toUpperCase();
-      if (code === 'SAR') return '?.?';
-      if (code === 'SYP') return '?.?';
-      return code || '?.?';
+      if (code === 'SAR') return 'ر.س';
+      if (code === 'SYP') return 'ل.س';
+      return code || 'ل.س';
     }
 
     function applyStore(storePayload) {
@@ -578,7 +500,27 @@
       var category = state.categories.find(function (item) {
         return item.id === categoryId;
       });
-      return category ? category.nameAr : 'ط§ظ„طھطµظ†ظٹظپ';
+      return category ? category.nameAr : 'التصنيف';
+    }
+
+    function hasActiveOffer(product) {
+      if (!product || typeof product !== 'object') return false;
+      var hasDiscount = product.hasDiscount;
+      if (hasDiscount === true || hasDiscount === 1 || hasDiscount === 'true') return true;
+      var original = Math.max(0, Number(product.originalPrice || 0));
+      var finalPrice = Math.max(0, Number(product.price || 0));
+      return original > finalPrice && finalPrice > 0;
+    }
+
+    function offerBadgeLabel(product) {
+      var discount = product && product.discount ? product.discount : null;
+      if (!discount) return 'عرض';
+      var type = String(discount.type || '').toUpperCase();
+      var value = Math.max(0, Number(discount.value || 0));
+      if (type === 'PERCENT') {
+        return 'خصم ' + value + '%';
+      }
+      return 'خصم ' + formatSar(value);
     }
 
     function renderHeader() {
@@ -597,56 +539,69 @@
 
       if (!filtered.length) {
         productsGrid.innerHTML =
-          '<div class="col-span-2 bg-surface-container-lowest rounded-2xl p-6 text-center text-sm text-on-surface-variant border border-outline/10">ظ„ط§ طھظˆط¬ط¯ ظ…ظ†طھط¬ط§طھ ظپظٹ ظ‡ط°ط§ ط§ظ„طھطµظ†ظٹظپ ط­ط§ظ„ظٹط§ظ‹.</div>';
+          '<div class="col-span-full bg-surface-container-lowest rounded-2xl p-6 text-center text-sm text-on-surface-variant border border-outline/10">لا توجد منتجات في هذا التصنيف حالياً.</div>';
         return;
       }
 
       productsGrid.innerHTML = filtered
         .map(function (product) {
           var qty = Math.max(0, Number(state.qtyByProduct[product.id]) || 0);
+          var finalPrice = Math.max(0, Number(product && product.price ? product.price : 0));
+          var originalPrice = Math.max(0, Number(product && product.originalPrice ? product.originalPrice : 0));
+          var showOriginalPrice = originalPrice > finalPrice && finalPrice > 0;
+          var hasOffer = hasActiveOffer(product);
+
           return (
-            '<div class="bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5" data-open-product="' +
+            '<div class="product-card bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col shadow-sm border border-outline/5" data-open-product="' +
             escapeHtml(product.id) +
             '">' +
             '<div class="h-32 overflow-hidden relative">' +
+            (hasOffer
+              ? '<div class="offer-badge absolute top-2 right-2">' + escapeHtml(offerBadgeLabel(product)) + '</div>'
+              : '') +
             (product.imageUrl
               ? '<img class="w-full h-full object-cover" alt="' +
-                escapeHtml(product.name || 'ظ…ظ†طھط¬') +
+                escapeHtml(product.name || 'منتج') +
                 '" src="' +
                 escapeHtml(product.imageUrl) +
                 '"/>'
               : '<div class="w-full h-full flex items-center justify-center text-primary/60 bg-surface-container"><span class="material-symbols-outlined text-3xl">inventory_2</span></div>') +
             '</div>' +
-            '<div class="p-3 flex flex-col flex-grow">' +
+            '<div class="p-3 flex flex-col flex-grow product-card-body">' +
             '<h3 class="font-tajawal font-bold text-sm line-clamp-2 min-h-[2.5rem]">' +
-            escapeHtml(product.name || 'ظ…ظ†طھط¬') +
+            escapeHtml(product.name || 'منتج') +
             '</h3>' +
             '<span class="text-tertiary-dim text-[10px] font-bold mt-0.5">' +
             escapeHtml(product.unit || '') +
             '</span>' +
-            '<div class="mt-2 mb-3"><span class="text-lg font-black text-primary block">' +
-            formatSar(product.price) +
-            '</span></div>' +
+            '<div class="price-row">' +
+            '<span class="text-lg font-black text-primary block">' +
+            formatSar(finalPrice) +
+            '</span>' +
+            (showOriginalPrice
+              ? '<span class="price-before">' + formatSar(originalPrice) + '</span>'
+              : '') +
+            '</div>' +
             '<div class="mt-auto space-y-2">' +
-            '<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">' +
-            '<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors" data-action="minus" data-product-id="' +
+            '<div class="qty-control">' +
+            '<button class="qty-btn text-primary hover:bg-primary-container transition-colors" data-action="minus" data-product-id="' +
             escapeHtml(product.id) +
             '">' +
             '<span class="material-symbols-outlined text-sm">remove</span></button>' +
-            '<span class="text-xs font-bold" data-qty-for="' +
+            '<span class="qty-value text-xs" data-qty-for="' +
             escapeHtml(product.id) +
             '">' +
             toArabicNumber(qty) +
             '</span>' +
-            '<button class="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors" data-action="plus" data-product-id="' +
+            '<button class="qty-btn text-primary hover:bg-primary-container transition-colors" data-action="plus" data-product-id="' +
             escapeHtml(product.id) +
             '">' +
             '<span class="material-symbols-outlined text-sm">add</span></button>' +
             '</div>' +
-            '<button class="w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform" data-action="add" data-product-id="' +
+            '<button class="add-btn w-full bg-secondary-container text-on-secondary-container text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform" data-action="add" data-product-id="' +
             escapeHtml(product.id) +
             '">' +
-            '<span class="material-symbols-outlined text-base">shopping_basket</span>ط£ط¶ظپ</button>' +
+            '<span class="material-symbols-outlined text-base">shopping_basket</span>أضف</button>' +
             '</div>' +
             '</div>' +
             '</div>'

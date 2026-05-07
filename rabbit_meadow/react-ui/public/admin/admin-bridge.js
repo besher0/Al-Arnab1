@@ -19,6 +19,22 @@
     );
   }
 
+  function fallbackHashNavigate(to) {
+    if (!to || typeof to !== 'string') return;
+
+    try {
+      if (!window.parent || window.parent === window) return;
+      if (!window.parent.location || window.parent.location.origin !== window.location.origin) return;
+
+      var normalized = to.charAt(0) === '#' ? to : '#' + to;
+      if (window.parent.location.hash !== normalized) {
+        window.parent.location.hash = normalized;
+      }
+    } catch (error) {
+      // Ignore fallback failures and keep postMessage navigation.
+    }
+  }
+
   function getToken() {
     try {
       return window.localStorage.getItem(USER_TOKEN_KEY) || '';
@@ -62,6 +78,7 @@
     if (!to) return;
 
     event.preventDefault();
+    fallbackHashNavigate(to);
     send('navigate', { to: to });
   }
 
@@ -221,7 +238,9 @@
 
     if (
       file === 'add-product.html' ||
-      file === 'new-discount.html'
+      file === 'new-discount.html' ||
+      file === 'products-list.html' ||
+      file === 'discounts-list.html'
     ) {
       return 'stock';
     }
@@ -255,7 +274,7 @@
       '<button class="nav-item" data-footer-key="categories" data-route="/admin/categories/new">',
       '<span class="material-symbols-outlined nav-icon">category</span>التصنيفات',
       '</button>',
-      '<button class="nav-item" data-footer-key="stock" data-route="/admin/products/new">',
+      '<button class="nav-item" data-footer-key="stock" data-route="/admin/products">',
       '<span class="material-symbols-outlined nav-icon">inventory_2</span>المخزون',
       '</button>',
       '<button class="nav-item" data-footer-key="reports" data-route="/admin/reports/sales">',
@@ -283,6 +302,7 @@
   window.AdminBridge = {
     init: init,
     go: function (to) {
+      fallbackHashNavigate(to);
       send('navigate', { to: to });
     },
     send: send,

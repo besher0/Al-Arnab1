@@ -3,7 +3,7 @@
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>طھظپط§طµظٹظ„ ط§ظ„ظ…ظ†طھط¬ - ط§ظ„ط£ط±ظ†ط¨</title>
+<title>تفاصيل المنتج - الأرنب</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&amp;family=Almarai:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -153,6 +153,70 @@
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
         }
 
+        .price-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 10px 14px;
+          border-radius: 16px;
+          border: 1px solid rgba(158, 199, 232, 0.52);
+          background: #f7fbff;
+          flex: 1 1 250px;
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        .price-before {
+          font-size: 0.9rem;
+          color: #7b8ea6;
+          text-decoration: line-through;
+        }
+
+        .discount-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          padding: 6px 10px;
+          font-size: 0.78rem;
+          font-weight: 800;
+          background: rgba(239, 68, 68, 0.14);
+          color: #c12b2b;
+          white-space: nowrap;
+          flex: 0 0 auto;
+        }
+
+        .offer-details {
+          margin-top: 14px;
+          border-radius: 14px;
+          border: 1px dashed rgba(158, 199, 232, 0.8);
+          background: #fafdff;
+          padding: 10px 12px;
+        }
+
+        .offer-details-title {
+          font-size: 0.94rem;
+          font-weight: 800;
+          color: #1a365d;
+        }
+
+        .offer-details-meta {
+          margin-top: 4px;
+          font-size: 0.82rem;
+          color: #4f6c8d;
+          line-height: 1.7;
+          white-space: pre-line;
+        }
+
+        .price-summary {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
         .product-action-bar {
           width: min(var(--page-max-width), 100%);
           left: 50%;
@@ -208,6 +272,19 @@
             padding-bottom: calc(var(--bottom-nav-height) + 136px);
           }
 
+          .price-summary {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .price-badge {
+            width: 100%;
+          }
+
+          .discount-pill {
+            align-self: flex-start;
+          }
+
           .product-action-bar {
             border-inline: 0;
             border-radius: 22px 22px 0 0;
@@ -229,7 +306,7 @@
 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
 </div>
-<h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">ط§ظ„ط£ط±ظ†ط¨</h1>
+<h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
 </div>
 <div class="flex items-center gap-2">
 <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
@@ -240,17 +317,25 @@
 <main class="pt-24 pb-64">
 <!-- Hero Section: Large Product Image -->
 <div class="w-full aspect-square relative">
-<img alt="ط·ظ…ط§ط·ظ… ظƒط±ط²ظٹط© ط­ظ…ط±ط§ط،" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9MJeVFPP9pMzvyD2_1KEauuqKB25Nm9kjENaBe0gJZPdtmkA4uR_Ux4ME62LVKD9T5DxMhicYkmCxgcvCsAJpfcISa6gVzBkUJVdnN6gl6zOO0UcCh90U1pzvF82xfgY6NzMAIjSYXChLOdA-BDw92lnxJz4QSeNZ-TpknjjCL871OSlDEQI4Dpol-H6W9X1C6lUMvT9opoRiCTjeyI-R7tmIaJA24gtrlSBrjVX7WvMbQybSBBm9yb6YE24V3wAWUTIi5s4ECgc"/>
+<img alt="طماطم كرزية حمراء" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9MJeVFPP9pMzvyD2_1KEauuqKB25Nm9kjENaBe0gJZPdtmkA4uR_Ux4ME62LVKD9T5DxMhicYkmCxgcvCsAJpfcISa6gVzBkUJVdnN6gl6zOO0UcCh90U1pzvF82xfgY6NzMAIjSYXChLOdA-BDw92lnxJz4QSeNZ-TpknjjCL871OSlDEQI4Dpol-H6W9X1C6lUMvT9opoRiCTjeyI-R7tmIaJA24gtrlSBrjVX7WvMbQybSBBm9yb6YE24V3wAWUTIi5s4ECgc"/>
 <button class="absolute top-6 right-6 bg-white/80 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center text-on-surface active:scale-90 transition-transform shadow-sm">
 <span class="material-symbols-outlined">arrow_forward</span>
 </button>
 </div>
 <!-- Product Content -->
 <div class="mt-8 px-6 text-center">
-<h1 class="font-headline text-4xl font-black text-on-surface tracking-tight">ط·ظ…ط§ط·ظ… ظƒط±ط²ظٹط© ط­ظ…ط±ط§ط،</h1>
-<p class="font-body text-on-surface-variant mt-2 text-lg">ظ…ط²ط§ط±ط¹ ط§ظ„ظ‚طµظٹظ… ط§ظ„ظ…ط­ظ„ظٹط©</p>
-<div class="mt-6 inline-block bg-surface px-6 py-3 rounded-2xl">
-<span class="font-headline text-3xl font-bold text-on-surface">ظ،ظ¤.ظ¥ظ  ط±.ط³</span>
+<h1 class="font-headline text-4xl font-black text-on-surface tracking-tight">طماطم كرزية حمراء</h1>
+<p class="font-body text-on-surface-variant mt-2 text-lg">مزارع القصيم المحلية</p>
+<div class="mt-6 price-summary">
+<div class="price-badge">
+<span id="product-current-price" class="font-headline text-3xl font-bold text-on-surface">٤.٥٠ ر.س</span>
+<span id="product-original-price" class="price-before" style="display:none">٥.٩٠ ر.س</span>
+</div>
+<span id="product-discount-pill" class="discount-pill" style="display:none">خصم</span>
+</div>
+<div id="product-offer-details" class="offer-details" style="display:none">
+<div id="product-offer-title" class="offer-details-title">عرض خاص</div>
+<p id="product-offer-meta" class="offer-details-meta">قبل: - | بعد: -</p>
 </div>
 </div>
 </main>
@@ -261,7 +346,7 @@
 <button class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
 <span class="material-symbols-outlined font-bold">add</span>
 </button>
-<span class="font-headline font-bold text-lg text-on-surface">ظ،</span>
+<span class="font-headline font-bold text-lg text-on-surface">١</span>
 <button class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
 <span class="material-symbols-outlined font-bold">remove</span>
 </button>
@@ -269,33 +354,33 @@
 <!-- Large Add to Cart Button -->
 <button class="w-full bg-primary text-on-primary h-12 rounded-full flex items-center justify-center gap-2 font-headline font-bold text-base shadow-lg active:scale-[0.98] transition-all">
 <span class="material-symbols-outlined">shopping_cart</span>
-            ط£ط¶ظپ ظ„ظ„ط³ظ„ط©
+            أضف للسلة
         </button>
 </div>
 <!-- BottomNavBar -->
 <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط±ط¦ظٹط³ظٹط©</span>
+<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
 </a>
 <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
 <span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط£ظ‚ط³ط§ظ…</span>
+<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط·ظ„ط¨ط§طھظٹ</span>
+<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <div class="relative">
 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">ظ </span>
+<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
 </div>
-<span class="font-label text-[11px] font-semibold mt-1">ط§ظ„ط³ظ„ط©</span>
+<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
 </a>
 <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
 <span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-label text-[11px] font-semibold mt-1">ط­ط³ط§ط¨ظٹ</span>
+<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
 </a>
 </nav>
 <script>
@@ -315,7 +400,12 @@
     var heroImage = document.querySelector('main .aspect-square img');
     var titleNode = document.querySelector('main h1.font-headline');
     var subtitleNode = document.querySelector('main p.font-body');
-    var priceNode = document.querySelector('main span.font-headline.text-3xl');
+    var currentPriceNode = document.getElementById('product-current-price');
+    var originalPriceNode = document.getElementById('product-original-price');
+    var discountPillNode = document.getElementById('product-discount-pill');
+    var offerDetailsNode = document.getElementById('product-offer-details');
+    var offerTitleNode = document.getElementById('product-offer-title');
+    var offerMetaNode = document.getElementById('product-offer-meta');
     var qtyNode = document.querySelector('.product-action-bar span.font-headline');
     var state = {
       products: [],
@@ -326,15 +416,15 @@
     };
 
     function toArabicNumber(value) {
-      var map = ['ظ ', 'ظ،', 'ظ¢', 'ظ£', 'ظ¤', 'ظ¥', 'ظ¦', 'ظ§', 'ظ¨', 'ظ©'];
+      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
       return String(value).replace(/[0-9]/g, function (digit) {
         return map[Number(digit)] || digit;
       });
     }
 
     function parseArabicNumber(value) {
-      var map = { 'ظ ': '0', 'ظ،': '1', 'ظ¢': '2', 'ظ£': '3', 'ظ¤': '4', 'ظ¥': '5', 'ظ¦': '6', 'ظ§': '7', 'ظ¨': '8', 'ظ©': '9' };
-      var normalized = (value || '').replace(/[ظ -ظ©]/g, function (digit) {
+      var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+      var normalized = (value || '').replace(/[٠-٩]/g, function (digit) {
         return map[digit] || digit;
       });
       var parsed = parseInt(normalized, 10);
@@ -342,9 +432,9 @@
     }
     function currencyLabel(currency) {
       var code = String(currency || '').toUpperCase();
-      if (code === 'SAR') return '?.?';
-      if (code === 'SYP') return '?.?';
-      return code || '?.?';
+      if (code === 'SAR') return 'ر.س';
+      if (code === 'SYP') return 'ل.س';
+      return code || 'ل.س';
     }
 
     function applyStore(storePayload) {
@@ -354,6 +444,74 @@
 
     function formatSar(value) {
       return (Math.max(0, Number(value) || 0)).toFixed(2) + ' ' + currencyLabel(state.currency);
+    }
+
+    function formatDiscountLabel(product) {
+      var discount = product && product.discount ? product.discount : null;
+      if (!discount) return 'عرض خاص';
+
+      var type = String(discount.type || '').toUpperCase();
+      var value = Math.max(0, Number(discount.value || 0));
+      if (type === 'PERCENT') {
+        return 'خصم ' + value + '%';
+      }
+
+      return 'خصم ' + formatSar(value);
+    }
+
+    function renderOfferDetails(product) {
+      var finalPrice = Math.max(0, Number(product && product.price ? product.price : 0));
+      var originalPrice = Math.max(0, Number(product && product.originalPrice ? product.originalPrice : 0));
+      var hasDiscountFlag = Boolean(product && (product.hasDiscount === true || product.hasDiscount === 1 || product.hasDiscount === 'true'));
+      var hasPriceDelta = originalPrice > finalPrice && finalPrice > 0;
+      var hasOffer = hasDiscountFlag || hasPriceDelta;
+
+      if (currentPriceNode) {
+        currentPriceNode.textContent = formatSar(finalPrice);
+      }
+
+      if (originalPriceNode) {
+        if (hasPriceDelta) {
+          originalPriceNode.style.display = '';
+          originalPriceNode.textContent = formatSar(originalPrice);
+        } else {
+          originalPriceNode.style.display = 'none';
+          originalPriceNode.textContent = '';
+        }
+      }
+
+      if (discountPillNode) {
+        if (hasOffer) {
+          discountPillNode.style.display = 'inline-flex';
+          discountPillNode.textContent = formatDiscountLabel(product);
+        } else {
+          discountPillNode.style.display = 'none';
+          discountPillNode.textContent = '';
+        }
+      }
+
+      if (!offerDetailsNode || !offerTitleNode || !offerMetaNode) {
+        return;
+      }
+
+      if (!hasOffer) {
+        offerDetailsNode.style.display = 'none';
+        offerTitleNode.textContent = 'عرض خاص';
+        offerMetaNode.textContent = '';
+        return;
+      }
+
+      var discount = product && product.discount ? product.discount : null;
+      var savings = Math.max(0, originalPrice - finalPrice);
+      offerDetailsNode.style.display = '';
+      offerTitleNode.textContent = discount && discount.title ? discount.title : 'عرض خاص على هذا المنتج';
+      offerMetaNode.textContent =
+        'السعر قبل الخصم: ' +
+        formatSar(originalPrice || finalPrice) +
+        '\nالسعر بعد الخصم: ' +
+        formatSar(finalPrice) +
+        '\nالتوفير: ' +
+        formatSar(savings);
     }
     function setFooterCartCount(count) {
       var next = Math.max(0, Number(count) || 0);
@@ -399,26 +557,27 @@
     function renderProductDetails() {
       var product = getSelectedProduct();
       if (!product) {
-        if (titleNode) titleNode.textContent = 'ظ…ظ†طھط¬ ط؛ظٹط± ظ…طھظˆظپط±';
-        if (subtitleNode) subtitleNode.textContent = 'طھط¹ط°ط± طھط­ظ…ظٹظ„ طھظپط§طµظٹظ„ ط§ظ„ظ…ظ†طھط¬';
-        if (priceNode) priceNode.textContent = formatSar(0);
+        if (titleNode) titleNode.textContent = 'منتج غير متوفر';
+        if (subtitleNode) subtitleNode.textContent = 'تعذر تحميل تفاصيل المنتج';
+        if (currentPriceNode) currentPriceNode.textContent = formatSar(0);
+        if (originalPriceNode) originalPriceNode.style.display = 'none';
+        if (discountPillNode) discountPillNode.style.display = 'none';
+        if (offerDetailsNode) offerDetailsNode.style.display = 'none';
         return;
       }
 
       if (heroImage) {
-        heroImage.alt = product.name || 'ظ…ظ†طھط¬';
+        heroImage.alt = product.name || 'منتج';
         if (product.imageUrl) {
           heroImage.src = product.imageUrl;
         }
       }
 
-      if (titleNode) titleNode.textContent = product.name || 'ظ…ظ†طھط¬';
+      if (titleNode) titleNode.textContent = product.name || 'منتج';
       if (subtitleNode) {
-        subtitleNode.textContent = product.categoryName || product.description || 'ظ…ظ†طھط¬ ط·ط§ط²ط¬ ظ…ظ† ط§ظ„ط£ط±ظ†ط¨';
+        subtitleNode.textContent = product.categoryName || product.description || 'منتج طازج من الأرنب';
       }
-      if (priceNode) {
-        priceNode.textContent = formatSar(product.price);
-      }
+      renderOfferDetails(product);
 
       window.localStorage.setItem(STORAGE_PRODUCT, product.id);
       if (product.categoryId) {
@@ -493,13 +652,12 @@
     }
 
     var addButton = Array.from(document.querySelectorAll('button')).find(function (button) {
-      return (button.textContent || '').indexOf('ط£ط¶ظپ ظ„ظ„ط³ظ„ط©') !== -1;
+      return (button.textContent || '').indexOf('أضف للسلة') !== -1;
     });
     if (addButton) {
       addButton.addEventListener('click', function () {
         if (!state.selectedProductId) return;
         send('add-item', { id: state.selectedProductId, qty: state.qty });
-        send('navigate', { to: '/cart' });
       });
     }
 

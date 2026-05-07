@@ -71,6 +71,7 @@ function normalizeCartResponse(cartResponse) {
         name: String(item?.name || ''),
         nameEn: item?.nameEn ? String(item.nameEn) : '',
         imageUrl: item?.imageUrl ? String(item.imageUrl) : '',
+        unit: item?.unit ? String(item.unit) : '',
         price,
         qty,
         total,
@@ -343,7 +344,7 @@ export function ShopProvider({ children }) {
   }, [token])
 
   const checkoutOrder = useCallback(
-    async ({ latitude, longitude }) => {
+    async ({ latitude, longitude, itemNotes }) => {
       if (!token) {
         throw new Error('يجب تسجيل الدخول أولاً.')
       }
@@ -358,6 +359,7 @@ export function ShopProvider({ children }) {
       const checkoutPayload = {
         latitude: lat,
         longitude: lng,
+        ...(itemNotes && typeof itemNotes === 'object' ? { itemNotes } : {}),
       }
 
       const checkoutResponse = await api.cart.checkout(token, checkoutPayload)

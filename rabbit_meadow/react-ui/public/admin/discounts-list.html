@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>كل العروض</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+    <style>
+      .offers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .offer-card {
+        background: #fff;
+        border: 1px solid #e4edf6;
+        border-radius: 24px;
+        padding: 14px;
+      }
+
+      .offer-title {
+        font-size: 19px;
+        font-weight: 900;
+        color: var(--admin-primary-deep);
+      }
+
+      .offer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+
+      .offer-meta {
+        font-size: 12px;
+        color: var(--admin-muted);
+      }
+
+      .offer-value {
+        font-weight: 900;
+        color: #58b5de;
+      }
+
+      .offer-targets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .offer-target-chip {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        background: #e8f4fd;
+        color: var(--admin-primary-deep);
+      }
+
+      .offer-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .offer-action-btn {
+        border: 0;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        background: #e8f4fd;
+        color: var(--admin-primary-deep);
+      }
+
+      .offers-feedback {
+        min-height: 16px;
+      }
+
+      .offers-feedback.is-error {
+        color: var(--admin-danger);
+      }
+
+      .offers-feedback.is-success {
+        color: var(--admin-success);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="admin-shell admin-compact">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title" style="font-size: 26px">كل العروض</h1>
+            <p class="page-subtitle">مراجعة العروض الفعّالة والقادمة والمنتهية</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="container stack">
+        <section class="hero">
+          <h2>إدارة العروض</h2>
+          <p>شاهد كل الخصومات في المتجر، حالتها الزمنية، وما هي الأهداف المرتبطة بها.</p>
+        </section>
+
+        <section class="card stack">
+          <div class="grid-2">
+            <label>
+              <div class="label">بحث</div>
+              <input id="offers-search" class="input-field" type="text" placeholder="ابحث بعنوان العرض..." />
+            </label>
+            <label>
+              <div class="label">الحالة</div>
+              <select id="offers-status-filter" class="select-field">
+                <option value="all">الكل</option>
+                <option value="active">فعّال الآن</option>
+                <option value="upcoming">قادم</option>
+                <option value="expired">منتهي</option>
+                <option value="inactive">غير مفعّل</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label>
+              <div class="label">نوع الخصم</div>
+              <select id="offers-type-filter" class="select-field">
+                <option value="all">الكل</option>
+                <option value="FIXED">مبلغ ثابت</option>
+                <option value="PERCENT">نسبة مئوية</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">الاستهداف</div>
+              <select id="offers-target-filter" class="select-field">
+                <option value="all">الكل</option>
+                <option value="PRODUCT">منتجات</option>
+                <option value="CATEGORY">تصنيفات</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="row">
+            <button id="offers-refresh" class="pill" type="button">تحديث</button>
+            <button class="pill active" data-route="/admin/discounts/new" type="button">إضافة عرض</button>
+          </div>
+
+          <div id="offers-feedback" class="tiny muted offers-feedback"></div>
+        </section>
+
+        <section id="offers-list" class="offers-list">
+          <article class="offer-card muted text-center">جاري تحميل العروض...</article>
+        </section>
+      </main>
+    </section>
+
+    <script src="/admin/admin-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.AdminBridge) return;
+
+        var searchInput = document.getElementById('offers-search');
+        var statusFilter = document.getElementById('offers-status-filter');
+        var typeFilter = document.getElementById('offers-type-filter');
+        var targetFilter = document.getElementById('offers-target-filter');
+        var refreshButton = document.getElementById('offers-refresh');
+        var offersList = document.getElementById('offers-list');
+        var feedbackNode = document.getElementById('offers-feedback');
+
+        var state = {
+          offers: [],
+          currency: 'SYP',
+        };
+
+        function setFeedback(message, isError) {
+          if (!feedbackNode) return;
+          feedbackNode.textContent = message || '';
+          feedbackNode.classList.toggle('is-error', Boolean(isError));
+          feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatNumber(value) {
+          var number = Number(value || 0);
+          return number.toLocaleString('ar-SA', { maximumFractionDigits: 2 });
+        }
+
+        function currencyLabel(currency) {
+          var code = String(currency || '').toUpperCase();
+          if (code === 'SAR') return 'ر.س';
+          if (code === 'SYP') return 'ل.س';
+          return code || 'ل.س';
+        }
+
+        function formatMoney(value) {
+          return formatNumber(value) + ' ' + currencyLabel(state.currency);
+        }
+
+        function formatDateTime(dateValue) {
+          var date = new Date(dateValue || 0);
+          if (Number.isNaN(date.getTime())) return '-';
+          return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        }
+
+        function offerStatus(offer) {
+          var now = Date.now();
+          var startAt = new Date(offer && offer.startAt ? offer.startAt : 0).getTime();
+          var endAt = new Date(offer && offer.endAt ? offer.endAt : 0).getTime();
+
+          if (!offer || !offer.isActive) {
+            return { key: 'inactive', label: 'غير مفعّل', tagClass: 'danger' };
+          }
+
+          if (now < startAt) {
+            return { key: 'upcoming', label: 'قادم', tagClass: 'warning' };
+          }
+
+          if (now > endAt) {
+            return { key: 'expired', label: 'منتهي', tagClass: 'danger' };
+          }
+
+          return { key: 'active', label: 'فعّال الآن', tagClass: 'success' };
+        }
+
+        function discountText(offer) {
+          var type = String(offer && offer.type ? offer.type : '').toUpperCase();
+          var value = Number(offer && offer.value ? offer.value : 0);
+
+          if (type === 'PERCENT') {
+            return formatNumber(value) + '%';
+          }
+
+          return formatMoney(value);
+        }
+
+        function offerTypeLabel(type) {
+          if (String(type || '').toUpperCase() === 'PERCENT') {
+            return 'نسبة مئوية';
+          }
+          return 'مبلغ ثابت';
+        }
+
+        function targetTypeLabel(type) {
+          if (String(type || '').toUpperCase() === 'CATEGORY') {
+            return 'تصنيفات';
+          }
+          return 'منتجات';
+        }
+
+        function targetLabel(target) {
+          if (!target) return '-';
+          if (target.targetType === 'PRODUCT') {
+            return target.productName || target.productId || 'منتج';
+          }
+          return target.categoryName || target.categoryId || 'تصنيف';
+        }
+
+        function getFilteredOffers() {
+          var query = String((searchInput && searchInput.value) || '').trim().toLowerCase();
+          var statusValue = String((statusFilter && statusFilter.value) || 'all');
+          var typeValue = String((typeFilter && typeFilter.value) || 'all').toUpperCase();
+          var targetValue = String((targetFilter && targetFilter.value) || 'all').toUpperCase();
+
+          return state.offers.filter(function (offer) {
+            var title = String(offer && offer.title ? offer.title : '').toLowerCase();
+            var description = String(offer && offer.description ? offer.description : '').toLowerCase();
+
+            if (query && title.indexOf(query) === -1 && description.indexOf(query) === -1) {
+              return false;
+            }
+
+            var status = offerStatus(offer);
+            if (statusValue !== 'all' && status.key !== statusValue) {
+              return false;
+            }
+
+            if (typeValue !== 'ALL' && String(offer.type || '').toUpperCase() !== typeValue) {
+              return false;
+            }
+
+            if (targetValue !== 'ALL' && String(offer.targetType || '').toUpperCase() !== targetValue) {
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        function renderOffers() {
+          if (!offersList) return;
+
+          var offers = getFilteredOffers();
+          if (!offers.length) {
+            offersList.innerHTML = '<article class="offer-card muted text-center">لا توجد عروض مطابقة للفلاتر.</article>';
+            return;
+          }
+
+          offersList.innerHTML = offers
+            .map(function (offer) {
+              var status = offerStatus(offer);
+              var targets = Array.isArray(offer.targets) ? offer.targets : [];
+              var targetsHtml = targets.length
+                ? targets
+                    .slice(0, 8)
+                    .map(function (target) {
+                      return '<span class="offer-target-chip">' + escapeHtml(targetLabel(target)) + '</span>';
+                    })
+                    .join('')
+                : '<span class="offer-target-chip">لا توجد أهداف</span>';
+
+              return [
+                '<article class="offer-card">',
+                '  <div class="row">',
+                '    <h3 class="offer-title">' + escapeHtml(offer.title || 'عرض') + '</h3>',
+                '    <span class="tag ' + status.tagClass + '">' + status.label + '</span>',
+                '  </div>',
+                '  <div class="offer-row">',
+                '    <span class="offer-meta">نوع الخصم: ' + escapeHtml(offerTypeLabel(offer.type)) + '</span>',
+                '    <span class="offer-value">' + escapeHtml(discountText(offer)) + '</span>',
+                '  </div>',
+                '  <div class="offer-row">',
+                '    <span class="offer-meta">الاستهداف: ' + escapeHtml(targetTypeLabel(offer.targetType)) + '</span>',
+                '    <span class="offer-meta">عدد الأهداف: ' + escapeHtml(formatNumber((offer.targetIds || []).length)) + '</span>',
+                '  </div>',
+                '  <div class="offer-row">',
+                '    <span class="offer-meta">يبدأ: ' + escapeHtml(formatDateTime(offer.startAt)) + '</span>',
+                '    <span class="offer-meta">ينتهي: ' + escapeHtml(formatDateTime(offer.endAt)) + '</span>',
+                '  </div>',
+                (offer.description ? '  <div class="offer-meta" style="margin-top:8px">' + escapeHtml(offer.description) + '</div>' : ''),
+                '  <div class="offer-targets">' + targetsHtml + '</div>',
+                '  <div class="offer-actions">',
+                '    <button class="offer-action-btn" data-copy-target-ids="' + escapeHtml((offer.targetIds || []).join(',')) + '">نسخ المعرفات</button>',
+                '    <button class="offer-action-btn" data-route="/admin/discounts/new">إضافة عرض جديد</button>',
+                '  </div>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+
+          if (window.AdminBridge && typeof window.AdminBridge.bindRoutes === 'function') {
+            window.AdminBridge.bindRoutes(offersList);
+          }
+        }
+
+        async function loadStoreSettings() {
+          try {
+            var settings = await window.AdminBridge.apiRequest('/admin/settings/store');
+            state.currency = settings && settings.currency ? String(settings.currency) : state.currency;
+          } catch (error) {
+            // Keep default currency
+          }
+        }
+
+        async function loadOffers() {
+          setFeedback('جاري تحميل العروض...', false);
+          if (offersList) {
+            offersList.innerHTML = '<article class="offer-card muted text-center">جاري تحميل العروض...</article>';
+          }
+
+          try {
+            var offers = await window.AdminBridge.apiRequest('/admin/discounts');
+            state.offers = Array.isArray(offers) ? offers : [];
+            renderOffers();
+            setFeedback('تم تحميل ' + state.offers.length + ' عرض.', false);
+          } catch (error) {
+            state.offers = [];
+            renderOffers();
+            setFeedback('تعذر تحميل العروض. تأكد من تسجيل الدخول بحساب أدمن.', true);
+          }
+        }
+
+        document.addEventListener('click', function (event) {
+          var copyButton = event.target.closest('[data-copy-target-ids]');
+          if (!copyButton) return;
+
+          event.preventDefault();
+          var payload = String(copyButton.getAttribute('data-copy-target-ids') || '');
+          if (!payload) {
+            setFeedback('لا توجد معرفات لنسخها في هذا العرض.', true);
+            return;
+          }
+
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard
+              .writeText(payload)
+              .then(function () {
+                setFeedback('تم نسخ المعرفات.', false);
+              })
+              .catch(function () {
+                setFeedback('تعذر نسخ المعرفات. انسخها يدويًا: ' + payload, true);
+              });
+            return;
+          }
+
+          setFeedback('المتصفح لا يدعم النسخ التلقائي. انسخ يدويًا: ' + payload, true);
+        });
+
+        [searchInput, statusFilter, typeFilter, targetFilter].forEach(function (node) {
+          if (!node) return;
+          node.addEventListener('input', renderOffers);
+          node.addEventListener('change', renderOffers);
+        });
+
+        if (refreshButton) {
+          refreshButton.addEventListener('click', loadOffers);
+        }
+
+        Promise.resolve()
+          .then(loadStoreSettings)
+          .then(loadOffers);
+      })();
+    </script>
+  </body>
+</html>

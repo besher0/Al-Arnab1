@@ -6,6 +6,11 @@ import {
 } from '@nestjs/common';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
+import {
+  buildDiscountIndex,
+  DiscountIndex,
+  resolveBestDiscount,
+} from '../common/utils/discount.util';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
@@ -21,7 +26,10 @@ export class CartService {
 
   async getCart(userId: string) {
     const cart = await this.ensureActiveCart(userId);
-    const exchangeRate = await this.getExchangeRate();
+    const [exchangeRate, discountIndex] = await Promise.all([
+      this.getExchangeRate(),
+      this.getActiveDiscountIndex(),
+    ]);
 
     const fullCart = await this.prisma.cart.findUnique({
       where: { id: cart.id },
@@ -38,26 +46,48 @@ export class CartService {
     });
 
     const items = (fullCart?.items ?? []).map((item) => {
-      const price = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
-      const qty = decimalToNumber(item.qty);
+      const pricing = this.resolveCartItemPricing({
+        productId: item.productId,
+        categoryId: item.product.categoryId,
+        qty: item.qty,
+        unitPriceSnapshot: item.unitPriceSnapshot,
+      }, exchangeRate, discountIndex);
+
       return {
         id: item.productId,
         name: item.product.nameAr,
         nameEn: item.product.nameEn,
         imageUrl: item.product.imageUrl,
-        price,
-        qty,
-        total: roundTo2(price * qty),
+        unit: item.product.unit,
+        price: pricing.unitPrice,
+        originalPrice: pricing.baseUnitPrice,
+        qty: pricing.qty,
+        total: pricing.lineTotal,
+        hasDiscount: Boolean(pricing.discount),
+        discountAmount: pricing.lineDiscount,
+        discount: pricing.discount
+          ? {
+              id: pricing.discount.id,
+              title: pricing.discount.title,
+              type: pricing.discount.type,
+              value: pricing.discount.value,
+              targetType: pricing.discount.targetType,
+            }
+          : null,
       };
     });
 
     const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
     const subtotal = roundTo2(items.reduce((sum, item) => sum + item.total, 0));
+    const discountTotal = roundTo2(
+      items.reduce((sum, item) => sum + (Number(item.discountAmount) || 0), 0),
+    );
 
     return {
       items,
       itemCount: roundTo2(itemCount),
       subtotal,
+      discountTotal,
       cartId: cart.id,
     };
   }
@@ -269,7 +299,10 @@ export class CartService {
 
   async checkout(userId: string, payload: CheckoutCartDto) {
     return this.withDbRetry(async () => {
-      const exchangeRate = await this.getExchangeRate();
+      const [exchangeRate, discountIndex] = await Promise.all([
+        this.getExchangeRate(),
+        this.getActiveDiscountIndex(),
+      ]);
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { phone: true, isActive: true },
@@ -285,6 +318,7 @@ export class CartService {
 
       const latitude = this.normalizeCoordinate(payload.latitude, -90, 90, 'خط العرض');
       const longitude = this.normalizeCoordinate(payload.longitude, -180, 180, 'خط الطول');
+      const itemNotes = this.normalizeItemNotes(payload.itemNotes);
 
       const cart = await this.ensureActiveCart(userId);
       const cartWithItems = await this.prisma.cart.findUnique({
@@ -306,15 +340,25 @@ export class CartService {
         throw new BadRequestException('السلة فارغة. أضف منتجات أولاً.');
       }
 
-      const subtotal = roundTo2(
-        cartItems.reduce((sum, item) => {
-          const unitPrice = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
-          const qty = decimalToNumber(item.qty);
-          return sum + roundTo2(unitPrice * qty);
-        }, 0),
+      const pricedCartItems = cartItems.map((item) =>
+        this.resolveCartItemPricing(
+          {
+            productId: item.productId,
+            categoryId: item.product?.categoryId || '',
+            qty: item.qty,
+            unitPriceSnapshot: item.unitPriceSnapshot,
+          },
+          exchangeRate,
+          discountIndex,
+        ),
       );
 
-      const discountTotal = 0;
+      const subtotal = roundTo2(
+        pricedCartItems.reduce((sum, item) => sum + item.baseLineTotal, 0),
+      );
+      const discountTotal = roundTo2(
+        pricedCartItems.reduce((sum, item) => sum + item.lineDiscount, 0),
+      );
       const deliveryFee = 0;
       const total = roundTo2(subtotal - discountTotal + deliveryFee);
 
@@ -350,6 +394,7 @@ export class CartService {
           },
         });
 
+        const orderNotes = this.buildOrderNotes(cartItems, itemNotes);
         const order = await this.createOrderWithUniqueNumber(tx, {
           userId,
           addressId: address.id,
@@ -358,22 +403,20 @@ export class CartService {
           discountTotal,
           deliveryFee,
           total,
-          notes: 'تم إنشاء الطلب من واجهة العميل.',
+          notes: orderNotes,
         });
 
         await tx.orderItem.createMany({
-          data: cartItems.map((item) => {
-            const unitPrice = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
-            const qty = roundTo2(decimalToNumber(item.qty));
-            const lineTotal = roundTo2(unitPrice * qty);
+          data: cartItems.map((item, index) => {
+            const pricing = pricedCartItems[index];
 
             return {
               orderId: order.id,
               productId: item.productId,
               nameSnapshot: item.product?.nameAr || 'منتج',
-              unitPrice,
-              qty,
-              lineTotal,
+              unitPrice: pricing.unitPrice,
+              qty: pricing.qty,
+              lineTotal: pricing.lineTotal,
             };
           }),
         });
@@ -428,6 +471,56 @@ export class CartService {
         cart: await this.getCart(userId),
       };
     });
+  }
+
+  private resolveCartItemPricing(
+    item: {
+      productId: string;
+      categoryId: string;
+      qty: unknown;
+      unitPriceSnapshot: unknown;
+    },
+    exchangeRate: number,
+    discountIndex: DiscountIndex,
+  ) {
+    const qty = roundTo2(decimalToNumber(item.qty));
+    const baseUnitPrice = this.toDisplayPrice(item.unitPriceSnapshot, exchangeRate);
+    const resolvedDiscount = resolveBestDiscount(
+      baseUnitPrice,
+      item.productId,
+      item.categoryId,
+      discountIndex,
+    );
+    const unitPrice = resolvedDiscount ? resolvedDiscount.finalPrice : baseUnitPrice;
+    const lineTotal = roundTo2(unitPrice * qty);
+    const baseLineTotal = roundTo2(baseUnitPrice * qty);
+    const lineDiscount = roundTo2(Math.max(0, baseLineTotal - lineTotal));
+
+    return {
+      qty,
+      unitPrice,
+      baseUnitPrice,
+      lineTotal,
+      baseLineTotal,
+      lineDiscount,
+      discount: resolvedDiscount ? resolvedDiscount.discount : null,
+    };
+  }
+
+  private async getActiveDiscountIndex(): Promise<DiscountIndex> {
+    const now = new Date();
+    const activeDiscounts = await this.prisma.discount.findMany({
+      where: {
+        isActive: true,
+        startAt: { lte: now },
+        endAt: { gte: now },
+      },
+      include: {
+        targets: true,
+      },
+    });
+
+    return buildDiscountIndex(activeDiscounts);
   }
 
   private isDbConnectionError(error: unknown): boolean {
@@ -550,6 +643,52 @@ export class CartService {
     return Number(parsed.toFixed(7));
   }
 
+  private normalizeItemNotes(raw: unknown): Record<string, string> {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return {};
+    }
+
+    const entries = Object.entries(raw as Record<string, unknown>);
+    const normalized: Record<string, string> = {};
+
+    entries.forEach(([productId, note]) => {
+      const cleanProductId = String(productId || '').trim();
+      if (!cleanProductId) return;
+
+      const cleanNote = String(note || '').trim();
+      if (!cleanNote) return;
+
+      normalized[cleanProductId] = cleanNote.slice(0, 400);
+    });
+
+    return normalized;
+  }
+
+  private buildOrderNotes(
+    cartItems: Array<{
+      productId: string;
+      product: { nameAr: string } | null;
+    }>,
+    itemNotes: Record<string, string>,
+  ) {
+    const baseNote = 'تم إنشاء الطلب من واجهة العميل.';
+    const noteLines: string[] = [];
+
+    cartItems.forEach((item) => {
+      const note = itemNotes[item.productId];
+      if (!note) return;
+
+      const productName = item.product?.nameAr || 'منتج';
+      noteLines.push(`- ${productName}: ${note}`);
+    });
+
+    if (!noteLines.length) {
+      return baseNote;
+    }
+
+    return [baseNote, 'ملاحظات المنتجات:', ...noteLines].join('\n');
+  }
+
   private mapUserOrder(order: {
     id: string;
     orderNumber: string;
@@ -559,6 +698,7 @@ export class CartService {
     discountTotal: unknown;
     deliveryFee: unknown;
     total: unknown;
+    notes: string | null;
     address: {
       id: string;
       label: string | null;
@@ -603,6 +743,7 @@ export class CartService {
         deliveryFee: decimalToNumber(order.deliveryFee),
         total: decimalToNumber(order.total),
       },
+      notes: order.notes || null,
       itemCount,
       alternatePhone: order.address?.building || null,
       location: order.address

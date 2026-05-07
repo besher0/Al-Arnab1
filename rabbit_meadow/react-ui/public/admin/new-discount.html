@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
-<html dir="ltr" lang="en">
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Discount</title>
+    <title>إضافة عرض جديد</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
       rel="stylesheet"
@@ -14,154 +14,238 @@
     />
     <link href="/admin/admin.css" rel="stylesheet" />
     <style>
-      body {
-        direction: ltr;
+      .discount-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
       }
-      .admin-shell {
-        direction: ltr;
+
+      .discount-page-title {
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--admin-primary-deep);
       }
-      .label,
-      .page-title,
-      .section-title,
-      strong,
-      .muted {
-        font-family: 'Almarai', sans-serif;
+
+      .discount-value-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
-      .section-title {
-        font-size: 34px;
+
+      .discount-value-row .input-field {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .target-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+
+      .targets-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-height: 34px;
+      }
+
+      .target-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #e7f3fc;
+        color: var(--admin-primary-deep);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .target-chip button {
+        border: 0;
+        background: transparent;
+        color: #d73839;
+        font-size: 16px;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .hint-note {
+        font-size: 11px;
+        color: var(--admin-muted);
+        line-height: 1.6;
+      }
+
+      .saving-feedback {
+        min-height: 16px;
+      }
+
+      .saving-feedback.is-error {
+        color: var(--admin-danger);
+      }
+
+      .saving-feedback.is-success {
+        color: var(--admin-success);
       }
     </style>
   </head>
   <body>
-    <section class="admin-shell">
-      <header class="admin-header" style="direction: ltr">
-        <button class="icon-btn" data-route="/admin/dashboard" title="Back">
-          <span class="material-symbols-outlined">arrow_back</span>
+    <section class="admin-shell admin-compact">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+          <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
-          <div>
-            <h1 class="page-title" style="font-size: 42px">New Discount</h1>
+          <div class="discount-page-header">
+            <h1 class="discount-page-title">إضافة عرض جديد</h1>
           </div>
         </div>
-        <img
-          class="avatar"
-          src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=120&q=80"
-          alt="admin"
-        />
       </header>
 
-      <main class="container stack" style="direction: ltr">
-        <section class="card" style="border-style: dashed">
-          <div class="media-box" style="min-height: 220px; border: 0; background: transparent">
-            <div>
-              <div class="media-icon"><span class="material-symbols-outlined">add_photo_alternate</span></div>
-              <strong style="font-size: 34px; display: block">Upload Discount Banner</strong>
-              <p class="muted">PNG, JPG or WEBP (Max. 5MB)</p>
-            </div>
-          </div>
+      <main class="container stack">
+        <section class="hero">
+          <h2>صمّم عرضك</h2>
+          <p>أنشئ خصمًا فعّالًا على منتج أو تصنيف، وحدد قيمته وتاريخ بدايته ونهايته بدقة.</p>
         </section>
 
         <section class="card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">sell</span>
+            <h3 class="stock-section-title">تفاصيل العرض</h3>
+          </div>
+
           <label>
-            <div class="label">Offer Title</div>
-            <input id="discount-title" class="input-field" type="text" placeholder="e.g. Weekend Fresh Sale" />
+            <div class="label">عنوان العرض</div>
+            <input id="discount-title" class="input-field" type="text" placeholder="مثال: تخفيض نهاية الأسبوع" />
           </label>
 
           <label>
-            <div class="label">Discount Description</div>
-            <textarea id="discount-description" class="textarea-field" placeholder="Briefly describe the offer details..."></textarea>
-          </label>
-        </section>
-
-        <section class="card stack">
-          <div class="row" style="justify-content: flex-start; gap: 8px">
-            <span class="material-symbols-outlined" style="color: #66bcdf">shopping_basket</span>
-            <h3 style="font-size: 35px">Target Product</h3>
-          </div>
-
-          <div class="row soft-card" style="border-radius: 999px">
-            <span class="material-symbols-outlined" style="color: #66bcdf">search</span>
-            <input id="discount-target-id" class="input-field" style="background: transparent; padding: 0; border: 0" placeholder="Target product id (e.g. carrot)" value="carrot" />
-          </div>
-
-          <div class="badge-soft" style="display: inline-flex; align-items: center; gap: 10px; font-size: 18px; width: fit-content">
-            <img
-              class="thumb"
-              src="https://images.unsplash.com/photo-1447175008436-054170c2e979?auto=format&fit=crop&w=120&q=80"
-              alt="Organic Carrots"
-            />
-            Organic Carrots
-            <span style="font-weight: 900">×</span>
-          </div>
-        </section>
-
-        <section class="card stack">
-          <label>
-            <div class="label">Deduction Amount (SAR)</div>
-            <div class="row soft-card" style="border-radius: 999px; padding: 14px 18px">
-              <input id="discount-value" class="input-field" type="number" min="0" step="0.01" value="0.00" style="padding: 0; border: 0; background: transparent; font-size: 32px; font-weight: 800" />
-              <strong style="font-size: 32px">SAR</strong>
-            </div>
+            <div class="label">وصف العرض</div>
+            <textarea id="discount-description" class="textarea-field" placeholder="اشرح باختصار ما الذي يميز هذا العرض..." ></textarea>
           </label>
 
-          <article class="soft-card">
-            <p class="muted small" style="margin: 0">
-              If the product is sold by <strong>piece</strong>, the amount is deducted per piece.
-              If sold by <strong>KG</strong>, the amount is deducted per KG.
-            </p>
-          </article>
+          <div class="grid-2">
+            <label>
+              <div class="label">نوع الخصم</div>
+              <select id="discount-type" class="select-field">
+                <option value="FIXED">مبلغ ثابت</option>
+                <option value="PERCENT">نسبة مئوية</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">القيمة</div>
+              <div class="discount-value-row">
+                <input id="discount-value" class="input-field" type="number" min="0" step="0.01" value="0" />
+              </div>
+            </label>
+          </div>
+
+          <div id="discount-value-hint" class="hint-note">سيتم خصم هذا المبلغ من سعر المنتج.</div>
         </section>
 
         <section class="card stack">
-          <div class="row" style="justify-content: flex-start; gap: 8px">
-            <span class="material-symbols-outlined" style="color: #66bcdf">calendar_month</span>
-            <h3 style="font-size: 35px">Validity Dates</h3>
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">target</span>
+            <h3 class="stock-section-title">الاستهداف</h3>
           </div>
 
           <div class="grid-2">
             <label>
-              <div class="label">STARTS</div>
+              <div class="label">نوع الاستهداف</div>
+              <select id="discount-target-type" class="select-field">
+                <option value="PRODUCT">منتج</option>
+                <option value="CATEGORY">تصنيف</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">قائمة سريعة</div>
+              <select id="discount-target-pick" class="select-field">
+                <option value="">اختر عنصرًا...</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="target-actions">
+            <input id="discount-target-ids" class="input-field" type="text" placeholder="معرّفات الأهداف (مثال: carrot,apple)" />
+            <button id="discount-add-target" class="pill active" type="button">إضافة</button>
+          </div>
+
+          <div class="hint-note">يمكنك إدخال أكثر من معرف بفاصلة، أو اختيار عنصر من القائمة ثم الضغط على إضافة.</div>
+          <div id="discount-target-chips" class="targets-wrap"></div>
+        </section>
+
+        <section class="card stack">
+          <div class="row">
+            <span class="material-symbols-outlined" style="color: #67bde2">calendar_month</span>
+            <h3 class="stock-section-title">مدة التفعيل</h3>
+          </div>
+
+          <div class="grid-2">
+            <label>
+              <div class="label">يبدأ في</div>
               <input id="discount-start-date" class="input-field" type="date" />
             </label>
             <label>
-              <div class="label">ENDS</div>
+              <div class="label">ينتهي في</div>
               <input id="discount-end-date" class="input-field" type="date" />
             </label>
           </div>
+
+          <label class="new-product-toggle">
+            <div class="new-product-toggle-box">
+              <input id="discount-is-active" type="checkbox" checked />
+              <span>تفعيل العرض مباشرة بعد الحفظ</span>
+            </div>
+          </label>
         </section>
+
+        <div id="discount-feedback" class="tiny muted saving-feedback"></div>
 
         <button id="save-discount-btn" class="cta" type="button">
           <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
-          Save Discount
+          حفظ العرض
         </button>
-        <button class="ghost" data-route="/admin/dashboard">Discard Draft</button>
+        <button class="ghost" data-route="/admin/dashboard">إلغاء</button>
       </main>
-
-      <nav class="bottom-nav" style="direction: ltr">
-        <button class="nav-item" data-route="/admin/dashboard">
-          <span class="material-symbols-outlined nav-icon">home</span>
-          Home
-        </button>
-        <button class="nav-item active" data-route="/admin/discounts/new">
-          <span class="material-symbols-outlined nav-icon">sell</span>
-          Discounts
-        </button>
-        <button class="nav-item" data-route="/admin/products/new">
-          <span class="material-symbols-outlined nav-icon">inventory_2</span>
-          Inventory
-        </button>
-        <button class="nav-item" data-route="/admin/dashboard">
-          <span class="material-symbols-outlined nav-icon">settings</span>
-          Settings
-        </button>
-      </nav>
     </section>
 
     <script src="/admin/admin-bridge.js"></script>
     <script>
       (function () {
+        if (!window.AdminBridge) return;
+
+        var titleInput = document.getElementById('discount-title');
+        var descriptionInput = document.getElementById('discount-description');
+        var typeSelect = document.getElementById('discount-type');
+        var valueInput = document.getElementById('discount-value');
+        var valueHint = document.getElementById('discount-value-hint');
+        var targetTypeSelect = document.getElementById('discount-target-type');
+        var targetPickSelect = document.getElementById('discount-target-pick');
+        var targetIdsInput = document.getElementById('discount-target-ids');
+        var addTargetButton = document.getElementById('discount-add-target');
+        var targetChips = document.getElementById('discount-target-chips');
+        var startDateInput = document.getElementById('discount-start-date');
+        var endDateInput = document.getElementById('discount-end-date');
+        var isActiveInput = document.getElementById('discount-is-active');
         var saveButton = document.getElementById('save-discount-btn');
-        if (!saveButton || !window.AdminBridge) return;
+        var feedbackNode = document.getElementById('discount-feedback');
+
+        var catalog = {
+          PRODUCT: [],
+          CATEGORY: [],
+        };
+
+        var targetIds = [];
+
+        function setFeedback(message, isError) {
+          if (!feedbackNode) return;
+          feedbackNode.textContent = message || '';
+          feedbackNode.classList.toggle('is-error', Boolean(isError));
+          feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
+        }
 
         function toIso(dateValue, atEnd) {
           if (!dateValue) return null;
@@ -169,55 +253,275 @@
           return String(dateValue) + suffix;
         }
 
-        saveButton.addEventListener('click', async function () {
-          var title = (document.getElementById('discount-title') || {}).value || '';
-          var description = (document.getElementById('discount-description') || {}).value || '';
-          var targetId = (document.getElementById('discount-target-id') || {}).value || '';
-          var value = Number((document.getElementById('discount-value') || {}).value || 0);
-          var startDate = (document.getElementById('discount-start-date') || {}).value || '';
-          var endDate = (document.getElementById('discount-end-date') || {}).value || '';
+        function normalizeTargetIds(rawValue) {
+          var input = String(rawValue || '');
+          return input
+            .split(',')
+            .map(function (item) {
+              return item.trim();
+            })
+            .filter(function (item) {
+              return item.length > 0;
+            });
+        }
 
-          if (!title.trim()) {
-            alert('Offer title is required.');
+        function syncInputFromTargets() {
+          if (!targetIdsInput) return;
+          targetIdsInput.value = targetIds.join(',');
+        }
+
+        function renderTargetChips() {
+          if (!targetChips) return;
+
+          if (!targetIds.length) {
+            targetChips.innerHTML = '<span class="muted tiny">لا توجد أهداف محددة بعد.</span>';
             return;
           }
 
-          if (!targetId.trim()) {
-            alert('Target product id is required.');
+          targetChips.innerHTML = targetIds
+            .map(function (id, index) {
+              return (
+                '<span class="target-chip">' +
+                id +
+                '<button type="button" data-remove-index="' +
+                index +
+                '">×</button>' +
+                '</span>'
+              );
+            })
+            .join('');
+        }
+
+        function updateValueHint() {
+          var type = (typeSelect && typeSelect.value) || 'FIXED';
+          if (!valueHint) return;
+
+          if (type === 'PERCENT') {
+            valueHint.textContent = 'أدخل نسبة الخصم (من 0 إلى 100).';
+            valueInput.max = '100';
+            valueInput.step = '0.01';
             return;
           }
 
-          if (!startDate || !endDate) {
-            alert('Start and end dates are required.');
-            return;
+          valueHint.textContent = 'سيتم خصم هذا المبلغ من سعر المنتج.';
+          valueInput.removeAttribute('max');
+          valueInput.step = '0.01';
+        }
+
+        function refreshTargetPicker() {
+          var type = (targetTypeSelect && targetTypeSelect.value) || 'PRODUCT';
+          var items = Array.isArray(catalog[type]) ? catalog[type] : [];
+
+          if (!targetPickSelect) return;
+          targetPickSelect.innerHTML = '<option value="">اختر عنصرًا...</option>';
+
+          items.forEach(function (item) {
+            var option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.label;
+            targetPickSelect.appendChild(option);
+          });
+        }
+
+        function mergeTargetIds(values) {
+          values.forEach(function (id) {
+            if (targetIds.indexOf(id) === -1) {
+              targetIds.push(id);
+            }
+          });
+          syncInputFromTargets();
+          renderTargetChips();
+        }
+
+        function applyPrefillFromQuery() {
+          var params = new URLSearchParams(window.location.search || '');
+          var queryTargetType = String(params.get('targetType') || '').toUpperCase();
+
+          if (queryTargetType === 'PRODUCT' || queryTargetType === 'CATEGORY') {
+            targetTypeSelect.value = queryTargetType;
           }
 
-          saveButton.disabled = true;
-          var originalLabel = saveButton.textContent;
-          saveButton.textContent = 'Saving...';
+          var productId = String(params.get('productId') || '').trim();
+          var categoryId = String(params.get('categoryId') || '').trim();
+          var targetIdsFromQuery = normalizeTargetIds(params.get('targetIds') || '');
+
+          if (productId) {
+            targetTypeSelect.value = 'PRODUCT';
+            targetIdsFromQuery.push(productId);
+          }
+
+          if (categoryId) {
+            targetTypeSelect.value = 'CATEGORY';
+            targetIdsFromQuery.push(categoryId);
+          }
+
+          if (targetIdsFromQuery.length) {
+            mergeTargetIds(targetIdsFromQuery);
+          }
+        }
+
+        async function loadCatalog() {
+          setFeedback('جاري تحميل المنتجات والتصنيفات...', false);
 
           try {
-            await window.AdminBridge.apiRequest('/admin/discounts', {
-              method: 'POST',
-              body: {
-                title: title.trim(),
-                description: description.trim() || undefined,
-                type: 'FIXED',
-                value: Number.isFinite(value) ? Math.max(0, value) : 0,
-                startAt: toIso(startDate, false),
-                endAt: toIso(endDate, true),
-                targetType: 'PRODUCT',
-                targetIds: [targetId.trim()],
-              },
+            var products = await window.AdminBridge.apiRequest('/admin/products');
+            var categories = await window.AdminBridge.apiRequest('/admin/categories');
+
+            catalog.PRODUCT = (Array.isArray(products) ? products : []).map(function (item) {
+              var id = String(item && item.id ? item.id : '').trim();
+              var name = String(item && item.nameAr ? item.nameAr : 'منتج');
+              return {
+                id: id,
+                label: name + ' (' + id + ')',
+              };
             });
 
-            window.AdminBridge.go('/admin/dashboard');
+            catalog.CATEGORY = (Array.isArray(categories) ? categories : []).map(function (item) {
+              var id = String(item && item.id ? item.id : '').trim();
+              var name = String(item && item.nameAr ? item.nameAr : 'تصنيف');
+              return {
+                id: id,
+                label: name + ' (' + id + ')',
+              };
+            });
+
+            refreshTargetPicker();
+            setFeedback('', false);
           } catch (error) {
-            alert('Failed to save discount. Make sure you are logged in as admin.');
-            saveButton.disabled = false;
-            saveButton.textContent = originalLabel;
+            setFeedback('تعذر تحميل القائمة السريعة. يمكنك إدخال المعرف يدويًا.', true);
           }
-        });
+        }
+
+        if (typeSelect) {
+          typeSelect.addEventListener('change', updateValueHint);
+        }
+
+        if (targetTypeSelect) {
+          targetTypeSelect.addEventListener('change', function () {
+            targetIds = [];
+            syncInputFromTargets();
+            renderTargetChips();
+            refreshTargetPicker();
+          });
+        }
+
+        if (targetPickSelect && addTargetButton) {
+          addTargetButton.addEventListener('click', function () {
+            var quickId = String(targetPickSelect.value || '').trim();
+            var manualIds = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
+            var all = manualIds.slice();
+            if (quickId) {
+              all.push(quickId);
+            }
+
+            if (!all.length) {
+              setFeedback('أدخل معرف هدف واحد على الأقل.', true);
+              return;
+            }
+
+            mergeTargetIds(all);
+            setFeedback('', false);
+            if (targetIdsInput) {
+              targetIdsInput.value = '';
+            }
+          });
+        }
+
+        if (targetChips) {
+          targetChips.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-remove-index]');
+            if (!button) return;
+
+            var index = Number(button.getAttribute('data-remove-index'));
+            if (!Number.isFinite(index) || index < 0 || index >= targetIds.length) return;
+
+            targetIds.splice(index, 1);
+            syncInputFromTargets();
+            renderTargetChips();
+          });
+        }
+
+        if (saveButton) {
+          saveButton.addEventListener('click', async function () {
+            var title = String((titleInput && titleInput.value) || '').trim();
+            var description = String((descriptionInput && descriptionInput.value) || '').trim();
+            var discountType = String((typeSelect && typeSelect.value) || 'FIXED');
+            var discountValue = Number((valueInput && valueInput.value) || 0);
+            var targetType = String((targetTypeSelect && targetTypeSelect.value) || 'PRODUCT');
+            var startDate = String((startDateInput && startDateInput.value) || '');
+            var endDate = String((endDateInput && endDateInput.value) || '');
+            var isActive = Boolean(isActiveInput && isActiveInput.checked);
+
+            var manualIds = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
+            mergeTargetIds(manualIds);
+
+            if (!title) {
+              setFeedback('عنوان العرض مطلوب.', true);
+              return;
+            }
+
+            if (!targetIds.length) {
+              setFeedback('أضف هدفًا واحدًا على الأقل (منتج أو تصنيف).', true);
+              return;
+            }
+
+            if (!Number.isFinite(discountValue) || discountValue <= 0) {
+              setFeedback('قيمة الخصم يجب أن تكون أكبر من الصفر.', true);
+              return;
+            }
+
+            if (discountType === 'PERCENT' && discountValue > 100) {
+              setFeedback('نسبة الخصم لا يمكن أن تتجاوز 100%.', true);
+              return;
+            }
+
+            if (!startDate || !endDate) {
+              setFeedback('حدد تاريخ البداية والنهاية.', true);
+              return;
+            }
+
+            if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
+              setFeedback('تاريخ النهاية يجب أن يكون بعد تاريخ البداية.', true);
+              return;
+            }
+
+            var payload = {
+              title: title,
+              description: description || undefined,
+              type: discountType,
+              value: discountValue,
+              startAt: toIso(startDate, false),
+              endAt: toIso(endDate, true),
+              isActive: isActive,
+              targetType: targetType,
+              targetIds: targetIds,
+            };
+
+            saveButton.disabled = true;
+            var originalLabel = saveButton.textContent;
+            saveButton.textContent = 'جاري حفظ العرض...';
+            setFeedback('جاري الحفظ...', false);
+
+            try {
+              await window.AdminBridge.apiRequest('/admin/discounts', {
+                method: 'POST',
+                body: payload,
+              });
+
+              setFeedback('تم حفظ العرض بنجاح.', false);
+              window.AdminBridge.go('/admin/dashboard');
+            } catch (error) {
+              setFeedback('تعذر حفظ العرض. تأكد من صحة البيانات وصلاحية حساب الأدمن.', true);
+              saveButton.disabled = false;
+              saveButton.textContent = originalLabel;
+            }
+          });
+        }
+
+        updateValueHint();
+        applyPrefillFromQuery();
+        renderTargetChips();
+        loadCatalog();
       })();
     </script>
   </body>

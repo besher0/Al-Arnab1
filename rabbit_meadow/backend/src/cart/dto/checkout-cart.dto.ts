@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNumber, IsObject, IsOptional, Max, Min } from 'class-validator';
 
 export class CheckoutCartDto {
   @IsOptional()
@@ -16,4 +16,8 @@ export class CheckoutCartDto {
   @Min(-180)
   @Max(180)
   longitude!: number;
+
+  @IsOptional()
+  @IsObject()
+  itemNotes?: Record<string, string>;
 }
