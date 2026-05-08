@@ -96,6 +96,22 @@
           });
         }
 
+        function getOrderCoordinates(order) {
+          var address = order && order.address ? order.address : null;
+          var latitude = Number(address && address.latitude);
+          var longitude = Number(address && address.longitude);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+          return {
+            latitude: Number(latitude.toFixed(7)),
+            longitude: Number(longitude.toFixed(7)),
+          };
+        }
+
+        function googleMapsUrl(latitude, longitude) {
+          return 'https://www.google.com/maps?q=' + encodeURIComponent(String(latitude) + ',' + String(longitude));
+        }
+
         function renderOrders(orders) {
           if (!listElement) return;
 
@@ -107,6 +123,8 @@
           listElement.innerHTML = orders
             .map(function (order) {
               var route = '/admin/orders/detail?id=' + encodeURIComponent(order.id || '');
+              var coordinates = getOrderCoordinates(order);
+              var mapUrl = coordinates ? googleMapsUrl(coordinates.latitude, coordinates.longitude) : '';
 
               return [
                 '<article class="card stack">',
@@ -128,6 +146,9 @@
                 '    <span class="muted">' + escapeHtml(order.customer && order.customer.name ? order.customer.name : '-') + '</span>',
                 '    <span class="muted tiny">' + escapeHtml(order.customer && order.customer.phone ? order.customer.phone : '-') + '</span>',
                 '  </div>',
+                mapUrl
+                  ? '  <a class="pill" href="' + escapeHtml(mapUrl) + '" target="_blank" rel="noopener noreferrer" style="text-align:center;text-decoration:none">فتح الموقع على Google Maps</a>'
+                  : '',
                 '  <button class="cta" data-route="' + escapeHtml(route) + '">عرض التفاصيل</button>',
                 '</article>',
               ].join('');

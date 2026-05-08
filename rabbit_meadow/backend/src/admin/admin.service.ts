@@ -93,6 +93,7 @@ export class AdminService {
       orderBy: { createdAt: 'desc' },
       include: {
         user: true,
+        address: true,
       },
     });
 
@@ -107,6 +108,7 @@ export class AdminService {
       orderBy: { createdAt: 'desc' },
       include: {
         user: true,
+        address: true,
       },
     });
 
@@ -641,6 +643,15 @@ export class AdminService {
     total: unknown;
     createdAt: Date;
     user: { id: string; name: string; phone: string };
+    address?: {
+      id: string;
+      city: string;
+      street: string;
+      building: string | null;
+      label: string | null;
+      latitude: unknown;
+      longitude: unknown;
+    } | null;
   }) {
     return {
       id: order.id,
@@ -653,6 +664,17 @@ export class AdminService {
         name: order.user.name,
         phone: order.user.phone,
       },
+      address: order.address
+        ? {
+            id: order.address.id,
+            city: order.address.city,
+            street: order.address.street,
+            building: order.address.building,
+            label: order.address.label,
+            latitude: decimalToNumber(order.address.latitude),
+            longitude: decimalToNumber(order.address.longitude),
+          }
+        : null,
     };
   }
 }

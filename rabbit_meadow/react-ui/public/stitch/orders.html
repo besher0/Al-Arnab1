@@ -5,39 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#87CEEB',
-            'on-primary': '#ffffff',
-            'on-background': '#1A365D',
-            'on-surface': '#1A365D',
-            'on-surface-variant': '#718096',
-            'surface-container': '#E0F2FF',
-            'surface-container-low': '#EAF5FF',
-            'surface-container-lowest': '#ffffff',
-            background: '#F0F8FF',
-          },
-          borderRadius: {
-            DEFAULT: '1rem',
-            lg: '2rem',
-            xl: '3rem',
-            full: '9999px',
-          },
-          fontFamily: {
-            headline: ['Tajawal', 'sans-serif'],
-            body: ['Almarai', 'sans-serif'],
-            label: ['Almarai', 'sans-serif'],
-          },
-        },
-      },
-    };
-  </script>
-  <style>
+<link rel="stylesheet" href="/stitch/tailwind/orders.css" />
+<style>
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -276,6 +245,41 @@
         return combined || 'الموقع غير متوفر';
       }
 
+      function orderLocationCoordinates(order) {
+        if (!order || !order.location) return null;
+
+        var lat = Number(order.location.latitude);
+        var lng = Number(order.location.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+        return {
+          latitude: Number(lat.toFixed(7)),
+          longitude: Number(lng.toFixed(7)),
+        };
+      }
+
+      function googleMapsUrl(latitude, longitude) {
+        return 'https://www.google.com/maps?q=' + encodeURIComponent(String(latitude) + ',' + String(longitude));
+      }
+
+      function orderMapLinkHtml(order, extraClass) {
+        var coordinates = orderLocationCoordinates(order);
+        if (!coordinates) return '';
+
+        var className = 'inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline';
+        if (extraClass) {
+          className += ' ' + String(extraClass);
+        }
+
+        return (
+          '<a href="' +
+          escapeHtml(googleMapsUrl(coordinates.latitude, coordinates.longitude)) +
+          '" target="_blank" rel="noopener noreferrer" class="' +
+          escapeHtml(className) +
+          '">فتح الموقع على Google Maps</a>'
+        );
+      }
+
       function openOrderDetails(order) {
         if (!order || !orderDetailsModal || !orderDetailsBody) return;
 
@@ -314,6 +318,7 @@
           '<p class="text-sm text-on-surface-variant mb-2">معلومات التوصيل</p>' +
           '<p class="text-sm font-bold">رقم التواصل: ' + escapeHtml(order.alternatePhone || '-') + '</p>' +
           '<p class="text-xs text-on-surface-variant mt-1">' + escapeHtml(orderLocationText(order)) + '</p>' +
+          orderMapLinkHtml(order, 'mt-2') +
           '</div>' +
           '<div class="space-y-2">' +
           '<p class="text-sm font-bold text-on-surface">عناصر الطلب</p>' +
@@ -394,11 +399,11 @@
 
         var total = Number(order && order.totals ? order.totals.total : 0) || 0;
         var itemCount = Number(order && order.itemCount ? order.itemCount : 0) || 0;
-        var locationText = order && order.location
-          ? 'GPS: ' + Number(order.location.latitude || 0).toFixed(6) + ', ' + Number(order.location.longitude || 0).toFixed(6)
-          : 'الموقع غير متوفر';
+        var locationText = orderLocationText(order);
+        var mapLinkHtml = orderMapLinkHtml(order);
 
         currentCard.innerHTML =
+          '<div class="space-y-2">' +
           '<button type="button" class="w-full text-right space-y-4 transition-transform hover:scale-[0.995] active:scale-[0.99]" data-order-id="' + escapeHtml(order.id || '') + '">' +
           '<div class="flex justify-between items-start gap-3">' +
           '<div>' +
@@ -416,7 +421,9 @@
           '<p class="mt-1">' + escapeHtml(locationText) + '</p>' +
           '</div>' +
           '<p class="text-[11px] text-primary font-bold">اضغط لعرض تفاصيل الطلب</p>' +
-          '</button>';
+          '</button>' +
+          (mapLinkHtml ? '<div class="px-1">' + mapLinkHtml + '</div>' : '') +
+          '</div>';
       }
 
       function renderHistoryList(orders) {
@@ -577,7 +584,5 @@
   </script>
 </body>
 </html>
-
-
 
 

@@ -137,6 +137,22 @@
           return String(value || '').replace(/[^+\d]/g, '');
         }
 
+        function getOrderCoordinates(order) {
+          var address = order && order.address ? order.address : null;
+          var latitude = Number(address && address.latitude);
+          var longitude = Number(address && address.longitude);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+          return {
+            latitude: Number(latitude.toFixed(7)),
+            longitude: Number(longitude.toFixed(7)),
+          };
+        }
+
+        function googleMapsUrl(latitude, longitude) {
+          return 'https://www.google.com/maps?q=' + encodeURIComponent(String(latitude) + ',' + String(longitude));
+        }
+
         function getCounts() {
           return {
             ALL: orders.length,
@@ -181,6 +197,8 @@
             .map(function (order) {
               var route = '/admin/orders/detail?id=' + encodeURIComponent(order.id || '');
               var phone = digitsOnly(order.customer && order.customer.phone ? order.customer.phone : '');
+              var coordinates = getOrderCoordinates(order);
+              var mapUrl = coordinates ? googleMapsUrl(coordinates.latitude, coordinates.longitude) : '';
 
               return [
                 '<article class="card stack">',
@@ -204,6 +222,9 @@
                 '  </div>',
                 '  <div class="action-row">',
                 '    <button class="pill active" data-route="' + escapeHtml(route) + '">عرض التفاصيل</button>',
+                mapUrl
+                  ? '    <a class="icon-btn" href="' + escapeHtml(mapUrl) + '" target="_blank" rel="noopener noreferrer" title="فتح الموقع على Google Maps"><span class="material-symbols-outlined">map</span></a>'
+                  : '    <span></span>',
                 phone
                   ? '    <a class="icon-btn" href="tel:' + escapeHtml(phone) + '" title="اتصال"><span class="material-symbols-outlined">call</span></a>'
                   : '    <span></span>',

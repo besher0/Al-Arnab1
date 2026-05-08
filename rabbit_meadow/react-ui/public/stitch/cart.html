@@ -5,39 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#0096d6',
-            'on-primary': '#ffffff',
-            'primary-container': '#e0f2fe',
-            'on-primary-container': '#0369a1',
-            surface: '#ffffff',
-            'on-surface': '#1e293b',
-            'surface-variant': '#f1f5f9',
-            'on-surface-variant': '#475569',
-            outline: '#cbd5e1',
-            background: '#f0f9ff',
-          },
-          borderRadius: {
-            DEFAULT: '1rem',
-            lg: '1.5rem',
-            xl: '2rem',
-            full: '9999px',
-          },
-          fontFamily: {
-            tajawal: ['Tajawal', 'sans-serif'],
-            almarai: ['Almarai', 'sans-serif'],
-          },
-        },
-      },
-    };
-  </script>
-  <style>
+<link rel="stylesheet" href="/stitch/tailwind/cart.css" />
+<style>
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -143,7 +112,7 @@
         </div>
         <div class="absolute bottom-3 right-3 left-3 bg-white/95 p-3 rounded-xl text-sm font-bold flex items-center gap-3 shadow-md border border-sky-50">
           <span class="material-symbols-outlined text-primary text-xl">home</span>
-          <span class="text-on-surface" id="selected-location-label">الموقع غير محدد بعد</span>
+          <span class="text-on-surface" id="selected-location-label" role="button" tabindex="0" aria-label="Open selected location in Google Maps">الموقع غير محدد بعد</span>
         </div>
       </div>
 
@@ -354,15 +323,44 @@
         locationStatusText.classList.toggle('text-red-600', Boolean(isError));
       }
 
+      function hasValidGpsLocation(location) {
+        if (!location) return false;
+        var lat = Number(location.latitude);
+        var lng = Number(location.longitude);
+        return Number.isFinite(lat) && Number.isFinite(lng);
+      }
+
+      function googleMapsUrlForLocation(location) {
+        if (!hasValidGpsLocation(location)) return '';
+        var lat = Number(location.latitude).toFixed(7);
+        var lng = Number(location.longitude).toFixed(7);
+        return 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng);
+      }
+
+      function openSelectedLocationInMaps() {
+        if (!hasValidGpsLocation(state.location)) {
+          setLocationStatus('يرجى تحديد موقعك أولاً عبر GPS.', true);
+          return;
+        }
+
+        var url = googleMapsUrlForLocation(state.location);
+        if (!url) return;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+
       function applySelectedLocation() {
         if (!selectedLocationLabel) return;
         if (!state.location) {
           selectedLocationLabel.textContent = 'الموقع غير محدد بعد';
+          selectedLocationLabel.classList.remove('cursor-pointer', 'underline', 'decoration-dotted', 'text-primary');
+          selectedLocationLabel.removeAttribute('title');
           return;
         }
 
         selectedLocationLabel.textContent =
           'GPS: ' + state.location.latitude.toFixed(6) + ', ' + state.location.longitude.toFixed(6);
+        selectedLocationLabel.classList.add('cursor-pointer', 'underline', 'decoration-dotted', 'text-primary');
+        selectedLocationLabel.setAttribute('title', 'افتح في خرائط Google');
       }
 
       function setConfirmLoading(isLoading) {
@@ -649,6 +647,18 @@
         detectLocationButton.addEventListener('click', requestLocation);
       }
 
+      if (selectedLocationLabel) {
+        selectedLocationLabel.addEventListener('click', function () {
+          openSelectedLocationInMaps();
+        });
+
+        selectedLocationLabel.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          openSelectedLocationInMaps();
+        });
+      }
+
       if (closeCartButton) {
         closeCartButton.addEventListener('click', function () {
           send('navigate', { to: closeRoute || '/home' });
@@ -715,7 +725,5 @@
   </script>
 </body>
 </html>
-
-
 
 

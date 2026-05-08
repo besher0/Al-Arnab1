@@ -2,6 +2,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+const LOCAL_FRONTEND_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+function parseOrigins(rawOrigins: string | undefined): string[] {
+  return String(rawOrigins || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -14,17 +26,27 @@ async function bootstrap() {
     }),
   );
 
-  const configuredOrigins = (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  const frontendOrigins = Array.from(
-    new Set([...configuredOrigins, 'http://localhost:5173', 'http://127.0.0.1:5173']),
-  );
+  const configuredOrigins = parseOrigins(process.env.FRONTEND_ORIGIN);
+  const hasExplicitOrigins = configuredOrigins.length > 0;
+  const allowedOrigins = new Set([
+    ...configuredOrigins,
+    ...(process.env.NODE_ENV === 'production' ? [] : LOCAL_FRONTEND_ORIGINS),
+  ]);
 
   app.enableCors({
-    origin: frontendOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (!hasExplicitOrigins || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`), false);
+    },
     credentials: true,
   });
 

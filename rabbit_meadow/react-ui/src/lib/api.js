@@ -1,4 +1,20 @@
-﻿const fallbackApiBase =
+﻿function readRuntimeApiBase() {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+
+  if (window.__AL_ARNAB_API_BASE__) {
+    return String(window.__AL_ARNAB_API_BASE__)
+  }
+
+  try {
+    return window.localStorage.getItem('al-arnab-api-base') || ''
+  } catch {
+    return ''
+  }
+}
+
+const fallbackApiBase =
   typeof window !== 'undefined'
     ? `${window.location.origin}/api`
     : 'http://localhost:3000/api'
@@ -21,7 +37,10 @@ function normalizeApiBase(rawBase) {
   }
 }
 
-const API_BASE_URL = normalizeApiBase(import.meta.env.VITE_API_BASE_URL || fallbackApiBase)
+const runtimeApiBase = readRuntimeApiBase()
+const API_BASE_URL = normalizeApiBase(
+  import.meta.env.VITE_API_BASE_URL || runtimeApiBase || fallbackApiBase,
+)
 
 async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
   const headers = {
@@ -32,12 +51,17 @@ async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
     headers.Authorization = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    signal,
-  })
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal,
+    })
+  } catch {
+    throw new Error('تعذر الاتصال بالخادم. تحقق من رابط API و CORS على السيرفر.')
+  }
 
   let data = null
   try {
@@ -99,7 +123,3 @@ export const api = {
     mine: (token) => apiRequest('/cart/orders', { token }),
   },
 }
-
-
-
-

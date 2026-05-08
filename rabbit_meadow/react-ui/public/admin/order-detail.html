@@ -57,6 +57,14 @@
               <span class="material-symbols-outlined" style="color: #67bbde">home</span>
               <strong id="order-address">-</strong>
             </div>
+            <a
+              id="order-map-link"
+              class="pill"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display:none;margin-top:12px;text-align:center;text-decoration:none"
+            >فتح الموقع على Google Maps</a>
           </article>
         </section>
 
@@ -138,6 +146,7 @@
         var totalNode = document.getElementById('order-total');
         var itemsNode = document.getElementById('order-items');
         var addressNode = document.getElementById('order-address');
+        var orderMapLinkNode = document.getElementById('order-map-link');
         var notesCard = document.getElementById('order-notes-card');
         var notesNode = document.getElementById('order-notes');
         var feedbackNode = document.getElementById('order-feedback');
@@ -215,6 +224,37 @@
           return parts.join(' - ');
         }
 
+        function getAddressCoordinates(address) {
+          if (!address) return null;
+
+          var latitude = Number(address.latitude);
+          var longitude = Number(address.longitude);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+          return {
+            latitude: Number(latitude.toFixed(7)),
+            longitude: Number(longitude.toFixed(7)),
+          };
+        }
+
+        function googleMapsUrl(latitude, longitude) {
+          return 'https://www.google.com/maps?q=' + encodeURIComponent(String(latitude) + ',' + String(longitude));
+        }
+
+        function updateOrderMapLink(address) {
+          if (!orderMapLinkNode) return;
+
+          var coordinates = getAddressCoordinates(address);
+          if (!coordinates) {
+            orderMapLinkNode.style.display = 'none';
+            orderMapLinkNode.setAttribute('href', '#');
+            return;
+          }
+
+          orderMapLinkNode.style.display = 'block';
+          orderMapLinkNode.setAttribute('href', googleMapsUrl(coordinates.latitude, coordinates.longitude));
+        }
+
         function setActionsDisabled(isDisabled) {
           if (acceptButton) acceptButton.disabled = isDisabled;
           if (rejectButton) rejectButton.disabled = isDisabled;
@@ -279,6 +319,7 @@
             customerNode.textContent = order.customer && order.customer.name ? order.customer.name : '-';
             totalNode.textContent = formatMoney(order.totals && order.totals.total ? order.totals.total : 0);
             addressNode.textContent = formatAddress(order.address);
+            updateOrderMapLink(order.address);
             renderItems(order.items || []);
             if (notesCard && notesNode) {
               var notes = String(order.notes || '').trim();
@@ -305,6 +346,7 @@
           } catch (error) {
             setFeedback('تعذر تحميل تفاصيل الطلب.', true);
             renderItems([]);
+            updateOrderMapLink(null);
           } finally {
             setActionsDisabled(isStatusLocked);
           }
