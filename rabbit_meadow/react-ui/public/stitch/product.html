@@ -219,8 +219,9 @@
 
         .product-action-bar {
           width: min(var(--page-max-width), 100%);
-          left: 50%;
-          transform: translateX(-50%);
+          left: 0;
+          right: 0;
+          margin-inline: auto;
           bottom: calc(92px + env(safe-area-inset-bottom));
           border-radius: 24px 24px 0 0;
           border: 1px solid rgba(158, 199, 232, 0.42);
@@ -340,7 +341,7 @@
 </div>
 </main>
 <!-- Simplified Bottom Bar -->
-<div class="product-action-bar fixed bottom-24 left-0 w-full bg-white border-t border-secondary p-3 flex flex-col gap-2 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<div class="product-action-bar fixed flex flex-col gap-2 z-40">
 <!-- Prominent Quantity Selector -->
 <div class="flex items-center justify-between bg-surface rounded-full p-1.5 h-12 w-full">
 <button class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-primary shadow-sm active:scale-90 transition-transform">
