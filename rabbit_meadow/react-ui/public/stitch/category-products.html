@@ -378,11 +378,8 @@
         refreshAllQuantities();
       }
     }
-    function currencyLabel(currency) {
-      var code = String(currency || '').toUpperCase();
-      if (code === 'SAR') return 'ر.س';
-      if (code === 'SYP') return 'ل.س';
-      return code || 'ل.س';
+    function currencyLabel() {
+      return 'ل.س';
     }
 
     function applyStore(storePayload) {
@@ -685,7 +682,6 @@
   })();
 </script>
 </body></html>
-
 
 
 

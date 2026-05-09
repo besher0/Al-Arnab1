@@ -299,8 +299,8 @@
 <p class="font-body text-on-surface-variant mt-2 text-lg">مزارع القصيم المحلية</p>
 <div class="mt-6 price-summary">
 <div class="price-badge">
-<span id="product-current-price" class="font-headline text-3xl font-bold text-on-surface">٤.٥٠ ر.س</span>
-<span id="product-original-price" class="price-before" style="display:none">٥.٩٠ ر.س</span>
+<span id="product-current-price" class="font-headline text-3xl font-bold text-on-surface">٤.٥٠ ل.س</span>
+<span id="product-original-price" class="price-before" style="display:none">٥.٩٠ ل.س</span>
 </div>
 <span id="product-discount-pill" class="discount-pill" style="display:none">خصم</span>
 </div>
@@ -401,11 +401,8 @@
       var parsed = parseInt(normalized, 10);
       return Number.isNaN(parsed) ? 1 : parsed;
     }
-    function currencyLabel(currency) {
-      var code = String(currency || '').toUpperCase();
-      if (code === 'SAR') return 'ر.س';
-      if (code === 'SYP') return 'ل.س';
-      return code || 'ل.س';
+    function currencyLabel() {
+      return 'ل.س';
     }
 
     function applyStore(storePayload) {

@@ -314,7 +314,12 @@ export class CartService {
       const normalizedUserPhone = typeof user.phone === 'string' ? user.phone.trim() : '';
       const hasRealAccountPhone =
         Boolean(normalizedUserPhone) && !normalizedUserPhone.startsWith('guest-');
-      const contactPhone = hasRealAccountPhone ? normalizedUserPhone : null;
+      const normalizedAlternatePhone = this.normalizeOptionalPhone(payload.alternatePhone);
+      if (!hasRealAccountPhone && !normalizedAlternatePhone) {
+        throw new BadRequestException('رقم التواصل البديل مطلوب لحسابات الضيوف.');
+      }
+      const contactPhone =
+        normalizedAlternatePhone || (hasRealAccountPhone ? normalizedUserPhone : null);
 
       const latitude = this.normalizeCoordinate(payload.latitude, -90, 90, 'خط العرض');
       const longitude = this.normalizeCoordinate(payload.longitude, -180, 180, 'خط الطول');
@@ -662,6 +667,11 @@ export class CartService {
     });
 
     return normalized;
+  }
+
+  private normalizeOptionalPhone(raw: unknown): string | null {
+    const normalized = String(raw ?? '').trim();
+    return normalized || null;
   }
 
   private buildOrderNotes(

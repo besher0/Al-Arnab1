@@ -133,11 +133,8 @@
           return map[Number(digit)] || digit;
         });
       }
-      function currencyLabel(currency) {
-      var code = String(currency || '').toUpperCase();
-      if (code === 'SAR') return '?.?';
-      if (code === 'SYP') return '?.?';
-      return code || '?.?';
+      function currencyLabel() {
+      return 'ل.س';
     }
 
     function applyStore(storePayload) {
@@ -584,5 +581,4 @@
   </script>
 </body>
 </html>
-
 

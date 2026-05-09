@@ -344,7 +344,7 @@ export function ShopProvider({ children }) {
   }, [token])
 
   const checkoutOrder = useCallback(
-    async ({ latitude, longitude, itemNotes }) => {
+    async ({ latitude, longitude, itemNotes, alternatePhone }) => {
       if (!token) {
         throw new Error('يجب تسجيل الدخول أولاً.')
       }
@@ -356,10 +356,12 @@ export function ShopProvider({ children }) {
         throw new Error('موقع التوصيل غير صالح.')
       }
 
+      const cleanAlternatePhone = String(alternatePhone || '').trim()
       const checkoutPayload = {
         latitude: lat,
         longitude: lng,
         ...(itemNotes && typeof itemNotes === 'object' ? { itemNotes } : {}),
+        ...(cleanAlternatePhone ? { alternatePhone: cleanAlternatePhone } : {}),
       }
 
       const checkoutResponse = await api.cart.checkout(token, checkoutPayload)
@@ -443,5 +445,5 @@ export function useShop() {
 }
 
 export function formatSar(value) {
-  return `${numberValue(value, 0).toFixed(2)} ر.س`
+  return `${numberValue(value, 0).toFixed(2)} ل.س`
 }

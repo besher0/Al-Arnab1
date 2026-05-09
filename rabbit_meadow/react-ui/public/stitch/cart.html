@@ -86,7 +86,7 @@
         <div class="space-y-3">
           <div class="flex justify-between text-sm">
             <span class="text-on-surface-variant">المجموع الفرعي (<span id="summary-item-count">0</span> وحدات)</span>
-            <span class="font-bold" id="summary-subtotal">0.00 ر.س</span>
+            <span class="font-bold" id="summary-subtotal">0.00 ل.س</span>
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-on-surface-variant">رسوم التوصيل</span>
@@ -95,7 +95,7 @@
           <div class="h-px bg-sky-100 my-4"></div>
           <div class="flex justify-between text-xl">
             <span class="font-tajawal font-bold">الإجمالي الكلي</span>
-            <span class="font-tajawal font-extrabold text-primary" id="summary-total">0.00 ر.س</span>
+            <span class="font-tajawal font-extrabold text-primary" id="summary-total">0.00 ل.س</span>
           </div>
         </div>
       </div>
@@ -119,6 +119,19 @@
       <div class="space-y-2">
         <button id="detect-location-button" type="button" class="w-full h-12 rounded-full border border-primary/20 bg-white text-primary font-bold hover:bg-primary/5 transition-colors">تحديد موقعي عبر GPS</button>
         <p id="location-status-text" class="text-xs text-on-surface-variant px-1">يرجى تحديد موقعك قبل تأكيد الطلب.</p>
+      </div>
+      <div class="space-y-1.5">
+        <label for="alternate-phone-input" class="block text-sm font-bold text-on-surface">رقم بديل للتواصل</label>
+        <input
+          id="alternate-phone-input"
+          type="tel"
+          dir="ltr"
+          inputmode="tel"
+          autocomplete="tel-national"
+          class="w-full h-12 rounded-xl border border-sky-200 bg-white px-3 text-base text-on-surface focus:border-primary focus:ring-0"
+          placeholder="09XXXXXXXX"
+        />
+        <p id="alternate-phone-hint" class="text-xs text-on-surface-variant px-1">هذا الرقم مطلوب لحسابات الضيوف فقط.</p>
       </div>
 
       <button id="confirm-order-button" class="w-full py-5 rounded-full bg-primary text-on-primary font-tajawal font-bold text-xl shadow-lg shadow-sky-200 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed" type="button">
@@ -167,6 +180,8 @@
       var detectLocationButton = document.getElementById('detect-location-button');
       var locationStatusText = document.getElementById('location-status-text');
       var selectedLocationLabel = document.getElementById('selected-location-label');
+      var alternatePhoneInput = document.getElementById('alternate-phone-input');
+      var alternatePhoneHint = document.getElementById('alternate-phone-hint');
       var confirmButton = document.getElementById('confirm-order-button');
       var confirmLabel = confirmButton ? confirmButton.querySelector('[data-confirm-label]') : null;
       var query = new URLSearchParams(window.location.search || '');
@@ -182,6 +197,8 @@
         itemsById: {},
         notesById: loadNotes(),
         isAuthenticated: false,
+        userPhone: '',
+        hasRealAccountPhone: false,
         itemCount: 0,
         location: null,
         isCheckoutLoading: false,
@@ -239,11 +256,8 @@
           badge.style.display = next > 0 ? 'flex' : 'none';
         });
       }
-      function currencyLabel(currency) {
-        var code = String(currency || '').toUpperCase();
-        if (code === 'SAR') return 'ر.س';
-        if (code === 'SYP') return 'ل.س';
-        return code || 'ل.س';
+      function currencyLabel() {
+        return 'ل.س';
       }
 
       function applyStore(storePayload) {
@@ -516,10 +530,16 @@
       function applyCartState(payload) {
         applyStore(payload && payload.store ? payload.store : null);
         var items = Array.isArray(payload && payload.items) ? payload.items : [];
+        var userPhone =
+          payload && payload.user && payload.user.phone
+            ? String(payload.user.phone).trim()
+            : '';
         state.qtyById = {};
         state.unitById = {};
         state.itemsById = {};
         state.isAuthenticated = Boolean(payload && payload.isAuthenticated);
+        state.userPhone = userPhone;
+        state.hasRealAccountPhone = Boolean(userPhone) && userPhone.indexOf('guest-') !== 0;
         state.itemCount = Math.max(0, Number(payload && payload.itemCount ? payload.itemCount : 0));
 
         var activeIds = {};
@@ -547,6 +567,15 @@
         if (summaryTotal) {
           summaryTotal.textContent = formatSar(payload && payload.subtotal ? payload.subtotal : 0);
         }
+        if (alternatePhoneInput) {
+          alternatePhoneInput.required = !state.hasRealAccountPhone;
+        }
+        if (alternatePhoneHint) {
+          alternatePhoneHint.textContent = state.hasRealAccountPhone
+            ? 'اختياري: اكتب رقم بديل إذا حابب.'
+            : 'هذا الرقم مطلوب لأن الحساب ضيف.';
+          alternatePhoneHint.classList.toggle('text-red-600', !state.hasRealAccountPhone);
+        }
 
         setFooterCartCount(state.itemCount);
       }
@@ -560,6 +589,17 @@
 
         if (!state.location) {
           missing.push('موقع GPS');
+        }
+
+        var alternatePhone = String(
+          (alternatePhoneInput && alternatePhoneInput.value) || '',
+        ).trim();
+        if (alternatePhone && (alternatePhone.length < 6 || alternatePhone.length > 20)) {
+          alert('رقم التواصل البديل يجب أن يكون بين 6 و 20 رقماً.');
+          return null;
+        }
+        if (!state.hasRealAccountPhone && !alternatePhone) {
+          missing.push('رقم بديل للتواصل');
         }
 
         if (state.itemCount <= 0) {
@@ -584,6 +624,9 @@
           latitude: state.location.latitude,
           longitude: state.location.longitude,
         };
+        if (alternatePhone) {
+          checkoutPayload.alternatePhone = alternatePhone;
+        }
         if (Object.keys(itemNotes).length) {
           checkoutPayload.itemNotes = itemNotes;
         }
@@ -725,5 +768,3 @@
   </script>
 </body>
 </html>
-
-

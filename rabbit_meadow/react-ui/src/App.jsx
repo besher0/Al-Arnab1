@@ -18,7 +18,7 @@ function LoadingShell() {
 }
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, isBootstrapping } = useShop()
+  const { isAuthenticated, isBootstrapping, user } = useShop()
   const location = useLocation()
 
   if (isBootstrapping) {
@@ -29,11 +29,15 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
   }
 
+  if (user?.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+
   return children
 }
 
 function PublicOnlyRoute({ children }) {
-  const { isAuthenticated, isBootstrapping } = useShop()
+  const { isAuthenticated, isBootstrapping, user } = useShop()
   const location = useLocation()
 
   if (isBootstrapping) {
@@ -46,7 +50,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />
+    return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/home'} replace />
   }
 
   return children
@@ -264,6 +268,7 @@ function BridgeListener() {
             latitude: payload.latitude,
             longitude: payload.longitude,
             itemNotes: payload.itemNotes,
+            alternatePhone: payload.alternatePhone,
           })
 
           sendFrameMessage(event.source, 'checkout-result', {

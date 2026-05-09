@@ -77,7 +77,7 @@
 </div>
 <h3 class="text-sm font-bold text-on-surface mb-1 truncate">عنب أخضر طازج</h3>
 <div class="flex items-center gap-2 mb-3">
-<span class="text-primary font-black text-base">12.50 ر.س</span>
+<span class="text-primary font-black text-base">12.50 ل.س</span>
 <span class="text-on-surface-variant text-xs line-through">18.00</span>
 </div>
 <button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2">
@@ -93,7 +93,7 @@
 </div>
 <h3 class="text-sm font-bold text-on-surface mb-1 truncate">جزر عضوي</h3>
 <div class="flex items-center gap-2 mb-3">
-<span class="text-primary font-black text-base">8.00 ر.س</span>
+<span class="text-primary font-black text-base">8.00 ل.س</span>
 <span class="text-on-surface-variant text-xs line-through">13.00</span>
 </div>
 <button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2">
@@ -108,7 +108,7 @@
 </div>
 <h3 class="text-sm font-bold text-on-surface mb-1 truncate">خبز ريفي</h3>
 <div class="flex items-center gap-2 mb-3">
-<span class="text-primary font-black text-base">5.50 ر.س</span>
+<span class="text-primary font-black text-base">5.50 ل.س</span>
 <span class="text-on-surface-variant text-xs line-through">7.00</span>
 </div>
 <button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold squash-and-stretch flex items-center justify-center gap-2">
@@ -137,7 +137,7 @@
 </div>
 <div class="flex-grow">
 <h4 class="font-bold text-on-surface text-sm">بيض دجاج عضوي</h4>
-<p class="text-primary font-black text-sm">22.00 ر.س</p>
+<p class="text-primary font-black text-sm">22.00 ل.س</p>
 </div>
 <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md squash-and-stretch">
 <span class="material-symbols-outlined">add</span>
@@ -150,7 +150,7 @@
 </div>
 <div class="flex-grow">
 <h4 class="font-bold text-on-surface text-sm">عصير برتقال طبيعي</h4>
-<p class="text-primary font-black text-sm">15.75 ر.س</p>
+<p class="text-primary font-black text-sm">15.75 ل.س</p>
 </div>
 <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md squash-and-stretch">
 <span class="material-symbols-outlined">add</span>
@@ -163,7 +163,7 @@
 </div>
 <div class="flex-grow">
 <h4 class="font-bold text-on-surface text-sm">حليب طازج</h4>
-<p class="text-primary font-black text-sm">7.50 ر.س</p>
+<p class="text-primary font-black text-sm">7.50 ل.س</p>
 </div>
 <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md squash-and-stretch">
 <span class="material-symbols-outlined">add</span>
@@ -268,11 +268,8 @@
             });
         }
 
-        function currencyLabel(currency) {
-            var code = String(currency || '').toUpperCase();
-            if (code === 'SAR') return 'ر.س';
-            if (code === 'SYP') return 'ل.س';
-            return code || 'ل.س';
+        function currencyLabel() {
+            return 'ل.س';
         }
 
         function applyStore(storePayload) {

@@ -1,8 +1,14 @@
-import { Type } from 'class-transformer';
-import { IsNumber, IsObject, IsOptional, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsNumber, IsObject, IsOptional, IsString, Length, Max, Min } from 'class-validator';
 
 export class CheckoutCartDto {
   @IsOptional()
+  @Transform(({ value }) => {
+    const normalized = String(value ?? '').trim();
+    return normalized || undefined;
+  })
+  @IsString()
+  @Length(6, 20)
   alternatePhone?: string;
 
   @Type(() => Number)
