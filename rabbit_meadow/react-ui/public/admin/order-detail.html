@@ -45,6 +45,25 @@
             </div>
           </div>
 
+          <article id="assigned-delivery-wrap" class="soft-card" style="display: none">
+            <div class="row">
+              <span class="material-symbols-outlined" style="color: #67bbde">local_shipping</span>
+              <div>
+                <div class="muted tiny">المندوب المكلّف</div>
+                <strong id="assigned-delivery-name">-</strong>
+              </div>
+              <a
+                id="assigned-delivery-call"
+                class="icon-btn"
+                href="#"
+                style="display: none"
+                title="اتصال بالمندوب"
+              >
+                <span class="material-symbols-outlined">call</span>
+              </a>
+            </div>
+          </article>
+
           <div id="order-items" class="stack">
             <article class="soft-card orders-empty">جاري تحميل المنتجات...</article>
           </div>
@@ -103,14 +122,6 @@
           </button>
         </section>
 
-        <section id="progress-section" class="soft-card stack" style="display: none">
-          <h3 id="progress-title">متابعة حالة الطلب</h3>
-          <button id="progress-order" class="cta" type="button">
-            <span class="material-symbols-outlined" style="vertical-align: middle">local_shipping</span>
-            <span id="progress-label">الطلب في التوصيل</span>
-          </button>
-        </section>
-
         <div id="order-feedback" class="tiny muted"></div>
       </main>
 
@@ -150,15 +161,14 @@
         var notesCard = document.getElementById('order-notes-card');
         var notesNode = document.getElementById('order-notes');
         var feedbackNode = document.getElementById('order-feedback');
+        var assignedDeliveryWrap = document.getElementById('assigned-delivery-wrap');
+        var assignedDeliveryName = document.getElementById('assigned-delivery-name');
+        var assignedDeliveryCall = document.getElementById('assigned-delivery-call');
 
         var acceptButton = document.getElementById('accept-order');
         var rejectButton = document.getElementById('reject-order');
         var acceptSection = document.getElementById('accept-section');
         var rejectSection = document.getElementById('reject-section');
-        var progressSection = document.getElementById('progress-section');
-        var progressTitle = document.getElementById('progress-title');
-        var progressButton = document.getElementById('progress-order');
-        var progressLabel = document.getElementById('progress-label');
 
         var prepButtons = Array.prototype.slice.call(document.querySelectorAll('[data-prep-minutes]'));
         var rejectButtons = Array.prototype.slice.call(document.querySelectorAll('[data-reject-reason]'));
@@ -168,7 +178,6 @@
         var selectedPrepMinutes = 20;
         var selectedRejectReason = 'المادة غير متوفرة';
         var isStatusLocked = false;
-        var currentStatus = '';
 
         function escapeHtml(value) {
           return String(value || '')
@@ -255,37 +264,38 @@
           orderMapLinkNode.setAttribute('href', googleMapsUrl(coordinates.latitude, coordinates.longitude));
         }
 
+        function updateAssignedDelivery(delivery) {
+          if (!assignedDeliveryWrap || !assignedDeliveryName || !assignedDeliveryCall) return;
+
+          if (!delivery || !delivery.name) {
+            assignedDeliveryWrap.style.display = 'none';
+            assignedDeliveryName.textContent = '-';
+            assignedDeliveryCall.style.display = 'none';
+            assignedDeliveryCall.setAttribute('href', '#');
+            return;
+          }
+
+          assignedDeliveryWrap.style.display = '';
+          assignedDeliveryName.textContent = delivery.name;
+
+          var phone = String(delivery.phone || '').replace(/[^\d+]/g, '');
+          if (!phone) {
+            assignedDeliveryCall.style.display = 'none';
+            assignedDeliveryCall.setAttribute('href', '#');
+            return;
+          }
+
+          assignedDeliveryCall.style.display = '';
+          assignedDeliveryCall.setAttribute('href', 'tel:' + phone);
+        }
+
         function setActionsDisabled(isDisabled) {
           if (acceptButton) acceptButton.disabled = isDisabled;
           if (rejectButton) rejectButton.disabled = isDisabled;
-          if (progressButton) progressButton.disabled = isDisabled;
-        }
-
-        function updateProgressContent(status) {
-          if (!progressButton || !progressTitle || !progressLabel) return;
-
-          if (status === 'PREPARING') {
-            progressTitle.textContent = 'الطلب مقبول وجاهز للتوصيل';
-            progressLabel.textContent = 'الطلب في التوصيل';
-            progressButton.dataset.targetStatus = 'ON_THE_WAY';
-            return;
-          }
-
-          if (status === 'ON_THE_WAY') {
-            progressTitle.textContent = 'الطلب قيد التوصيل';
-            progressLabel.textContent = 'تم تسليم الطلب';
-            progressButton.dataset.targetStatus = 'DELIVERED';
-            return;
-          }
-
-          progressTitle.textContent = 'متابعة حالة الطلب';
-          progressLabel.textContent = 'تحديث الحالة';
-          progressButton.dataset.targetStatus = '';
         }
 
         function updateActionsVisibility(status) {
           var canManage = status === 'NEW';
-          var canProgress = status === 'PREPARING' || status === 'ON_THE_WAY';
 
           if (acceptSection) {
             acceptSection.style.display = canManage ? '' : 'none';
@@ -293,11 +303,6 @@
           if (rejectSection) {
             rejectSection.style.display = canManage ? '' : 'none';
           }
-          if (progressSection) {
-            progressSection.style.display = canProgress ? '' : 'none';
-          }
-
-          updateProgressContent(status);
         }
 
         async function loadOrder() {
@@ -312,7 +317,6 @@
 
           try {
             var order = await window.AdminBridge.apiRequest('/admin/orders/' + encodeURIComponent(orderId));
-            currentStatus = order && order.status ? String(order.status) : '';
             isStatusLocked = ['DELIVERED', 'REJECTED', 'CANCELLED'].indexOf(order.status) !== -1;
             updateActionsVisibility(order.status);
             titleNode.textContent = 'تفاصيل الطلب #' + (order.orderNumber || '-');
@@ -320,6 +324,7 @@
             totalNode.textContent = formatMoney(order.totals && order.totals.total ? order.totals.total : 0);
             addressNode.textContent = formatAddress(order.address);
             updateOrderMapLink(order.address);
+            updateAssignedDelivery(order.assignedDelivery);
             renderItems(order.items || []);
             if (notesCard && notesNode) {
               var notes = String(order.notes || '').trim();
@@ -337,9 +342,9 @@
             } else if (order.status === 'NEW') {
               setFeedback('', false);
             } else if (order.status === 'PREPARING') {
-              setFeedback('تم قبول الطلب. عند خروج الطلب مع المندوب اضغط "الطلب في التوصيل".', false);
-            } else if (order.status === 'ON_THE_WAY') {
-              setFeedback('الطلب في التوصيل. عند التسليم اضغط "تم تسليم الطلب".', false);
+              setFeedback('تم قبول الطلب وتحويله إلى المندوب المكلّف.', false);
+            } else if (order.status === 'ON_THE_WAY' || order.status === 'DELIVERED') {
+              setFeedback('متابعة التوصيل تتم من حساب الديلفري.', false);
             } else {
               setFeedback('', false);
             }
@@ -347,6 +352,7 @@
             setFeedback('تعذر تحميل تفاصيل الطلب.', true);
             renderItems([]);
             updateOrderMapLink(null);
+            updateAssignedDelivery(null);
           } finally {
             setActionsDisabled(isStatusLocked);
           }
@@ -419,31 +425,6 @@
             'تم رفض الطلب بنجاح.',
           );
         });
-
-        if (progressButton) {
-          progressButton.addEventListener('click', function () {
-            if (currentStatus === 'PREPARING') {
-              updateStatus(
-                {
-                  status: 'ON_THE_WAY',
-                  note: 'الطلب في التوصيل',
-                },
-                'تم تحديث الطلب إلى "في التوصيل".',
-              );
-              return;
-            }
-
-            if (currentStatus === 'ON_THE_WAY') {
-              updateStatus(
-                {
-                  status: 'DELIVERED',
-                  note: 'تم تسليم الطلب',
-                },
-                'تم تأكيد تسليم الطلب.',
-              );
-            }
-          });
-        }
 
         loadOrder();
       })();

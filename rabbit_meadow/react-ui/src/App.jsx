@@ -17,6 +17,12 @@ function LoadingShell() {
   )
 }
 
+function roleHomePath(role) {
+  if (role === 'ADMIN') return '/admin/dashboard'
+  if (role === 'DELIVERY') return '/delivery/orders'
+  return '/home'
+}
+
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isBootstrapping, user } = useShop()
   const location = useLocation()
@@ -29,8 +35,8 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
   }
 
-  if (user?.role === 'ADMIN') {
-    return <Navigate to="/admin/dashboard" replace />
+  if (user?.role !== 'CUSTOMER') {
+    return <Navigate to={roleHomePath(user?.role)} replace />
   }
 
   return children
@@ -50,7 +56,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/home'} replace />
+    return <Navigate to={roleHomePath(user?.role)} replace />
   }
 
   return children
@@ -68,7 +74,25 @@ function AdminRoute({ children }) {
   }
 
   if (user?.role !== 'ADMIN') {
-    return <Navigate to="/home" replace />
+    return <Navigate to={roleHomePath(user?.role)} replace />
+  }
+
+  return children
+}
+
+function DeliveryRoute({ children }) {
+  const { isAuthenticated, isBootstrapping, user } = useShop()
+
+  if (isBootstrapping) {
+    return <LoadingShell />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.role !== 'DELIVERY') {
+    return <Navigate to={roleHomePath(user?.role)} replace />
   }
 
   return children
@@ -77,7 +101,8 @@ function AdminRoute({ children }) {
 function FramePage({ src, title, forwardSearch = false }) {
   const location = useLocation()
   const frameSrc = forwardSearch ? `${src}${location.search || ''}` : src
-  const isAdminFrame = typeof src === 'string' && src.startsWith('/admin/')
+  const isAdminFrame =
+    typeof src === 'string' && (src.startsWith('/admin/') || src.startsWith('/delivery/'))
 
   return (
     <section className={`single-view${isAdminFrame ? ' single-view-admin' : ''}`}>
@@ -99,7 +124,7 @@ function CartQuickCheckoutButton() {
   const canShow =
     !isBootstrapping &&
     isAuthenticated &&
-    user?.role !== 'ADMIN' &&
+    user?.role === 'CUSTOMER' &&
     !isAdminPath &&
     !isHiddenPath &&
     Number(itemCount || 0) > 0
@@ -217,7 +242,7 @@ function BridgeListener() {
     }
 
     function postAuthPath(authPayload) {
-      return authPayload?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home'
+      return roleHomePath(authPayload?.user?.role)
     }
 
     async function onMessage(event) {
@@ -595,6 +620,31 @@ function AppRoutes() {
             <ProtectedRoute>
               <FramePage src="/stitch/profile.html" title="profile" />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/delivery"
+          element={
+            <DeliveryRoute>
+              <Navigate to="/delivery/orders" replace />
+            </DeliveryRoute>
+          }
+        />
+        <Route
+          path="/delivery/orders"
+          element={
+            <DeliveryRoute>
+              <FramePage src="/delivery/orders.html" title="delivery-orders" />
+            </DeliveryRoute>
+          }
+        />
+        <Route
+          path="/delivery/*"
+          element={
+            <DeliveryRoute>
+              <Navigate to="/delivery/orders" replace />
+            </DeliveryRoute>
           }
         />
 

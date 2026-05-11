@@ -21,6 +21,11 @@ type StatusNotificationInput = OrderNotificationInput & {
   note?: string | null;
 };
 
+type DeliveryAssignmentNotificationInput = OrderNotificationInput & {
+  prepMinutes?: number | null;
+  customerName?: string | null;
+};
+
 type CreateNotificationInput = {
   title: string;
   body: string;
@@ -205,6 +210,31 @@ export class NotificationsService {
         orderNumber: order.orderNumber,
         userId: order.userId || null,
         status: OrderStatus.NEW,
+      },
+    });
+  }
+
+  async notifyOrderAssignedToDelivery(
+    deliveryUserId: string,
+    input: DeliveryAssignmentNotificationInput,
+  ) {
+    const prepMinutes = Number(input.prepMinutes);
+    const hasPrepMinutes =
+      input.prepMinutes !== null &&
+      input.prepMinutes !== undefined &&
+      Number.isFinite(prepMinutes) &&
+      prepMinutes >= 0;
+    const prepLabel = hasPrepMinutes ? ` - وقت التجهيز: ${prepMinutes} دقيقة` : '';
+    const customerLabel = input.customerName?.trim() ? ` للعميل ${input.customerName.trim()}` : '';
+
+    return this.createForUsers([deliveryUserId], {
+      title: `تم تحويل طلب جديد #${input.orderNumber}`,
+      body: `لديك طلب جديد${customerLabel}${prepLabel}.`,
+      type: NotificationType.ORDER_STATUS,
+      metadata: {
+        orderId: input.orderId,
+        orderNumber: input.orderNumber,
+        status: OrderStatus.PREPARING,
       },
     });
   }

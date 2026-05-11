@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>طلبات المندوب</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/admin/admin.css" rel="stylesheet" />
+    <style>
+      .delivery-feedback {
+        margin: 6px 4px 0;
+        min-height: 22px;
+      }
+
+      .delivery-feedback.error {
+        color: #c53c3d;
+      }
+
+      .delivery-feedback.success {
+        color: #228a59;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="admin-shell admin-compact">
+      <header class="admin-header">
+        <button class="icon-btn" data-route="/delivery/orders" title="تحديث">
+          <span class="material-symbols-outlined">refresh</span>
+        </button>
+        <div class="header-group">
+          <div>
+            <h1 class="page-title">طلباتي</h1>
+            <p class="page-subtitle">لوحة المندوب</p>
+          </div>
+        </div>
+        <button class="icon-btn" data-delivery-action="logout" title="تسجيل خروج">
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </header>
+
+      <main class="container stack">
+        <section class="row orders-filter-row">
+          <button class="pill active" data-filter="ALL">الكل (0)</button>
+          <button class="pill" data-filter="PREPARING">جاهز للاستلام (0)</button>
+          <button class="pill" data-filter="ON_THE_WAY">في الطريق (0)</button>
+          <button class="pill" data-filter="DELIVERED">تم التوصيل (0)</button>
+        </section>
+
+        <div id="delivery-feedback" class="tiny muted delivery-feedback"></div>
+
+        <section id="delivery-orders-list" class="stack">
+          <article class="card orders-empty">جاري تحميل الطلبات...</article>
+        </section>
+      </main>
+
+      <nav class="bottom-nav five">
+        <button class="nav-item active" data-route="/delivery/orders">
+          <span class="material-symbols-outlined nav-icon">local_shipping</span>
+          الطلبات
+        </button>
+        <button class="nav-item" data-delivery-action="logout">
+          <span class="material-symbols-outlined nav-icon">logout</span>
+          خروج
+        </button>
+      </nav>
+    </section>
+
+    <script src="/delivery/delivery-bridge.js"></script>
+    <script>
+      (function () {
+        if (!window.DeliveryBridge || typeof window.DeliveryBridge.apiRequest !== 'function') {
+          return;
+        }
+
+        var STATUS_LABELS = {
+          PREPARING: 'جاهز للاستلام',
+          ON_THE_WAY: 'في الطريق',
+          DELIVERED: 'تم التوصيل',
+        };
+
+        var listNode = document.getElementById('delivery-orders-list');
+        var feedbackNode = document.getElementById('delivery-feedback');
+        var filterButtons = Array.prototype.slice.call(document.querySelectorAll('[data-filter]'));
+        var orders = [];
+        var activeFilter = 'ALL';
+        var isUpdating = false;
+        var pollingTimer = null;
+        var pollingInFlight = false;
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ر.س';
+        }
+
+        function formatDateTime(value) {
+          var date = new Date(value);
+          if (Number.isNaN(date.getTime())) return '-';
+
+          return date.toLocaleString('ar-SA', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        }
+
+        function statusLabel(status) {
+          return STATUS_LABELS[status] || status || '-';
+        }
+
+        function statusClass(status) {
+          if (status === 'DELIVERED') return 'success';
+          if (status === 'PREPARING') return 'warning';
+          if (status === 'ON_THE_WAY') return 'success';
+          return '';
+        }
+
+        function setFeedback(message, isError) {
+          if (!feedbackNode) return;
+          feedbackNode.textContent = message || '';
+          feedbackNode.classList.remove('error');
+          feedbackNode.classList.remove('success');
+
+          if (!message) {
+            return;
+          }
+
+          feedbackNode.classList.add(isError ? 'error' : 'success');
+        }
+
+        function getCounts() {
+          return {
+            ALL: orders.length,
+            PREPARING: orders.filter(function (order) { return order.status === 'PREPARING'; }).length,
+            ON_THE_WAY: orders.filter(function (order) { return order.status === 'ON_THE_WAY'; }).length,
+            DELIVERED: orders.filter(function (order) { return order.status === 'DELIVERED'; }).length,
+          };
+        }
+
+        function renderFilters() {
+          var counts = getCounts();
+          filterButtons.forEach(function (button) {
+            var filter = button.getAttribute('data-filter') || 'ALL';
+            var label = filter === 'ALL' ? 'الكل' : statusLabel(filter);
+            button.textContent = label + ' (' + String(counts[filter] || 0) + ')';
+            button.classList.toggle('active', activeFilter === filter);
+          });
+        }
+
+        function currentOrders() {
+          if (activeFilter === 'ALL') return orders;
+          return orders.filter(function (order) {
+            return order.status === activeFilter;
+          });
+        }
+
+        function addressText(order) {
+          if (!order || !order.address) {
+            return 'لا يوجد عنوان.';
+          }
+
+          var parts = [
+            order.address.label,
+            order.address.city,
+            order.address.street,
+            order.address.building,
+          ].filter(Boolean);
+
+          return parts.length ? parts.join(' - ') : 'لا يوجد عنوان.';
+        }
+
+        function orderCoordinates(order) {
+          var latitude = Number(order && order.address && order.address.latitude);
+          var longitude = Number(order && order.address && order.address.longitude);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+          return {
+            latitude: Number(latitude.toFixed(7)),
+            longitude: Number(longitude.toFixed(7)),
+          };
+        }
+
+        function googleMapsUrl(latitude, longitude) {
+          return 'https://www.google.com/maps?q=' + encodeURIComponent(String(latitude) + ',' + String(longitude));
+        }
+
+        function phoneLink(phone) {
+          return String(phone || '').replace(/[^\d+]/g, '');
+        }
+
+        function nextStatus(order) {
+          if (!order) return '';
+          if (order.status === 'PREPARING') return 'ON_THE_WAY';
+          if (order.status === 'ON_THE_WAY') return 'DELIVERED';
+          return '';
+        }
+
+        function actionLabel(status) {
+          if (status === 'ON_THE_WAY') return 'في الطريق';
+          if (status === 'DELIVERED') return 'تم التوصيل';
+          return '';
+        }
+
+        function renderOrders() {
+          if (!listNode) return;
+          var data = currentOrders();
+
+          if (!data.length) {
+            listNode.innerHTML = '<article class="card orders-empty">لا توجد طلبات ضمن هذا التصنيف حالياً.</article>';
+            return;
+          }
+
+          listNode.innerHTML = data
+            .map(function (order) {
+              var mapCoordinates = orderCoordinates(order);
+              var mapUrl = mapCoordinates
+                ? googleMapsUrl(mapCoordinates.latitude, mapCoordinates.longitude)
+                : '';
+              var phone = phoneLink(order && order.customer ? order.customer.phone : '');
+              var targetStatus = nextStatus(order);
+              var buttonLabel = actionLabel(targetStatus);
+              var canUpdate = Boolean(targetStatus) && !isUpdating;
+              var customerName = order && order.customer ? order.customer.name : '-';
+              var total = order && order.totals ? order.totals.total : 0;
+              var itemsCount = Array.isArray(order.items) ? order.items.length : 0;
+
+              return [
+                '<article class="card stack">',
+                '  <div class="row">',
+                '    <span class="tag ' + escapeHtml(statusClass(order.status)) + '">' + escapeHtml(statusLabel(order.status)) + '</span>',
+                '    <strong class="orders-customer">طلب #' + escapeHtml(order.orderNumber || '-') + '</strong>',
+                '  </div>',
+                '  <div class="row">',
+                '    <div>',
+                '      <div class="muted tiny">العميل</div>',
+                '      <strong>' + escapeHtml(customerName) + '</strong>',
+                '    </div>',
+                '    <div class="text-left">',
+                '      <div class="muted tiny">الإجمالي</div>',
+                '      <div class="price-sm">' + escapeHtml(formatMoney(total)) + '</div>',
+                '    </div>',
+                '  </div>',
+                '  <div class="row">',
+                '    <span class="muted tiny">' + escapeHtml(formatDateTime(order.createdAt)) + '</span>',
+                '    <span class="muted tiny">الأصناف: ' + escapeHtml(String(itemsCount)) + '</span>',
+                '  </div>',
+                '  <div class="muted tiny">' + escapeHtml(addressText(order)) + '</div>',
+                order.notes
+                  ? '  <div class="muted tiny" style="white-space: pre-line">ملاحظات: ' + escapeHtml(order.notes) + '</div>'
+                  : '',
+                '  <div class="action-row">',
+                canUpdate
+                  ? '    <button class="pill active" data-order-id="' + escapeHtml(order.id || '') + '" data-next-status="' + escapeHtml(targetStatus) + '">' + escapeHtml(buttonLabel) + '</button>'
+                  : '    <span></span>',
+                mapUrl
+                  ? '    <a class="icon-btn" href="' + escapeHtml(mapUrl) + '" target="_blank" rel="noopener noreferrer" title="فتح الموقع على Google Maps"><span class="material-symbols-outlined">map</span></a>'
+                  : '    <span></span>',
+                phone
+                  ? '    <a class="icon-btn" href="tel:' + escapeHtml(phone) + '" title="اتصال"><span class="material-symbols-outlined">call</span></a>'
+                  : '    <span></span>',
+                '  </div>',
+                '</article>',
+              ].join('');
+            })
+            .join('');
+
+          bindStatusButtons();
+        }
+
+        function bindFilters() {
+          filterButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+              activeFilter = button.getAttribute('data-filter') || 'ALL';
+              renderFilters();
+              renderOrders();
+            });
+          });
+        }
+
+        function statusNote(status) {
+          if (status === 'ON_THE_WAY') return 'الطلب في الطريق';
+          if (status === 'DELIVERED') return 'تم تسليم الطلب';
+          return '';
+        }
+
+        async function updateOrderStatus(orderId, status) {
+          if (!orderId || !status || isUpdating) return;
+          isUpdating = true;
+          setFeedback('جاري تحديث حالة الطلب...', false);
+          renderOrders();
+
+          try {
+            await window.DeliveryBridge.apiRequest('/delivery/orders/' + encodeURIComponent(orderId) + '/status', {
+              method: 'PATCH',
+              body: {
+                status: status,
+                note: statusNote(status),
+              },
+            });
+            setFeedback('تم تحديث حالة الطلب بنجاح.', false);
+            await loadOrders({ silent: true });
+          } catch (_error) {
+            setFeedback('تعذر تحديث حالة الطلب. حاول مرة ثانية.', true);
+          } finally {
+            isUpdating = false;
+            renderOrders();
+          }
+        }
+
+        function bindStatusButtons() {
+          var buttons = listNode.querySelectorAll('[data-next-status][data-order-id]');
+          buttons.forEach(function (button) {
+            if (button.__statusBound) return;
+            button.__statusBound = true;
+            button.addEventListener('click', function () {
+              var orderId = button.getAttribute('data-order-id') || '';
+              var status = button.getAttribute('data-next-status') || '';
+              updateOrderStatus(orderId, status);
+            });
+          });
+        }
+
+        async function loadOrders(options) {
+          var silent = Boolean(options && options.silent);
+          if (!silent && listNode) {
+            listNode.innerHTML = '<article class="card orders-empty">جاري تحميل الطلبات...</article>';
+          }
+
+          try {
+            var response = await window.DeliveryBridge.apiRequest('/delivery/orders');
+            orders = Array.isArray(response) ? response : [];
+            renderFilters();
+            renderOrders();
+            if (!orders.length) {
+              setFeedback('لا يوجد طلبات موجهة لك حالياً.', false);
+            } else if (!silent) {
+              setFeedback('', false);
+            }
+          } catch (error) {
+            orders = [];
+            renderFilters();
+            if (listNode && !silent) {
+              listNode.innerHTML = '<article class="card orders-empty">تعذر تحميل الطلبات. تأكد أنك داخل بحساب ديلفري.</article>';
+            }
+            setFeedback('تعذر الوصول لطلبات الديلفري.', true);
+          }
+        }
+
+        function startPolling() {
+          if (pollingTimer) return;
+          pollingTimer = window.setInterval(function () {
+            if (pollingInFlight || isUpdating) return;
+            pollingInFlight = true;
+            loadOrders({ silent: true })
+              .catch(function () {
+                // Ignore polling errors.
+              })
+              .finally(function () {
+                pollingInFlight = false;
+              });
+          }, 5000);
+        }
+
+        bindFilters();
+        loadOrders();
+        startPolling();
+
+        window.addEventListener('beforeunload', function () {
+          if (pollingTimer) {
+            window.clearInterval(pollingTimer);
+            pollingTimer = null;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

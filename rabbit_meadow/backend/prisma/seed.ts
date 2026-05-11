@@ -3,22 +3,48 @@ import { PrismaClient, UserRole } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const DEFAULT_ADMIN_PHONE = '0500000000';
+const DELIVERY_ACCOUNTS = [
+  { name: 'Delivery 1', phone: '0999000001' },
+  { name: 'Delivery 2', phone: '0999000002' },
+  { name: 'Delivery 3', phone: '0999000003' },
+  { name: 'Delivery 4', phone: '0999000004' },
+  { name: 'Delivery 5', phone: '0999000005' },
+];
 
 async function main() {
   const admin = await prisma.user.upsert({
     where: { phone: DEFAULT_ADMIN_PHONE },
     update: {
-      name: 'مدير الأرنب',
+      name: 'Al-Arnab Admin',
       role: UserRole.ADMIN,
       isActive: true,
     },
     create: {
-      name: 'مدير الأرنب',
+      name: 'Al-Arnab Admin',
       phone: DEFAULT_ADMIN_PHONE,
       role: UserRole.ADMIN,
       isActive: true,
     },
   });
+
+  await Promise.all(
+    DELIVERY_ACCOUNTS.map((account) =>
+      prisma.user.upsert({
+        where: { phone: account.phone },
+        update: {
+          name: account.name,
+          role: UserRole.DELIVERY,
+          isActive: true,
+        },
+        create: {
+          name: account.name,
+          phone: account.phone,
+          role: UserRole.DELIVERY,
+          isActive: true,
+        },
+      }),
+    ),
+  );
 
   await prisma.storeSetting.upsert({
     where: { id: 1 },
@@ -37,7 +63,7 @@ async function main() {
     },
   });
 
-  console.log('Seed completed: admin account and store settings are ready.');
+  console.log('Seed completed: admin + 5 delivery accounts + store settings are ready.');
 }
 
 main()

@@ -1,6 +1,6 @@
 ﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, UserRole } from '@prisma/client';
 import { createHash } from 'node:crypto';
 import { decimalToNumber, roundTo2 } from '../common/utils/decimal.util';
 import { PrismaService } from '../prisma/prisma.service';
@@ -95,6 +95,7 @@ export class AdminService {
       include: {
         user: true,
         address: true,
+        assignedDelivery: true,
       },
     });
 
@@ -110,6 +111,7 @@ export class AdminService {
       include: {
         user: true,
         address: true,
+        assignedDelivery: true,
       },
     });
 
@@ -122,6 +124,7 @@ export class AdminService {
       include: {
         user: true,
         address: true,
+        assignedDelivery: true,
         items: true,
         statusLogs: {
           include: {
@@ -145,6 +148,13 @@ export class AdminService {
         name: order.user.name,
         phone: order.user.phone,
       },
+      assignedDelivery: order.assignedDelivery
+        ? {
+            id: order.assignedDelivery.id,
+            name: order.assignedDelivery.name,
+            phone: order.assignedDelivery.phone,
+          }
+        : null,
       address: order.address
         ? {
             id: order.address.id,
@@ -185,7 +195,16 @@ export class AdminService {
   }
 
   async updateOrderStatus(orderId: string, payload: UpdateOrderStatusDto, changedById: string) {
-    const existing = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const existing = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
     if (!existing) {
       throw new NotFoundException('الطلب غير موجود.');
     }
@@ -196,8 +215,8 @@ export class AdminService {
 
     const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
       [OrderStatus.NEW]: [OrderStatus.PREPARING, OrderStatus.REJECTED],
-      [OrderStatus.PREPARING]: [OrderStatus.ON_THE_WAY, OrderStatus.REJECTED],
-      [OrderStatus.ON_THE_WAY]: [OrderStatus.DELIVERED],
+      [OrderStatus.PREPARING]: [],
+      [OrderStatus.ON_THE_WAY]: [],
       [OrderStatus.DELIVERED]: [],
       [OrderStatus.REJECTED]: [],
       [OrderStatus.CANCELLED]: [],
@@ -211,15 +230,27 @@ export class AdminService {
     }
 
     const statusChanged = existing.status !== payload.status;
+    const assignedDelivery =
+      existing.status === OrderStatus.NEW && payload.status === OrderStatus.PREPARING
+        ? await this.pickDeliveryAssignee()
+        : null;
+    const logNote =
+      payload.note?.trim() ||
+      (assignedDelivery ? `تم تعيين الطلب للمندوب ${assignedDelivery.name}.` : null);
 
     await this.prisma.$transaction(async (tx) => {
+      const nextAssignedDeliveryId =
+        payload.status === OrderStatus.REJECTED ? null : assignedDelivery?.id;
+
       await tx.order.update({
         where: { id: orderId },
         data: {
           status: payload.status,
           prepMinutes: payload.prepMinutes,
           rejectReason: payload.status === OrderStatus.REJECTED ? payload.rejectReason?.trim() : null,
-          ...(payload.note ? { notes: payload.note } : {}),
+          ...(nextAssignedDeliveryId !== undefined
+            ? { assignedDeliveryId: nextAssignedDeliveryId }
+            : {}),
         },
       });
 
@@ -228,7 +259,7 @@ export class AdminService {
           orderId,
           status: payload.status,
           changedById,
-          note: payload.note,
+          note: logNote,
         },
       });
     });
@@ -243,11 +274,12 @@ export class AdminService {
         note,
       });
 
-      if (payload.status === OrderStatus.DELIVERED) {
-        await this.notificationsService.notifyOrderDeliveredForAdmins({
+      if (payload.status === OrderStatus.PREPARING && assignedDelivery) {
+        await this.notificationsService.notifyOrderAssignedToDelivery(assignedDelivery.id, {
           orderId: existing.id,
           orderNumber: existing.orderNumber,
-          userId: existing.userId,
+          customerName: existing.user?.name || null,
+          prepMinutes: payload.prepMinutes ?? null,
         });
       }
     }
@@ -712,6 +744,7 @@ export class AdminService {
     total: unknown;
     createdAt: Date;
     user: { id: string; name: string; phone: string };
+    assignedDelivery?: { id: string; name: string; phone: string } | null;
     address?: {
       id: string;
       city: string;
@@ -733,6 +766,13 @@ export class AdminService {
         name: order.user.name,
         phone: order.user.phone,
       },
+      assignedDelivery: order.assignedDelivery
+        ? {
+            id: order.assignedDelivery.id,
+            name: order.assignedDelivery.name,
+            phone: order.assignedDelivery.phone,
+          }
+        : null,
       address: order.address
         ? {
             id: order.address.id,
@@ -745,5 +785,66 @@ export class AdminService {
           }
         : null,
     };
+  }
+
+  private async pickDeliveryAssignee() {
+    const deliveryUsers = await this.prisma.user.findMany({
+      where: {
+        role: UserRole.DELIVERY,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    if (!deliveryUsers.length) {
+      throw new BadRequestException('لا يوجد مندوب توصيل نشط. يرجى إنشاء حسابات ديلفري أولاً.');
+    }
+
+    const loadRows = await this.prisma.order.groupBy({
+      by: ['assignedDeliveryId'],
+      where: {
+        assignedDeliveryId: {
+          in: deliveryUsers.map((user) => user.id),
+        },
+        status: {
+          in: [OrderStatus.PREPARING, OrderStatus.ON_THE_WAY],
+        },
+      },
+      _count: {
+        _all: true,
+      },
+    });
+
+    const loadByDeliveryId = new Map<string, number>();
+    loadRows.forEach((row) => {
+      if (row.assignedDeliveryId) {
+        loadByDeliveryId.set(row.assignedDeliveryId, row._count._all);
+      }
+    });
+
+    deliveryUsers.sort((a, b) => {
+      const aLoad = loadByDeliveryId.get(a.id) || 0;
+      const bLoad = loadByDeliveryId.get(b.id) || 0;
+      if (aLoad !== bLoad) {
+        return aLoad - bLoad;
+      }
+
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+
+    const selected = deliveryUsers[0];
+    if (!selected) {
+      throw new BadRequestException('لا يوجد مندوب توصيل متاح حالياً.');
+    }
+
+    return selected;
   }
 }
