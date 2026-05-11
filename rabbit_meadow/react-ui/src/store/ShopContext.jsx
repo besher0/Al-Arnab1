@@ -140,8 +140,6 @@ export function ShopProvider({ children }) {
       const config = firebaseConfigFromEnv()
       if (config) {
         window.localStorage.setItem(FIREBASE_CONFIG_STORAGE_KEY, JSON.stringify(config))
-      } else {
-        window.localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY)
       }
     } catch {
       // ignore storage restrictions

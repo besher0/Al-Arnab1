@@ -27,9 +27,6 @@
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
-      </div>
       <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">حسابي</h1>
     </div>
     <div class="flex items-center gap-2">
@@ -45,12 +42,9 @@
   <main class="pt-24 px-4 max-w-2xl mx-auto space-y-6">
     <section class="bg-surface-card border border-primary/10 rounded-3xl p-6 shadow-[0_14px_36px_rgba(26,54,93,0.08)] relative overflow-hidden">
       <div class="absolute -top-12 -left-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl"></div>
-      <div class="relative flex items-center gap-4">
-        <div id="user-avatar" class="w-16 h-16 rounded-full bg-primary text-on-primary font-black text-2xl flex items-center justify-center">م</div>
-        <div>
-          <h2 id="user-name" class="font-headline font-black text-2xl leading-tight">...</h2>
-          <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
-        </div>
+      <div class="relative">
+        <h2 id="user-name" class="font-headline font-black text-2xl leading-tight">...</h2>
+        <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
       </div>
     </section>
 
@@ -62,10 +56,6 @@
       <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
         <p class="text-on-surface-variant text-xs font-bold mb-1">رقم الهاتف</p>
         <p id="field-phone" class="font-bold text-base" dir="ltr">-</p>
-      </div>
-      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
-        <p class="text-on-surface-variant text-xs font-bold mb-1">نوع الحساب</p>
-        <p id="field-role" class="font-bold text-base">-</p>
       </div>
     </section>
 
@@ -143,36 +133,19 @@
       });
     }
 
-    function roleLabel(role) {
-      if (role === 'ADMIN') return 'مدير النظام';
-      if (role === 'CUSTOMER') return 'عميل';
-      return role || '-';
-    }
-
-    function firstLetter(value) {
-      var clean = String(value || '').trim();
-      if (!clean) return 'م';
-      return clean.charAt(0);
-    }
-
     function setUserData(user) {
       var name = user && user.name ? String(user.name) : 'مستخدم';
       var phone = user && user.phone ? String(user.phone) : '-';
-      var role = user && user.role ? String(user.role) : '';
 
       var title = document.getElementById('user-name');
       var welcome = document.getElementById('user-welcome');
-      var avatar = document.getElementById('user-avatar');
       var fieldName = document.getElementById('field-name');
       var fieldPhone = document.getElementById('field-phone');
-      var fieldRole = document.getElementById('field-role');
 
       if (title) title.textContent = name;
-      if (welcome) welcome.textContent = 'مرحباً بك في حسابك.';
-      if (avatar) avatar.textContent = firstLetter(name);
+      if (welcome) welcome.textContent = 'مرحباً ' + name + '.';
       if (fieldName) fieldName.textContent = name;
       if (fieldPhone) fieldPhone.textContent = phone;
-      if (fieldRole) fieldRole.textContent = roleLabel(role);
     }
 
     function setLogoutLoading(isLoading) {

@@ -56,8 +56,8 @@
 <body class="bg-background text-on-surface min-h-screen pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
     <div>
-      <h1 class="text-on-surface font-black text-2xl tracking-tight">منتجات القسم</h1>
-      <p class="text-xs text-on-surface-variant font-bold" data-category-subtitle>جاري التحميل...</p>
+      <h1 class="text-on-surface font-black text-2xl tracking-tight">نتائج البحث</h1>
+      <p class="text-xs text-on-surface-variant font-bold" data-results-subtitle>جاري التحميل...</p>
     </div>
     <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
       <span class="material-symbols-outlined">notifications</span>
@@ -70,13 +70,13 @@
     <section>
       <div class="search-shell flex items-center bg-white rounded-full px-5 py-3 border border-primary/10">
         <button data-search-submit class="material-symbols-outlined text-primary" type="button">search</button>
-        <input data-search-input class="bg-transparent border-none focus:ring-0 w-full text-sm font-label pr-3 text-right text-on-surface" placeholder="ابحث داخل هذا القسم..." type="text"/>
+        <input data-search-input class="bg-transparent border-none focus:ring-0 w-full text-sm font-label pr-3 text-right text-on-surface" placeholder="ابحث عن منتج..." type="text"/>
       </div>
     </section>
 
     <section>
-      <div class="grid grid-cols-2 gap-3" data-category-products-grid>
-        <article class="col-span-2 bg-white rounded-2xl p-5 text-center text-sm text-on-surface-variant border border-primary/10">جاري تحميل المنتجات...</article>
+      <div class="grid grid-cols-2 gap-3" data-search-results>
+        <article class="col-span-2 bg-white rounded-2xl p-5 text-center text-sm text-on-surface-variant border border-primary/10">جاري البحث...</article>
       </div>
     </section>
   </main>
@@ -86,8 +86,8 @@
       <span class="material-symbols-outlined" data-icon="home">home</span>
       <span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
     </a>
-    <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
-      <span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
       <span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
     </a>
     <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
@@ -120,17 +120,16 @@
         })() ||
         window.location.origin + '/api';
 
-      var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
       var STORAGE_PRODUCT = 'al-arnab-selected-product-id';
-      var gridNode = document.querySelector('[data-category-products-grid]');
-      var subtitleNode = document.querySelector('[data-category-subtitle]');
       var searchInput = document.querySelector('[data-search-input]');
+      var subtitleNode = document.querySelector('[data-results-subtitle]');
+      var resultsNode = document.querySelector('[data-search-results]');
       var searchButton = document.querySelector('[data-search-submit]');
       var storeClosedBanner = document.querySelector('[data-store-closed-banner]');
 
       var state = {
-        categories: [],
         products: [],
+        query: '',
         categoryId: '',
         isStoreOpen: true,
       };
@@ -142,9 +141,11 @@
         });
       }
 
+      function currencyLabel() { return 'ل.س'; }
+
       function formatSar(value) {
         var numeric = Math.max(0, Number(value) || 0);
-        return numeric.toFixed(2) + ' ل.س';
+        return numeric.toFixed(2) + ' ' + currencyLabel();
       }
 
       function escapeHtml(value) {
@@ -172,6 +173,19 @@
         });
       }
 
+      function readQueryParams() {
+        var params = new URLSearchParams(window.location.search || '');
+        state.query = String(params.get('q') || '').trim();
+        state.categoryId = String(params.get('categoryId') || '').trim();
+      }
+
+      function updateUrlAndSearch(query) {
+        var params = new URLSearchParams();
+        if (query) params.set('q', query);
+        if (state.categoryId) params.set('categoryId', state.categoryId);
+        send('navigate', { to: '/search' + (params.toString() ? '?' + params.toString() : '') });
+      }
+
       function applyStore(storePayload) {
         if (!storePayload || typeof storePayload !== 'object') return;
         state.isStoreOpen = Boolean(storePayload.isOpen !== false);
@@ -186,54 +200,44 @@
         });
       }
 
-      function categoryLabel() {
-        var current = state.categories.find(function (category) {
-          return String(category.id || '') === String(state.categoryId || '');
-        });
-        return current ? String(current.nameAr || 'القسم') : 'القسم';
-      }
-
-      function readCategoryId(searchValue) {
-        var raw = String(searchValue || window.location.search || '').trim();
-        if (!raw) return '';
-        var search = raw.charAt(0) === '?' ? raw.slice(1) : raw;
-        var params = new URLSearchParams(search);
-        var fromQuery = String(params.get('categoryId') || params.get('category') || '').trim();
-        return fromQuery;
-      }
-
-      function applyCategoryFromRoute(searchValue) {
-        var fromRoute = readCategoryId(searchValue);
-        if (!fromRoute) return;
-        state.categoryId = fromRoute;
-        window.localStorage.setItem(STORAGE_CATEGORY, fromRoute);
-      }
-
       function filteredProducts() {
+        var query = state.query.toLowerCase();
         return state.products.filter(function (product) {
-          if (!state.categoryId) return true;
-          return String(product.categoryId || '') === String(state.categoryId || '');
+          if (state.categoryId && String(product.categoryId || '') !== state.categoryId) {
+            return false;
+          }
+          if (!query) return true;
+          var name = String(product.name || '').toLowerCase();
+          var category = String(product.categoryName || '').toLowerCase();
+          return name.indexOf(query) !== -1 || category.indexOf(query) !== -1;
         });
       }
 
       function render() {
-        if (subtitleNode) {
-          subtitleNode.textContent = categoryLabel();
+        if (searchInput) {
+          searchInput.value = state.query;
         }
 
         if (storeClosedBanner) {
           storeClosedBanner.classList.toggle('hidden', state.isStoreOpen);
         }
 
-        if (!gridNode) return;
-
         var rows = filteredProducts();
+        if (subtitleNode) {
+          if (!state.query) {
+            subtitleNode.textContent = 'اكتب اسم المنتج للبحث.';
+          } else {
+            subtitleNode.textContent = 'عدد النتائج: ' + toArabicNumber(rows.length);
+          }
+        }
+
+        if (!resultsNode) return;
         if (!rows.length) {
-          gridNode.innerHTML = '<article class="col-span-2 bg-white rounded-2xl p-5 text-center text-sm text-on-surface-variant border border-primary/10">لا توجد منتجات في هذا القسم حالياً.</article>';
+          resultsNode.innerHTML = '<article class="col-span-2 bg-white rounded-2xl p-5 text-center text-sm text-on-surface-variant border border-primary/10">لا توجد نتائج مطابقة للبحث.</article>';
           return;
         }
 
-        gridNode.innerHTML = rows
+        resultsNode.innerHTML = rows
           .map(function (product) {
             return (
               '<article class="product-card" data-open-product="' + escapeHtml(product.id) + '">' +
@@ -244,7 +248,7 @@
               '</div>' +
               '<div class="body">' +
               '<h3 class="font-bold text-sm line-clamp-2 min-h-[2.5rem]">' + escapeHtml(product.name || 'منتج') + '</h3>' +
-              '<p class="text-xs text-on-surface-variant truncate">' + escapeHtml(product.unit || '') + '</p>' +
+              '<p class="text-xs text-on-surface-variant truncate">' + escapeHtml(product.categoryName || '') + '</p>' +
               '<p class="text-primary font-black text-base mt-auto">' + formatSar(product.price || 0) + '</p>' +
               '<button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold flex items-center justify-center gap-2' + (state.isStoreOpen ? '' : ' disabled-action') + '" data-add-product="' + escapeHtml(product.id) + '">' +
               '<span class="material-symbols-outlined text-sm">shopping_cart</span>أضف للسلة</button>' +
@@ -255,20 +259,13 @@
           .join('');
       }
 
-      function openSearchPage() {
-        var query = (searchInput && searchInput.value ? searchInput.value : '').trim();
-        if (!query) {
+      function submitSearch() {
+        var next = (searchInput && searchInput.value ? searchInput.value : '').trim();
+        if (!next) {
           showStitchAlert('اكتب اسم المنتج أولاً.');
           return;
         }
-
-        var params = new URLSearchParams();
-        params.set('q', query);
-        if (state.categoryId) {
-          params.set('categoryId', state.categoryId);
-        }
-
-        send('navigate', { to: '/search?' + params.toString() });
+        updateUrlAndSearch(next);
       }
 
       var navLinks = document.querySelectorAll('nav a');
@@ -304,14 +301,14 @@
       });
 
       if (searchButton) {
-        searchButton.addEventListener('click', openSearchPage);
+        searchButton.addEventListener('click', submitSearch);
       }
 
       if (searchInput) {
         searchInput.addEventListener('keydown', function (event) {
           if (event.key !== 'Enter') return;
           event.preventDefault();
-          openSearchPage();
+          submitSearch();
         });
       }
 
@@ -320,39 +317,24 @@
         var payload = event.data;
         if (!payload || payload.source !== 'react-shell') return;
         if (payload.type !== 'cart-state') return;
-
         applyStore(payload.store || null);
         setFooterCartCount(payload.itemCount || 0);
-
-        if (payload.route && payload.route.pathname === '/category-products') {
-          applyCategoryFromRoute(payload.route.search || '');
-        }
-
         render();
       });
 
-      applyCategoryFromRoute(window.location.search);
-      if (!state.categoryId) {
-        state.categoryId = String(window.localStorage.getItem(STORAGE_CATEGORY) || '').trim();
-      }
+      readQueryParams();
+      render();
 
-      fetch(API_BASE + '/catalog/bootstrap')
+      fetch(API_BASE + '/catalog/products')
         .then(function (response) {
           if (!response.ok) throw new Error('catalog');
           return response.json();
         })
-        .then(function (payload) {
-          state.categories = Array.isArray(payload && payload.categories) ? payload.categories : [];
-          state.products = Array.isArray(payload && payload.products) ? payload.products : [];
-
-          if (!state.categoryId && state.categories.length) {
-            state.categoryId = String(state.categories[0].id || '');
-          }
-
+        .then(function (products) {
+          state.products = Array.isArray(products) ? products : [];
           render();
         })
         .catch(function () {
-          state.categories = [];
           state.products = [];
           render();
         });
@@ -362,7 +344,6 @@
       }
 
       send('request-state');
-      render();
     })();
   </script>
 </body>

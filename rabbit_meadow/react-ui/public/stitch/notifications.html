@@ -367,6 +367,13 @@
         window.AlArnabNotifications.tryBindForegroundMessages();
       }
 
+      if (
+        window.AlArnabNotifications &&
+        typeof window.AlArnabNotifications.syncPushTokenIfGranted === 'function'
+      ) {
+        window.AlArnabNotifications.syncPushTokenIfGranted();
+      }
+
       send('request-state');
       loadNotifications();
     })();

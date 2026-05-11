@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="utf-8" />
@@ -77,6 +77,10 @@
   </header>
 
   <main id="cart-main" class="pt-24 px-4 max-w-2xl mx-auto space-y-6">
+    <section id="store-closed-banner" class="hidden bg-red-100 border border-red-300 text-red-700 rounded-2xl px-4 py-3 text-sm font-bold">
+      المحل مغلق حالياً، لا يمكن تأكيد الطلب الآن.
+    </section>
+
     <section class="space-y-4">
       <h2 class="font-tajawal font-extrabold text-xl text-on-surface px-2">محتويات السلة</h2>
       <div id="cart-items-container" class="space-y-4"></div>
@@ -136,7 +140,7 @@
 
       <button id="confirm-order-button" class="w-full py-5 rounded-full bg-primary text-on-primary font-tajawal font-bold text-xl shadow-lg shadow-sky-200 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed" type="button">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-        <span data-confirm-label>تأكيد الطلب</span>
+        <span data-confirm-label>اكبس لإكمال الطلب</span>
       </button>
     </section>
   </main>
@@ -184,6 +188,7 @@
       var alternatePhoneHint = document.getElementById('alternate-phone-hint');
       var confirmButton = document.getElementById('confirm-order-button');
       var confirmLabel = confirmButton ? confirmButton.querySelector('[data-confirm-label]') : null;
+      var storeClosedBanner = document.getElementById('store-closed-banner');
       var query = new URLSearchParams(window.location.search || '');
       var isSheetMode = ['1', 'true', 'yes'].indexOf(String(query.get('sheet') || '').toLowerCase()) !== -1;
       var closeRoute = String(query.get('from') || '/home');
@@ -202,6 +207,7 @@
         itemCount: 0,
         location: null,
         isCheckoutLoading: false,
+        isStoreOpen: true,
         currency: 'SYP',
       };
 
@@ -263,6 +269,19 @@
       function applyStore(storePayload) {
         if (!storePayload || typeof storePayload !== 'object') return;
         state.currency = String(storePayload.currency || state.currency || 'SYP').toUpperCase();
+        state.isStoreOpen = Boolean(storePayload.isOpen !== false);
+      }
+
+      function renderStoreOpenState() {
+        if (storeClosedBanner) {
+          storeClosedBanner.classList.toggle('hidden', state.isStoreOpen);
+        }
+
+        if (!confirmButton || state.isCheckoutLoading) return;
+        confirmButton.disabled = !state.isStoreOpen;
+        if (confirmLabel) {
+          confirmLabel.textContent = state.isStoreOpen ? 'اكبس لإكمال الطلب' : 'المحل مغلق';
+        }
       }
 
       function formatSar(value) {
@@ -380,10 +399,14 @@
       function setConfirmLoading(isLoading) {
         state.isCheckoutLoading = Boolean(isLoading);
         if (confirmButton) {
-          confirmButton.disabled = state.isCheckoutLoading;
+          confirmButton.disabled = state.isCheckoutLoading || !state.isStoreOpen;
         }
         if (confirmLabel) {
-          confirmLabel.textContent = state.isCheckoutLoading ? 'جاري تأكيد الطلب...' : 'تأكيد الطلب';
+          if (state.isCheckoutLoading) {
+            confirmLabel.textContent = 'جاري تأكيد الطلب...';
+          } else {
+            confirmLabel.textContent = state.isStoreOpen ? 'اكبس لإكمال الطلب' : 'المحل مغلق';
+          }
         }
       }
 
@@ -529,6 +552,7 @@
 
       function applyCartState(payload) {
         applyStore(payload && payload.store ? payload.store : null);
+        renderStoreOpenState();
         var items = Array.isArray(payload && payload.items) ? payload.items : [];
         var userPhone =
           payload && payload.user && payload.user.phone
@@ -711,6 +735,10 @@
       if (confirmButton) {
         confirmButton.addEventListener('click', function () {
           if (state.isCheckoutLoading) return;
+          if (!state.isStoreOpen) {
+            alert('المحل مغلق حالياً، لا يمكن تأكيد الطلب.');
+            return;
+          }
 
           var checkoutPayload = getCheckoutPayload();
           if (!checkoutPayload) return;
@@ -763,6 +791,7 @@
 
       applySheetMode();
       applySelectedLocation();
+      renderStoreOpenState();
       send('request-state');
     })();
   </script>

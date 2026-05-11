@@ -526,6 +526,10 @@ select {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.bottom-nav.seven {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
 .nav-item {
   border: 0;
   background: transparent;

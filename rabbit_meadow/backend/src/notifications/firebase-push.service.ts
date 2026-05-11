@@ -18,6 +18,8 @@ type PushResult = {
 };
 
 const FIREBASE_APP_NAME = 'al-arnab-notifications';
+const MAX_MULTICAST_TOKENS = 500;
+const WEB_PUSH_ICON = '/favicon.svg';
 
 type FirebaseServiceAccount = {
   project_id?: string;
@@ -62,74 +64,77 @@ export class FirebasePushService {
       };
     }
 
-    const message: MulticastMessage = {
-      tokens: normalizedTokens,
-      notification: {
-        title: payload.title,
-        body: payload.body,
-      },
-      data: payload.data || {},
-      android: {
-        priority: 'high',
-      },
-      apns: {
-        headers: {
-          'apns-priority': '10',
-        },
-      },
-      webpush: {
-        headers: {
-          Urgency: 'high',
-        },
+    let successCount = 0;
+    let failureCount = 0;
+    const invalidTokens: string[] = [];
+    const messaging = getMessaging(app);
+
+    for (let start = 0; start < normalizedTokens.length; start += MAX_MULTICAST_TOKENS) {
+      const batchTokens = normalizedTokens.slice(start, start + MAX_MULTICAST_TOKENS);
+      const message: MulticastMessage = {
+        tokens: batchTokens,
         notification: {
           title: payload.title,
           body: payload.body,
-          icon: '/icons/icon-192.png',
         },
-        fcmOptions: payload.data?.link
-          ? {
-              link: payload.data.link,
-            }
-          : undefined,
-      },
-    };
-
-    try {
-      const response = await getMessaging(app).sendEachForMulticast(message);
-      const invalidTokens: string[] = [];
-
-      response.responses.forEach((result, index) => {
-        if (result.success) return;
-
-        const code = result.error?.code || '';
-        if (
-          code === 'messaging/registration-token-not-registered' ||
-          code === 'messaging/invalid-registration-token'
-        ) {
-          invalidTokens.push(normalizedTokens[index]);
-        }
-      });
-
-      return {
-        attemptedTokens: normalizedTokens.length,
-        successCount: response.successCount,
-        failureCount: response.failureCount,
-        invalidTokens,
+        data: payload.data || {},
+        android: {
+          priority: 'high',
+        },
+        apns: {
+          headers: {
+            'apns-priority': '10',
+          },
+        },
+        webpush: {
+          headers: {
+            Urgency: 'high',
+          },
+          notification: {
+            title: payload.title,
+            body: payload.body,
+            icon: WEB_PUSH_ICON,
+          },
+          fcmOptions: payload.data?.link
+            ? {
+                link: payload.data.link,
+              }
+            : undefined,
+        },
       };
-    } catch (error) {
-      this.logger.warn(
-        `Failed to send Firebase push notifications: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
 
-      return {
-        attemptedTokens: normalizedTokens.length,
-        successCount: 0,
-        failureCount: normalizedTokens.length,
-        invalidTokens: [],
-      };
+      try {
+        const response = await messaging.sendEachForMulticast(message);
+        successCount += response.successCount;
+        failureCount += response.failureCount;
+
+        response.responses.forEach((result, index) => {
+          if (result.success) return;
+
+          const code = result.error?.code || '';
+          if (
+            code === 'messaging/registration-token-not-registered' ||
+            code === 'messaging/invalid-registration-token'
+          ) {
+            invalidTokens.push(batchTokens[index]);
+          }
+        });
+      } catch (error) {
+        failureCount += batchTokens.length;
+        this.logger.warn(
+          `Failed to send Firebase push notifications batch (${start + 1}-${start + batchTokens.length}): ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
     }
+
+    return {
+      attemptedTokens: normalizedTokens.length,
+      successCount,
+      failureCount,
+      invalidTokens,
+    };
   }
 
   private getApp(): App | null {

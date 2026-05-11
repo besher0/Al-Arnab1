@@ -299,10 +299,16 @@ export class CartService {
 
   async checkout(userId: string, payload: CheckoutCartDto) {
     return this.withDbRetry(async () => {
+      const settings = await this.prisma.storeSetting.findUnique({ where: { id: 1 } });
+      if (settings?.isOpen === false) {
+        throw new BadRequestException('المحل مغلق حالياً، لا يمكن تأكيد الطلب.');
+      }
+
       const [exchangeRate, discountIndex] = await Promise.all([
         this.getExchangeRate(),
         this.getActiveDiscountIndex(),
       ]);
+
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { phone: true, isActive: true },

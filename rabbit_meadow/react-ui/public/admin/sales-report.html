@@ -204,8 +204,9 @@
 
           operationsNode.innerHTML = operations
             .map(function (operation) {
+              var route = '/admin/orders/detail?id=' + encodeURIComponent(operation.id || '');
               return [
-                '<article class="order-row row">',
+                '<button type="button" class="order-row row w-full text-right" data-order-route="' + escapeHtml(route) + '">',
                 '  <span class="material-symbols-outlined" style="font-size: 22px; color: #8ea2bc">receipt_long</span>',
                 '  <div>',
                 '    <strong>طلب #' + escapeHtml(operation.orderNumber || '-') + '</strong>',
@@ -215,7 +216,7 @@
                 '    <div class="price-sm">' + escapeHtml(formatMoney(operation.total)) + '</div>',
                 '    <span class="tag ' + statusClass(operation.status) + '">' + escapeHtml(STATUS_LABELS[operation.status] || 'غير محدد') + '</span>',
                 '  </div>',
-                '</article>',
+                '</button>',
               ].join('');
             })
             .join('');
@@ -275,6 +276,19 @@
           fromInput.value = toDateInputValue(monthStart);
           toInput.value = toDateInputValue(today);
         }
+
+        document.addEventListener('click', function (event) {
+          var orderButton = event.target.closest('[data-order-route]');
+          if (!orderButton || !window.AdminBridge || typeof window.AdminBridge.go !== 'function') {
+            return;
+          }
+
+          event.preventDefault();
+          var route = orderButton.getAttribute('data-order-route');
+          if (route) {
+            window.AdminBridge.go(route);
+          }
+        });
 
         refreshButton.addEventListener('click', loadReport);
         setDefaultDates();

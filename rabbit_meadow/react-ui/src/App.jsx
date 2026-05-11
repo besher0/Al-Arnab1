@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo } from 'react'
+﻿import { useEffect, useMemo, useRef } from 'react'
 import {
   Navigate,
   Route,
@@ -90,6 +90,7 @@ function FramePage({ src, title, forwardSearch = false }) {
 function BridgeListener() {
   const navigate = useNavigate()
   const location = useLocation()
+  const lastOrdersSignatureRef = useRef('')
   const {
     login,
     register,
@@ -143,6 +144,7 @@ function BridgeListener() {
           store: {
             currency: store?.currency || 'SYP',
             usdSarRate: Number(store?.usdSarRate) >= 100 ? Number(store.usdSarRate) : 15000,
+            isOpen: Boolean(store?.isOpen ?? true),
           },
           user: user
             ? {
@@ -289,9 +291,17 @@ function BridgeListener() {
       if (payload.type === 'orders-list') {
         try {
           const orders = await listOrders()
+          const safeOrders = Array.isArray(orders) ? orders : []
+          lastOrdersSignatureRef.current = JSON.stringify(
+            safeOrders.map((order) => ({
+              id: order?.id || '',
+              status: order?.status || '',
+              updatedAt: order?.updatedAt || '',
+            })),
+          )
           sendFrameMessage(event.source, 'orders-result', {
             success: true,
-            orders: Array.isArray(orders) ? orders : [],
+            orders: safeOrders,
           })
         } catch (error) {
           sendFrameMessage(event.source, 'orders-result', {
@@ -356,6 +366,78 @@ function BridgeListener() {
     user,
   ])
 
+  useEffect(() => {
+    if (isBootstrapping || !isAuthenticated || location.pathname !== '/orders') {
+      return undefined
+    }
+
+    let cancelled = false
+    let intervalId = null
+
+    function sendOrdersResult(payload) {
+      const frame = document.querySelector('.screen-frame')
+      const targetWindow = frame?.contentWindow
+      if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
+        return
+      }
+
+      targetWindow.postMessage(
+        Object.assign({ source: 'react-shell', type: 'orders-result' }, payload),
+        window.location.origin,
+      )
+    }
+
+    async function fetchOrders(force = false) {
+      try {
+        const orders = await listOrders()
+        if (cancelled) {
+          return
+        }
+
+        const safeOrders = Array.isArray(orders) ? orders : []
+        const nextSignature = JSON.stringify(
+          safeOrders.map((order) => ({
+            id: order?.id || '',
+            status: order?.status || '',
+            updatedAt: order?.updatedAt || '',
+          })),
+        )
+
+        if (!force && nextSignature === lastOrdersSignatureRef.current) {
+          return
+        }
+
+        lastOrdersSignatureRef.current = nextSignature
+        sendOrdersResult({
+          success: true,
+          orders: safeOrders,
+        })
+      } catch (error) {
+        if (cancelled || !force) {
+          return
+        }
+
+        sendOrdersResult({
+          success: false,
+          message: error?.message || 'تعذر تحميل الطلبات.',
+          orders: [],
+        })
+      }
+    }
+
+    void fetchOrders(true)
+    intervalId = window.setInterval(() => {
+      void fetchOrders(false)
+    }, 5000)
+
+    return () => {
+      cancelled = true
+      if (intervalId) {
+        window.clearInterval(intervalId)
+      }
+    }
+  }, [isAuthenticated, isBootstrapping, listOrders, location.pathname])
+
   return null
 }
 
@@ -406,6 +488,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <FramePage src="/stitch/categories.html" title="categories" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <FramePage src="/stitch/search.html" title="search" forwardSearch />
             </ProtectedRoute>
           }
         />
@@ -654,3 +744,4 @@ function App() {
 }
 
 export default App
+

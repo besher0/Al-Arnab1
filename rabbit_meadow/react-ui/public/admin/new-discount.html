@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>إضافة عرض جديد</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Almarai:wght@400;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -14,37 +14,6 @@
     />
     <link href="/admin/admin.css" rel="stylesheet" />
     <style>
-      .discount-page-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-
-      .discount-page-title {
-        font-size: 28px;
-        font-weight: 900;
-        color: var(--admin-primary-deep);
-      }
-
-      .discount-value-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .discount-value-row .input-field {
-        text-align: center;
-        font-size: 22px;
-        font-weight: 800;
-      }
-
-      .target-actions {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-      }
-
       .targets-wrap {
         display: flex;
         flex-wrap: wrap;
@@ -73,10 +42,10 @@
         line-height: 1;
       }
 
-      .hint-note {
-        font-size: 11px;
-        color: var(--admin-muted);
-        line-height: 1.6;
+      .target-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
       }
 
       .saving-feedback {
@@ -90,6 +59,17 @@
       .saving-feedback.is-success {
         color: var(--admin-success);
       }
+
+      .bundle-box {
+        border: 1px solid #d6e9f6;
+        border-radius: 16px;
+        padding: 12px;
+        background: #f8fcff;
+      }
+
+      .bundle-box[hidden] {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -99,16 +79,17 @@
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
         <div class="header-group">
-          <div class="discount-page-header">
-            <h1 class="discount-page-title">إضافة عرض جديد</h1>
+          <div>
+            <h1 class="page-title">إضافة عرض جديد</h1>
+            <p class="page-subtitle">خصم مباشر أو إنشاء بكج جديد ثم إضافته كعرض</p>
           </div>
         </div>
       </header>
 
       <main class="container stack">
         <section class="hero">
-          <h2>صمّم عرضك</h2>
-          <p>أنشئ خصمًا فعّالًا على منتج أو تصنيف، وحدد قيمته وتاريخ بدايته ونهايته بدقة.</p>
+          <h2>إدارة العروض</h2>
+          <p>يمكنك إضافة عرض على منتجات موجودة أو إنشاء منتج بكج جديد وإدخاله في العرض مباشرة.</p>
         </section>
 
         <section class="card stack">
@@ -119,12 +100,12 @@
 
           <label>
             <div class="label">عنوان العرض</div>
-            <input id="discount-title" class="input-field" type="text" placeholder="مثال: تخفيض نهاية الأسبوع" />
+            <input id="discount-title" class="input-field" type="text" placeholder="مثال: عرض البكج الأسبوعي" />
           </label>
 
           <label>
             <div class="label">وصف العرض</div>
-            <textarea id="discount-description" class="textarea-field" placeholder="اشرح باختصار ما الذي يميز هذا العرض..." ></textarea>
+            <textarea id="discount-description" class="textarea-field" placeholder="وصف مختصر للعرض..."></textarea>
           </label>
 
           <div class="grid-2">
@@ -136,20 +117,18 @@
               </select>
             </label>
             <label>
-              <div class="label">القيمة</div>
-              <div class="discount-value-row">
-                <input id="discount-value" class="input-field" type="number" min="0" step="0.01" value="0" />
-              </div>
+              <div class="label">قيمة الخصم</div>
+              <input id="discount-value" class="input-field" type="number" min="0" step="0.01" value="0" />
             </label>
           </div>
 
-          <div id="discount-value-hint" class="hint-note">سيتم خصم هذا المبلغ من سعر المنتج.</div>
+          <div id="discount-value-hint" class="tiny muted">سيتم خصم هذا المبلغ من السعر.</div>
         </section>
 
         <section class="card stack">
           <div class="row">
             <span class="material-symbols-outlined" style="color: #67bde2">target</span>
-            <h3 class="stock-section-title">الاستهداف</h3>
+            <h3 class="stock-section-title">استهداف العرض</h3>
           </div>
 
           <div class="grid-2">
@@ -161,20 +140,90 @@
               </select>
             </label>
             <label>
-              <div class="label">قائمة سريعة</div>
+              <div class="label">اختيار سريع</div>
               <select id="discount-target-pick" class="select-field">
-                <option value="">اختر عنصرًا...</option>
+                <option value="">اختر عنصر...</option>
               </select>
             </label>
           </div>
 
           <div class="target-actions">
-            <input id="discount-target-ids" class="input-field" type="text" placeholder="معرّفات الأهداف (مثال: carrot,apple)" />
+            <input id="discount-target-ids" class="input-field" type="text" placeholder="أدخل معرفات مفصولة بفاصلة" />
             <button id="discount-add-target" class="pill active" type="button">إضافة</button>
           </div>
 
-          <div class="hint-note">يمكنك إدخال أكثر من معرف بفاصلة، أو اختيار عنصر من القائمة ثم الضغط على إضافة.</div>
           <div id="discount-target-chips" class="targets-wrap"></div>
+          <div class="tiny muted">يمكن اختيار منتج/تصنيف موجود أو إدخال معرف يدوي.</div>
+        </section>
+
+        <section class="card stack">
+          <label class="new-product-toggle">
+            <div class="label">بكج جديد</div>
+            <div class="new-product-toggle-box">
+              <input id="bundle-create-enabled" type="checkbox" />
+              <span>إنشاء منتج بكج جديد وإضافته تلقائيًا للعرض</span>
+            </div>
+          </label>
+
+          <div id="bundle-box" class="bundle-box stack" hidden>
+            <div class="row">
+              <span class="material-symbols-outlined" style="color: #67bde2">inventory_2</span>
+              <h3 class="stock-section-title">بيانات البكج</h3>
+            </div>
+
+            <label>
+              <div class="label">اسم البكج</div>
+              <input id="bundle-name" class="input-field" type="text" placeholder="مثال: بكج فطور عائلي" />
+            </label>
+
+            <label>
+              <div class="label">وصف البكج</div>
+              <textarea id="bundle-description" class="textarea-field" placeholder="وصف مختصر للبكج..."></textarea>
+            </label>
+
+            <div class="grid-2">
+              <label>
+                <div class="label">تصنيف البكج</div>
+                <select id="bundle-category-id" class="select-field">
+                  <option value="">اختر التصنيف...</option>
+                </select>
+              </label>
+              <label>
+                <div class="label">عملة إدخال السعر</div>
+                <select id="bundle-input-currency" class="select-field">
+                  <option value="SYP">ليرة سورية (SYP)</option>
+                  <option value="USD">دولار أمريكي (USD)</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              <div id="bundle-cost-label" class="label">رأس المال (SYP)</div>
+              <input id="bundle-cost-price" class="input-field" type="number" min="0" step="0.01" value="0" />
+              <div id="bundle-cost-converted" class="tiny muted">بالسوري: 0 ل.س</div>
+            </label>
+
+            <label>
+              <div id="bundle-sell-label" class="label">سعر المبيع (SYP)</div>
+              <input id="bundle-sell-price" class="input-field" type="number" min="0" step="0.01" value="0" />
+              <div id="bundle-sell-converted" class="tiny muted">بالسوري: 0 ل.س</div>
+            </label>
+
+            <div id="bundle-rate-label" class="tiny muted">سعر الصرف الحالي: 1 USD = 0</div>
+
+            <input id="bundle-image-file" type="file" accept="image/*" hidden />
+            <button id="bundle-image-picker" class="media-box media-box-button" type="button">
+              <div>
+                <div class="media-icon">
+                  <span class="material-symbols-outlined">cloud_upload</span>
+                </div>
+                <strong class="stock-media-title">رفع صورة البكج (اختياري)</strong>
+                <p class="muted small">PNG أو JPG، حجم أقصى 5 ميجابايت</p>
+              </div>
+            </button>
+            <img id="bundle-image-preview" class="media-preview" alt="صورة البكج" hidden />
+            <div id="bundle-image-feedback" class="tiny muted upload-status">لم يتم رفع صورة للبكج بعد.</div>
+          </div>
         </section>
 
         <section class="card stack">
@@ -233,29 +282,88 @@
         var saveButton = document.getElementById('save-discount-btn');
         var feedbackNode = document.getElementById('discount-feedback');
 
-        var catalog = {
-          PRODUCT: [],
-          CATEGORY: [],
+        var bundleEnabledInput = document.getElementById('bundle-create-enabled');
+        var bundleBox = document.getElementById('bundle-box');
+        var bundleNameInput = document.getElementById('bundle-name');
+        var bundleDescriptionInput = document.getElementById('bundle-description');
+        var bundleCategorySelect = document.getElementById('bundle-category-id');
+        var bundleCurrencySelect = document.getElementById('bundle-input-currency');
+        var bundleCostInput = document.getElementById('bundle-cost-price');
+        var bundleSellInput = document.getElementById('bundle-sell-price');
+        var bundleCostLabel = document.getElementById('bundle-cost-label');
+        var bundleSellLabel = document.getElementById('bundle-sell-label');
+        var bundleCostConverted = document.getElementById('bundle-cost-converted');
+        var bundleSellConverted = document.getElementById('bundle-sell-converted');
+        var bundleRateLabel = document.getElementById('bundle-rate-label');
+        var bundleImageInput = document.getElementById('bundle-image-file');
+        var bundleImagePicker = document.getElementById('bundle-image-picker');
+        var bundleImagePreview = document.getElementById('bundle-image-preview');
+        var bundleImageFeedback = document.getElementById('bundle-image-feedback');
+
+        var state = {
+          catalog: {
+            PRODUCT: [],
+            CATEGORY: [],
+          },
+          targetIds: [],
+          usdSarRate: 15000,
+          storeCurrency: 'SYP',
+          bundleImageUrl: '',
+          bundleImageUploading: false,
+          previousBundleCurrency: 'SYP',
         };
 
-        var targetIds = [];
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function toDateInputValue(date) {
+          var year = date.getFullYear();
+          var month = String(date.getMonth() + 1).padStart(2, '0');
+          var day = String(date.getDate()).padStart(2, '0');
+          return year + '-' + month + '-' + day;
+        }
+
+        function currencyLabel(currency) {
+          var code = String(currency || '').toUpperCase();
+          if (code === 'SYP') return 'ل.س';
+          if (code === 'SAR') return 'ر.س';
+          if (code === 'USD') return 'USD';
+          return code || 'ل.س';
+        }
+
+        function formatNumber(value) {
+          return Number(value || 0).toLocaleString('ar-SA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        }
+
+        function formatMoney(value, currency) {
+          return formatNumber(value) + ' ' + currencyLabel(currency);
+        }
 
         function setFeedback(message, isError) {
           if (!feedbackNode) return;
           feedbackNode.textContent = message || '';
-          feedbackNode.classList.toggle('is-error', Boolean(isError));
+          feedbackNode.classList.toggle('is-error', Boolean(message) && Boolean(isError));
           feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
         }
 
-        function toIso(dateValue, atEnd) {
-          if (!dateValue) return null;
-          var suffix = atEnd ? 'T23:59:59.000Z' : 'T00:00:00.000Z';
-          return String(dateValue) + suffix;
+        function setBundleImageFeedback(message, isError) {
+          if (!bundleImageFeedback) return;
+          bundleImageFeedback.textContent = message || '';
+          bundleImageFeedback.classList.toggle('is-error', Boolean(isError));
+          bundleImageFeedback.classList.toggle('is-success', Boolean(message) && !isError);
         }
 
         function normalizeTargetIds(rawValue) {
-          var input = String(rawValue || '');
-          return input
+          return String(rawValue || '')
             .split(',')
             .map(function (item) {
               return item.trim();
@@ -265,24 +373,28 @@
             });
         }
 
-        function syncInputFromTargets() {
-          if (!targetIdsInput) return;
-          targetIdsInput.value = targetIds.join(',');
+        function uniqIds(ids) {
+          var seen = {};
+          return (Array.isArray(ids) ? ids : []).filter(function (id) {
+            var key = String(id || '').trim();
+            if (!key || seen[key]) return false;
+            seen[key] = true;
+            return true;
+          });
         }
 
         function renderTargetChips() {
           if (!targetChips) return;
-
-          if (!targetIds.length) {
+          if (!state.targetIds.length) {
             targetChips.innerHTML = '<span class="muted tiny">لا توجد أهداف محددة بعد.</span>';
             return;
           }
 
-          targetChips.innerHTML = targetIds
+          targetChips.innerHTML = state.targetIds
             .map(function (id, index) {
               return (
                 '<span class="target-chip">' +
-                id +
+                escapeHtml(id) +
                 '<button type="button" data-remove-index="' +
                 index +
                 '">×</button>' +
@@ -292,30 +404,18 @@
             .join('');
         }
 
-        function updateValueHint() {
-          var type = (typeSelect && typeSelect.value) || 'FIXED';
-          if (!valueHint) return;
-
-          if (type === 'PERCENT') {
-            valueHint.textContent = 'أدخل نسبة الخصم (من 0 إلى 100).';
-            valueInput.max = '100';
-            valueInput.step = '0.01';
-            return;
-          }
-
-          valueHint.textContent = 'سيتم خصم هذا المبلغ من سعر المنتج.';
-          valueInput.removeAttribute('max');
-          valueInput.step = '0.01';
+        function mergeTargetIds(values) {
+          state.targetIds = uniqIds(state.targetIds.concat(values || []));
+          renderTargetChips();
         }
 
-        function refreshTargetPicker() {
-          var type = (targetTypeSelect && targetTypeSelect.value) || 'PRODUCT';
-          var items = Array.isArray(catalog[type]) ? catalog[type] : [];
-
+        function renderTargetPicker() {
           if (!targetPickSelect) return;
-          targetPickSelect.innerHTML = '<option value="">اختر عنصرًا...</option>';
+          var type = String((targetTypeSelect && targetTypeSelect.value) || 'PRODUCT');
+          var list = Array.isArray(state.catalog[type]) ? state.catalog[type] : [];
+          targetPickSelect.innerHTML = '<option value="">اختر عنصر...</option>';
 
-          items.forEach(function (item) {
+          list.forEach(function (item) {
             var option = document.createElement('option');
             option.value = item.id;
             option.textContent = item.label;
@@ -323,107 +423,438 @@
           });
         }
 
-        function mergeTargetIds(values) {
-          values.forEach(function (id) {
-            if (targetIds.indexOf(id) === -1) {
-              targetIds.push(id);
-            }
+        function renderBundleCategoryOptions() {
+          if (!bundleCategorySelect) return;
+          var selected = String(bundleCategorySelect.value || '');
+          bundleCategorySelect.innerHTML = '<option value="">اختر التصنيف...</option>';
+
+          state.catalog.CATEGORY.forEach(function (item) {
+            var option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.label;
+            bundleCategorySelect.appendChild(option);
           });
-          syncInputFromTargets();
-          renderTargetChips();
+
+          if (selected) {
+            bundleCategorySelect.value = selected;
+          }
         }
 
-        function applyPrefillFromQuery() {
-          var params = new URLSearchParams(window.location.search || '');
-          var queryTargetType = String(params.get('targetType') || '').toUpperCase();
+        function updateDiscountValueHint() {
+          if (!valueHint) return;
+          var type = String((typeSelect && typeSelect.value) || 'FIXED');
+          if (type === 'PERCENT') {
+            valueHint.textContent = 'أدخل نسبة الخصم (من 0 إلى 100).';
+            if (valueInput) {
+              valueInput.max = '100';
+            }
+            return;
+          }
+          valueHint.textContent = 'سيتم خصم هذا المبلغ من السعر.';
+          if (valueInput) {
+            valueInput.removeAttribute('max');
+          }
+        }
 
-          if (queryTargetType === 'PRODUCT' || queryTargetType === 'CATEGORY') {
-            targetTypeSelect.value = queryTargetType;
+        function toggleBundleSection() {
+          if (!bundleBox || !bundleEnabledInput) return;
+          bundleBox.hidden = !bundleEnabledInput.checked;
+        }
+
+        function bundleCurrency() {
+          return String((bundleCurrencySelect && bundleCurrencySelect.value) || 'SYP').toUpperCase();
+        }
+
+        function parseInputNumber(node) {
+          return Number((node && node.value) || 0);
+        }
+
+        function toLocalPrice(rawValue, code) {
+          var numeric = Number(rawValue);
+          var currency = String(code || 'SYP').toUpperCase();
+          if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+          if (currency === 'USD') {
+            return numeric * Math.max(1, Number(state.usdSarRate) || 1);
+          }
+          return numeric;
+        }
+
+        function fromLocalPrice(localValue, code) {
+          var numeric = Number(localValue);
+          var currency = String(code || 'SYP').toUpperCase();
+          if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+          if (currency === 'USD') {
+            return numeric / Math.max(1, Number(state.usdSarRate) || 1);
+          }
+          return numeric;
+        }
+
+        function formatEditable(value) {
+          var numeric = Number(value || 0);
+          if (!Number.isFinite(numeric)) return '0';
+          return (Math.round(numeric * 100) / 100).toString();
+        }
+
+        function updateBundleLabelsAndRates() {
+          var code = bundleCurrency();
+          if (bundleCostLabel) {
+            bundleCostLabel.textContent = 'رأس المال (' + code + ')';
+          }
+          if (bundleSellLabel) {
+            bundleSellLabel.textContent = 'سعر المبيع (' + code + ')';
+          }
+          if (bundleRateLabel) {
+            bundleRateLabel.textContent =
+              'سعر الصرف الحالي: 1 USD = ' + formatMoney(state.usdSarRate, state.storeCurrency);
+          }
+        }
+
+        function updateBundleConvertedHints() {
+          var code = bundleCurrency();
+          var rawCost = parseInputNumber(bundleCostInput);
+          var rawSell = parseInputNumber(bundleSellInput);
+          var localCost = toLocalPrice(rawCost, code);
+          var localSell = toLocalPrice(rawSell, code);
+
+          if (bundleCostConverted) {
+            bundleCostConverted.textContent = 'بالسوري: ' + formatMoney(localCost, state.storeCurrency);
+          }
+          if (bundleSellConverted) {
+            bundleSellConverted.textContent = 'بالسوري: ' + formatMoney(localSell, state.storeCurrency);
+          }
+        }
+
+        function swapBundleCurrency(nextCurrency) {
+          var nextCode = String(nextCurrency || 'SYP').toUpperCase();
+          var prevCode = state.previousBundleCurrency;
+          if (nextCode === prevCode) return;
+
+          var currentCostRaw = parseInputNumber(bundleCostInput);
+          var currentSellRaw = parseInputNumber(bundleSellInput);
+          var localCost = toLocalPrice(currentCostRaw, prevCode);
+          var localSell = toLocalPrice(currentSellRaw, prevCode);
+          var nextCostRaw = fromLocalPrice(localCost, nextCode);
+          var nextSellRaw = fromLocalPrice(localSell, nextCode);
+
+          if (bundleCostInput) bundleCostInput.value = formatEditable(nextCostRaw);
+          if (bundleSellInput) bundleSellInput.value = formatEditable(nextSellRaw);
+
+          state.previousBundleCurrency = nextCode;
+          updateBundleLabelsAndRates();
+          updateBundleConvertedHints();
+        }
+
+        function makeProductId(name) {
+          var base = String(name || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-]/g, '')
+            .replace(/\-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+          if (!base) {
+            base = 'bundle';
           }
 
-          var productId = String(params.get('productId') || '').trim();
-          var categoryId = String(params.get('categoryId') || '').trim();
-          var targetIdsFromQuery = normalizeTargetIds(params.get('targetIds') || '');
+          return (base + '-' + Date.now().toString(36)).slice(0, 60);
+        }
 
-          if (productId) {
-            targetTypeSelect.value = 'PRODUCT';
-            targetIdsFromQuery.push(productId);
+        async function uploadBundleImage(file) {
+          if (!file) return;
+
+          if (!file.type || file.type.indexOf('image/') !== 0) {
+            setBundleImageFeedback('الملف يجب أن يكون صورة.', true);
+            return;
           }
 
-          if (categoryId) {
-            targetTypeSelect.value = 'CATEGORY';
-            targetIdsFromQuery.push(categoryId);
+          if (file.size > 5 * 1024 * 1024) {
+            setBundleImageFeedback('حجم الصورة أكبر من 5 ميجابايت.', true);
+            return;
           }
 
-          if (targetIdsFromQuery.length) {
-            mergeTargetIds(targetIdsFromQuery);
+          state.bundleImageUploading = true;
+          setBundleImageFeedback('جاري رفع الصورة...', false);
+          if (bundleImagePicker) bundleImagePicker.disabled = true;
+
+          try {
+            var sign = await window.AdminBridge.apiRequest('/admin/uploads/cloudinary-signature');
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', String(sign.apiKey || ''));
+            formData.append('timestamp', String(sign.timestamp || ''));
+            formData.append('signature', String(sign.signature || ''));
+            formData.append('folder', String(sign.folder || 'al-arnab'));
+
+            var response = await fetch(String(sign.uploadUrl || ''), {
+              method: 'POST',
+              body: formData,
+            });
+
+            var data = null;
+            try {
+              data = await response.json();
+            } catch (_error) {
+              data = null;
+            }
+
+            if (!response.ok) {
+              throw new Error((data && data.error && data.error.message) || 'تعذر رفع الصورة.');
+            }
+
+            state.bundleImageUrl =
+              data && (data.secure_url || data.url) ? String(data.secure_url || data.url) : '';
+
+            if (bundleImagePreview) {
+              bundleImagePreview.src = state.bundleImageUrl;
+              bundleImagePreview.hidden = !state.bundleImageUrl;
+            }
+
+            setBundleImageFeedback('تم رفع الصورة بنجاح.', false);
+          } catch (error) {
+            state.bundleImageUrl = '';
+            if (bundleImagePreview) {
+              bundleImagePreview.src = '';
+              bundleImagePreview.hidden = true;
+            }
+            setBundleImageFeedback((error && error.message) || 'تعذر رفع الصورة.', true);
+          } finally {
+            state.bundleImageUploading = false;
+            if (bundleImagePicker) bundleImagePicker.disabled = false;
           }
+        }
+
+        async function loadStoreSettings() {
+          updateBundleLabelsAndRates();
+          updateBundleConvertedHints();
+
+          try {
+            var settings = await window.AdminBridge.apiRequest('/admin/settings/store');
+            var rate = Number(settings && settings.usdSarRate ? settings.usdSarRate : 0);
+            if (Number.isFinite(rate) && rate > 0) {
+              state.usdSarRate = rate;
+            }
+            state.storeCurrency =
+              (settings && settings.currency ? String(settings.currency) : state.storeCurrency) || 'SYP';
+          } catch (_error) {
+            // keep defaults
+          }
+
+          updateBundleLabelsAndRates();
+          updateBundleConvertedHints();
         }
 
         async function loadCatalog() {
-          setFeedback('جاري تحميل المنتجات والتصنيفات...', false);
-
           try {
             var products = await window.AdminBridge.apiRequest('/admin/products');
             var categories = await window.AdminBridge.apiRequest('/admin/categories');
 
-            catalog.PRODUCT = (Array.isArray(products) ? products : []).map(function (item) {
-              var id = String(item && item.id ? item.id : '').trim();
-              var name = String(item && item.nameAr ? item.nameAr : 'منتج');
-              return {
-                id: id,
-                label: name + ' (' + id + ')',
-              };
-            });
+            state.catalog.PRODUCT = (Array.isArray(products) ? products : [])
+              .filter(function (item) {
+                return Boolean(item && item.id);
+              })
+              .map(function (item) {
+                var id = String(item.id);
+                var name = String(item.nameAr || 'منتج');
+                return {
+                  id: id,
+                  label: name + ' (' + id + ')',
+                };
+              });
 
-            catalog.CATEGORY = (Array.isArray(categories) ? categories : []).map(function (item) {
-              var id = String(item && item.id ? item.id : '').trim();
-              var name = String(item && item.nameAr ? item.nameAr : 'تصنيف');
-              return {
-                id: id,
-                label: name + ' (' + id + ')',
-              };
-            });
+            state.catalog.CATEGORY = (Array.isArray(categories) ? categories : [])
+              .filter(function (item) {
+                return Boolean(item && item.id);
+              })
+              .map(function (item) {
+                var id = String(item.id);
+                var name = String(item.nameAr || 'تصنيف');
+                return {
+                  id: id,
+                  label: name,
+                };
+              });
 
-            refreshTargetPicker();
-            setFeedback('', false);
-          } catch (error) {
-            setFeedback('تعذر تحميل القائمة السريعة. يمكنك إدخال المعرف يدويًا.', true);
+            renderTargetPicker();
+            renderBundleCategoryOptions();
+          } catch (_error) {
+            setFeedback('تعذر تحميل قائمة المنتجات/التصنيفات.', true);
           }
         }
 
+        function toIso(dateValue, atEnd) {
+          if (!dateValue) return null;
+          return String(dateValue) + (atEnd ? 'T23:59:59.000Z' : 'T00:00:00.000Z');
+        }
+
+        function applyPrefillFromQuery() {
+          var params = new URLSearchParams(window.location.search || '');
+          var targetType = String(params.get('targetType') || '').toUpperCase();
+          var productId = String(params.get('productId') || '').trim();
+          var categoryId = String(params.get('categoryId') || '').trim();
+          var ids = normalizeTargetIds(params.get('targetIds') || '');
+
+          if (targetType === 'PRODUCT' || targetType === 'CATEGORY') {
+            targetTypeSelect.value = targetType;
+          }
+
+          if (productId) {
+            targetTypeSelect.value = 'PRODUCT';
+            ids.push(productId);
+          }
+
+          if (categoryId) {
+            targetTypeSelect.value = 'CATEGORY';
+            ids.push(categoryId);
+          }
+
+          if (ids.length) {
+            mergeTargetIds(ids);
+          }
+        }
+
+        async function createBundleProductIfNeeded() {
+          if (!bundleEnabledInput || !bundleEnabledInput.checked) {
+            return null;
+          }
+
+          var name = String((bundleNameInput && bundleNameInput.value) || '').trim();
+          var description = String((bundleDescriptionInput && bundleDescriptionInput.value) || '').trim();
+          var categoryId = String((bundleCategorySelect && bundleCategorySelect.value) || '').trim();
+          var currency = bundleCurrency();
+          var rawCost = parseInputNumber(bundleCostInput);
+          var rawSell = parseInputNumber(bundleSellInput);
+
+          if (!name) {
+            throw new Error('اسم البكج مطلوب.');
+          }
+
+          if (!categoryId) {
+            throw new Error('اختر تصنيف البكج أولاً.');
+          }
+
+          if (state.bundleImageUploading) {
+            throw new Error('انتظر حتى انتهاء رفع صورة البكج.');
+          }
+
+          var costPrice = toLocalPrice(rawCost, currency);
+          var sellPrice = toLocalPrice(rawSell, currency);
+          if (!Number.isFinite(sellPrice) || sellPrice <= 0) {
+            throw new Error('سعر مبيع البكج يجب أن يكون أكبر من الصفر.');
+          }
+
+          var productPayload = {
+            id: makeProductId(name),
+            categoryId: categoryId,
+            nameAr: name,
+            description: description || undefined,
+            costPrice: Number.isFinite(costPrice) ? Math.max(0, costPrice) : 0,
+            sellPrice: Math.max(0, sellPrice),
+            stockQty: 0,
+            minStock: 0,
+            unit: 'BUNDLE',
+            isNew: false,
+            imageUrl: state.bundleImageUrl || undefined,
+          };
+
+          var created = await window.AdminBridge.apiRequest('/admin/products', {
+            method: 'POST',
+            body: productPayload,
+          });
+
+          return {
+            id: String(created && created.id ? created.id : productPayload.id),
+          };
+        }
+
+        async function saveDiscount() {
+          var title = String((titleInput && titleInput.value) || '').trim();
+          var description = String((descriptionInput && descriptionInput.value) || '').trim();
+          var discountType = String((typeSelect && typeSelect.value) || 'FIXED');
+          var discountValue = Number((valueInput && valueInput.value) || 0);
+          var targetType = String((targetTypeSelect && targetTypeSelect.value) || 'PRODUCT');
+          var startDate = String((startDateInput && startDateInput.value) || '');
+          var endDate = String((endDateInput && endDateInput.value) || '');
+          var isActive = Boolean(isActiveInput && isActiveInput.checked);
+
+          var manualIds = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
+          var targetIds = uniqIds(state.targetIds.concat(manualIds));
+
+          if (!title) {
+            throw new Error('عنوان العرض مطلوب.');
+          }
+
+          if (!Number.isFinite(discountValue) || discountValue <= 0) {
+            throw new Error('قيمة الخصم يجب أن تكون أكبر من الصفر.');
+          }
+
+          if (discountType === 'PERCENT' && discountValue > 100) {
+            throw new Error('نسبة الخصم لا يمكن أن تتجاوز 100%.');
+          }
+
+          if (!startDate || !endDate) {
+            throw new Error('يرجى تحديد تاريخ البداية والنهاية.');
+          }
+
+          if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
+            throw new Error('تاريخ النهاية يجب أن يكون بعد تاريخ البداية.');
+          }
+
+          var bundleProduct = await createBundleProductIfNeeded();
+          if (bundleProduct && bundleProduct.id) {
+            targetType = 'PRODUCT';
+            targetIds = uniqIds(targetIds.concat([bundleProduct.id]));
+          }
+
+          if (!targetIds.length) {
+            throw new Error('أضف هدفًا واحدًا على الأقل (منتج أو تصنيف).');
+          }
+
+          var payload = {
+            title: title,
+            description: description || undefined,
+            type: discountType,
+            value: discountValue,
+            startAt: toIso(startDate, false),
+            endAt: toIso(endDate, true),
+            isActive: isActive,
+            targetType: targetType,
+            targetIds: targetIds,
+          };
+
+          await window.AdminBridge.apiRequest('/admin/discounts', {
+            method: 'POST',
+            body: payload,
+          });
+        }
+
         if (typeSelect) {
-          typeSelect.addEventListener('change', updateValueHint);
+          typeSelect.addEventListener('change', updateDiscountValueHint);
         }
 
         if (targetTypeSelect) {
           targetTypeSelect.addEventListener('change', function () {
-            targetIds = [];
-            syncInputFromTargets();
+            state.targetIds = [];
             renderTargetChips();
-            refreshTargetPicker();
+            renderTargetPicker();
           });
         }
 
-        if (targetPickSelect && addTargetButton) {
+        if (addTargetButton) {
           addTargetButton.addEventListener('click', function () {
-            var quickId = String(targetPickSelect.value || '').trim();
-            var manualIds = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
-            var all = manualIds.slice();
-            if (quickId) {
-              all.push(quickId);
-            }
+            var quickId = String((targetPickSelect && targetPickSelect.value) || '').trim();
+            var manual = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
+            var ids = manual.slice();
+            if (quickId) ids.push(quickId);
 
-            if (!all.length) {
+            if (!ids.length) {
               setFeedback('أدخل معرف هدف واحد على الأقل.', true);
               return;
             }
 
-            mergeTargetIds(all);
+            mergeTargetIds(ids);
+            if (targetIdsInput) targetIdsInput.value = '';
             setFeedback('', false);
-            if (targetIdsInput) {
-              targetIdsInput.value = '';
-            }
           });
         }
 
@@ -433,95 +864,78 @@
             if (!button) return;
 
             var index = Number(button.getAttribute('data-remove-index'));
-            if (!Number.isFinite(index) || index < 0 || index >= targetIds.length) return;
+            if (!Number.isFinite(index) || index < 0 || index >= state.targetIds.length) return;
 
-            targetIds.splice(index, 1);
-            syncInputFromTargets();
+            state.targetIds.splice(index, 1);
             renderTargetChips();
+          });
+        }
+
+        if (bundleEnabledInput) {
+          bundleEnabledInput.addEventListener('change', toggleBundleSection);
+        }
+
+        if (bundleCurrencySelect) {
+          bundleCurrencySelect.addEventListener('change', function () {
+            swapBundleCurrency(bundleCurrencySelect.value);
+          });
+        }
+
+        if (bundleCostInput) {
+          bundleCostInput.addEventListener('input', updateBundleConvertedHints);
+        }
+
+        if (bundleSellInput) {
+          bundleSellInput.addEventListener('input', updateBundleConvertedHints);
+        }
+
+        if (bundleImagePicker && bundleImageInput) {
+          bundleImagePicker.addEventListener('click', function () {
+            bundleImageInput.click();
+          });
+
+          bundleImageInput.addEventListener('change', function () {
+            var file = bundleImageInput.files && bundleImageInput.files[0] ? bundleImageInput.files[0] : null;
+            uploadBundleImage(file);
           });
         }
 
         if (saveButton) {
           saveButton.addEventListener('click', async function () {
-            var title = String((titleInput && titleInput.value) || '').trim();
-            var description = String((descriptionInput && descriptionInput.value) || '').trim();
-            var discountType = String((typeSelect && typeSelect.value) || 'FIXED');
-            var discountValue = Number((valueInput && valueInput.value) || 0);
-            var targetType = String((targetTypeSelect && targetTypeSelect.value) || 'PRODUCT');
-            var startDate = String((startDateInput && startDateInput.value) || '');
-            var endDate = String((endDateInput && endDateInput.value) || '');
-            var isActive = Boolean(isActiveInput && isActiveInput.checked);
-
-            var manualIds = normalizeTargetIds(targetIdsInput ? targetIdsInput.value : '');
-            mergeTargetIds(manualIds);
-
-            if (!title) {
-              setFeedback('عنوان العرض مطلوب.', true);
-              return;
-            }
-
-            if (!targetIds.length) {
-              setFeedback('أضف هدفًا واحدًا على الأقل (منتج أو تصنيف).', true);
-              return;
-            }
-
-            if (!Number.isFinite(discountValue) || discountValue <= 0) {
-              setFeedback('قيمة الخصم يجب أن تكون أكبر من الصفر.', true);
-              return;
-            }
-
-            if (discountType === 'PERCENT' && discountValue > 100) {
-              setFeedback('نسبة الخصم لا يمكن أن تتجاوز 100%.', true);
-              return;
-            }
-
-            if (!startDate || !endDate) {
-              setFeedback('حدد تاريخ البداية والنهاية.', true);
-              return;
-            }
-
-            if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
-              setFeedback('تاريخ النهاية يجب أن يكون بعد تاريخ البداية.', true);
-              return;
-            }
-
-            var payload = {
-              title: title,
-              description: description || undefined,
-              type: discountType,
-              value: discountValue,
-              startAt: toIso(startDate, false),
-              endAt: toIso(endDate, true),
-              isActive: isActive,
-              targetType: targetType,
-              targetIds: targetIds,
-            };
-
             saveButton.disabled = true;
-            var originalLabel = saveButton.textContent;
-            saveButton.textContent = 'جاري حفظ العرض...';
+            var originalText = saveButton.textContent;
+            saveButton.textContent = 'جاري الحفظ...';
             setFeedback('جاري الحفظ...', false);
 
             try {
-              await window.AdminBridge.apiRequest('/admin/discounts', {
-                method: 'POST',
-                body: payload,
-              });
-
+              await saveDiscount();
               setFeedback('تم حفظ العرض بنجاح.', false);
-              window.AdminBridge.go('/admin/dashboard');
+              window.AdminBridge.go('/admin/discounts/list');
             } catch (error) {
-              setFeedback('تعذر حفظ العرض. تأكد من صحة البيانات وصلاحية حساب الأدمن.', true);
+              setFeedback((error && error.message) || 'تعذر حفظ العرض.', true);
               saveButton.disabled = false;
-              saveButton.textContent = originalLabel;
+              saveButton.textContent = originalText;
             }
           });
         }
 
-        updateValueHint();
-        applyPrefillFromQuery();
+        var today = new Date();
+        if (startDateInput) startDateInput.value = toDateInputValue(today);
+        if (endDateInput) endDateInput.value = toDateInputValue(today);
+
+        updateDiscountValueHint();
         renderTargetChips();
-        loadCatalog();
+        toggleBundleSection();
+        state.previousBundleCurrency = bundleCurrency();
+        updateBundleLabelsAndRates();
+        updateBundleConvertedHints();
+        applyPrefillFromQuery();
+        renderTargetPicker();
+
+        Promise.all([loadStoreSettings(), loadCatalog()]).then(function () {
+          renderTargetPicker();
+          renderBundleCategoryOptions();
+        });
       })();
     </script>
   </body>

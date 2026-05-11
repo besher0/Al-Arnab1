@@ -139,7 +139,14 @@ export class NotificationsService {
 
   async createAdminBroadcast(adminId: string, payload: CreateAdminNotificationDto) {
     const audience = payload.audience || AdminNotificationAudience.CUSTOMERS;
-    const recipientIds = await this.resolveAudienceUserIds(audience);
+    const targetPhone = String(payload.targetPhone || '').trim();
+    const recipientIds = targetPhone
+      ? await this.resolveAudienceUserIdsByPhone(audience, targetPhone)
+      : await this.resolveAudienceUserIds(audience);
+
+    if (targetPhone && !recipientIds.length) {
+      throw new NotFoundException('لا يوجد مستخدم نشط بهذا الرقم.');
+    }
 
     const result = await this.createForUsers(recipientIds, {
       title: payload.title.trim(),
@@ -149,11 +156,13 @@ export class NotificationsService {
         source: 'ADMIN_BROADCAST',
         sentBy: adminId,
         audience,
+        targetPhone: targetPhone || null,
       },
     });
 
     return {
       audience,
+      targetPhone: targetPhone || null,
       recipients: result.recipients,
       push: result.push,
     };
@@ -352,6 +361,42 @@ export class NotificationsService {
     });
 
     return users.map((user) => user.id);
+  }
+
+  private async resolveAudienceUserIdsByPhone(
+    audience: AdminNotificationAudience,
+    targetPhone: string,
+  ) {
+    const normalizedTarget = this.normalizePhoneValue(targetPhone);
+    if (!normalizedTarget) {
+      return [];
+    }
+
+    let roleFilter: UserRole[] | null = null;
+    if (audience === AdminNotificationAudience.CUSTOMERS) {
+      roleFilter = [UserRole.CUSTOMER];
+    } else if (audience === AdminNotificationAudience.ADMINS) {
+      roleFilter = [UserRole.ADMIN];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        ...(roleFilter ? { role: { in: roleFilter } } : {}),
+      },
+      select: {
+        id: true,
+        phone: true,
+      },
+    });
+
+    return users
+      .filter((user) => this.normalizePhoneValue(user.phone) === normalizedTarget)
+      .map((user) => user.id);
+  }
+
+  private normalizePhoneValue(raw: string) {
+    return String(raw || '').replace(/[^\d+]/g, '');
   }
 
   private emptyPushResult() {

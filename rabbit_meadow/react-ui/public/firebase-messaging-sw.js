@@ -38,7 +38,7 @@ if (firebase.apps && firebase.apps.length) {
       (payload &&
         payload.notification &&
         payload.notification.icon) ||
-      '/icons/icon-192.png';
+      '/favicon.svg';
 
     self.registration.showNotification(title, {
       body: body,

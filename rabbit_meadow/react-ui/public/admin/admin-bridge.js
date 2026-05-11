@@ -113,6 +113,26 @@
     });
   }
 
+  function bindAdminActions(root) {
+    var scope = root || document;
+    var nodes = scope.querySelectorAll('[data-admin-action]');
+
+    nodes.forEach(function (node) {
+      if (node.__adminActionBound) return;
+      node.__adminActionBound = true;
+
+      node.addEventListener('click', function (event) {
+        var action = node.getAttribute('data-admin-action');
+        if (!action) return;
+
+        event.preventDefault();
+        if (action === 'logout') {
+          send('logout');
+        }
+      });
+    });
+  }
+
   function getShopState() {
     try {
       var saved = window.localStorage.getItem(SHOP_STATE_KEY);
@@ -259,7 +279,7 @@
       shell.appendChild(nav);
     }
 
-    nav.className = 'bottom-nav admin-unified-footer six';
+    nav.className = 'bottom-nav admin-unified-footer seven';
     nav.removeAttribute('style');
     nav.innerHTML = [
       '<button class="nav-item" data-footer-key="dashboard" data-route="/admin/dashboard">',
@@ -280,6 +300,9 @@
       '<button class="nav-item" data-footer-key="reports" data-route="/admin/reports/sales">',
       '<span class="material-symbols-outlined nav-icon">query_stats</span>التقارير',
       '</button>',
+      '<button class="nav-item" data-admin-action="logout">',
+      '<span class="material-symbols-outlined nav-icon">logout</span>خروج',
+      '</button>',
     ].join('');
 
     var activeKey = getAdminPageKey();
@@ -290,6 +313,7 @@
     });
 
     bindRoutes(nav);
+    bindAdminActions(nav);
   }
 
   function init() {
@@ -297,6 +321,7 @@
     bindRoutes(document);
     bindToggleGroups(document);
     bindShopSwitch(document);
+    bindAdminActions(document);
   }
 
   window.AdminBridge = {
@@ -309,6 +334,7 @@
     bindRoutes: bindRoutes,
     bindToggleGroups: bindToggleGroups,
     bindShopSwitch: bindShopSwitch,
+    bindAdminActions: bindAdminActions,
     setShopState: setShopState,
     getShopState: getShopState,
     apiRequest: apiRequest,

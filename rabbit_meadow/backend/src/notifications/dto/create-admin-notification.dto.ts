@@ -18,4 +18,9 @@ export class CreateAdminNotificationDto {
   @IsOptional()
   @IsEnum(AdminNotificationAudience)
   audience?: AdminNotificationAudience;
+
+  @IsOptional()
+  @IsString()
+  @Length(6, 24)
+  targetPhone?: string;
 }

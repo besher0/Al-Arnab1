@@ -1,312 +1,233 @@
-<!DOCTYPE html>
-
-<html dir="rtl" lang="ar"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;family=Almarai:wght@300;400;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/stitch/tailwind/categories.css" />
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            display: inline-block;
-            line-height: 1;
-            text-transform: none;
-            letter-spacing: normal;
-            word-wrap: normal;
-            white-space: nowrap;
-            direction: ltr;
-        }
-        body {
-            font-family: 'Almarai', sans-serif;
-            background-color: #F0F8FF;
-        }
-        .header-font {
-            font-family: 'Tajawal', sans-serif;
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/stitch/tailwind/categories.css" />
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    body { font-family: 'Almarai', sans-serif; background: #f0f8ff; }
+    h1, h2, h3 { font-family: 'Cairo', sans-serif; }
+    html, body { scrollbar-width: none; -ms-overflow-style: none; }
+    html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; }
+    .search-shell { box-shadow: 0 12px 26px rgba(26, 54, 93, 0.12); }
   </style>
-<style>
-        html,
-        body {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        html::-webkit-scrollbar,
-        body::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
-    </style>
   <script src="/stitch/stitch-alert.js"></script>
   <script src="/stitch/stitch-notifications.js"></script>
 </head>
 <body class="bg-surface text-on-surface antialiased min-h-screen">
-<header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
-</div>
-<h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">الأرنب</h1>
-</div>
-<div class="flex items-center gap-2">
-<button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-</div>
-</header>
-<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
-<div class="mb-8">
-<h2 class="font-tajawal font-black text-4xl text-on-background mb-6">الأقسام</h2>
-<div class="relative group">
-<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-tertiary">search</span>
-</div>
-<input class="w-full bg-surface-container-lowest border-none rounded-full py-4 pr-12 pl-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary shadow-sm text-lg" placeholder="ابحث عن قسم أو منتج..." type="text"/>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Dairy" class="w-full h-full object-cover" data-alt="Fresh cold milk being poured into a clear glass bottle with droplets of condensation on a light wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI_GWu33kB_jgJHbv_Kd5rCUhmJcEvFIhZ8X4UbuQCz7WJI8Xg8eZYQEhInjWtFWWFiaCNc_3EAPhNp1YfAMOPFIzEpoq4n-dAFVbeIBZY4JTHmFFL8thLRDYXs-eHYENfqKwATu9uaIptFYg6And6dCK6gEEQvA-qErda9-Y5Iqcdeg5igkDZcEENqGedWpXEveVkDsHgaKOI9pfXEqxZ3CRDKFLDtDUXizU4KlxRaF7f37K4uen0zWTsuXiZeLRkSRSbisySEM9w"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">الألبان والأجبان</h3>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Meat" class="w-full h-full object-cover" data-alt="Prime cuts of raw wagyu beef with marble texture on a dark slate board with rosemary sprigs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHusgdHlM4wonruMBjL2l_Vovua5JJTXlkQBkUpn6SIK9Q81qSBn8a2jj06pslsIbDZYd6yD-ho2AKtKeJJFA1Ht23H8-7DZ1RftU3LAhKbgpjXmrlYxLiRBosa-IAaV2RHZNURka1fbZcBk-2IptAiVcuSYjBNDL3hR0A0ZeHPXl88qC8ODb5R5gQpFpZ0uTsOE9T_EL6USSgnnD_u8u34ugShI7p6BM8YT31hkeB_k4fQJHYiYIXTLEMR9O89E1LH23-kj-xO2Ap"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">اللحوم والدواجن</h3>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Bakery" class="w-full h-full object-cover" data-alt="Golden brown artisan bread loaf and warm croissants dusting with flour in a sunlit bakery setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPGq09I9wZXqKN3xNm8fmSoQE4ElXqnHv5eagwbIrLzhEZwld72YozdZtLUl1qW6LXZb0ik64712puxYwP9Ds5OfM0UO5L1769_yjjAPvzCjop_Y59ZVyYsXp-TpwSrTVkKyZr-afEQKxY0BRg7Lv_sYHzJ78vGfgI1IIqGgHJR5FxDPnvo1RgvWbtOj2w-rUZ-xwdMA1Gjct_CDCq8vUjYw9_xPIZxhdsa4glnQaFeylhDn-98ZMWdRfebGsSAfRGZhu8KwQ7I4Ad"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">المخبوزات</h3>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Drinks" class="w-full h-full object-cover" data-alt="Variety of colorful refreshing fruit juices in tall glass bottles with ice cubes and fresh mint" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhAl82_xZSzbjQxsFCOUDCycvPTDCjrT1q3VTB0x4B4MhM7KY1aXSjSlYR-NFzj-eDrhE8Lf7uU3bofWgXd-99wjdkHAsNjvNmdNuZkIq-BE35l6scWxawv9yhf272OTuvdqN4pM56k694ZZnxbYBLD__tlpN6gTtgAf_ZmRX52JM4Dksttv5Jp4nxzV-3aRzNGRPXDqfGq0SVX_nJd_MRi7ZzNrULDagYG0ANu-ushvFI080XJh4SnFV5UKUOPSm0xfmyz90W_Htv"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">المشروبات</h3>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Sweets" class="w-full h-full object-cover" data-alt="Collection of premium chocolate truffles and colorful french macarons on a white ceramic platter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDedJDajDpsUF2zi80mbcaNoVNPQcDclkpmLQnXnub1mgGHlxi1kcnZYdLlO0bKaIakOveF4ukSVVAHrUiO89x_MvDvspG59VRJI7V6ysCkC3-E_pmTcJNPkmeDWtj5rQVVctCIH-a4jlPjzLibB1zTci47AOOL5ePFOtROtVI2OUdlJi1ZVJi5N-SB--8UC8x76miy4IJsa4soc_oMcjKNZ9jb8llLGrBge3gxlZsfyfX5anW_fLGaamqTVbJ6u729ySDstV_z4Sll"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">الحلويات والمسليات</h3>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm">
-<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30">
-<img alt="Canned Food" class="w-full h-full object-cover" data-alt="Artisanal glass jars of honey, olive oil, and preserved vegetables on a clean kitchen pantry shelf" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEbds318Ps2YjA9JhKy32nqx8LaaE82r0Q15Go4nkeSJ7JexYE83FtHJAIhpklwVLn1UxjN2wKOn5QGyHwhzI3hmODvUa-Lm6-KKsaCDb9xN6ebDRFWxaf1TP5lRBW265wRREovTkNK0EI0hjm_O5LMo4IyiDeeKfyKR45ESN_DYhy3rRJ4Ea6pYGGkaW_Sct_EsJkU_J4_BlKesSJWEkDTdduR7x8qT0LQaAVmHLC070ExbPbdE_5flg2SdRRT-cYnHqeEVYgUsCr"/>
-</div>
-<h3 class="font-tajawal font-bold text-lg text-on-background">المعلبات والزيوت</h3>
-</div>
-</div>
-</main>
-<nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
-<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
-<span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-<span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
-<span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
-<div class="relative">
-<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-<span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
-</div>
-<span class="font-label text-[11px] font-semibold mt-1">السلة</span>
-</a>
-<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
-</a>
-</nav>
-<script>
+  <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
+    <div>
+      <h1 class="text-on-surface font-black text-2xl tracking-tight">الأقسام</h1>
+      <p class="text-xs text-on-surface-variant font-bold">اختر القسم أو ابحث عن منتج</p>
+    </div>
+    <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+  </header>
+
+  <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+    <section class="mb-8">
+      <div class="search-shell flex items-center bg-white rounded-full px-5 py-3 border border-primary/10">
+        <button data-category-search-btn class="material-symbols-outlined text-primary" type="button">search</button>
+        <input data-category-search-input class="bg-transparent border-none focus:ring-0 w-full text-sm font-label pr-3 text-right text-on-surface" placeholder="ابحث عن منتج من هنا..." type="text"/>
+      </div>
+    </section>
+
+    <section>
+      <div class="grid grid-cols-2 gap-4" data-categories-grid>
+        <div class="col-span-2 bg-white rounded-xl p-6 text-center text-sm text-on-surface-variant border border-primary/10">جاري تحميل الأقسام...</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center px-2 pt-3 pb-6 rounded-t-[3rem] z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="home">home</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الرئيسية</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-[#87CEEB] text-white rounded-[24px] px-5 py-2" href="#">
+      <span class="material-symbols-outlined" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+      <span class="font-label text-[11px] font-semibold mt-1">الأقسام</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+      <span class="font-label text-[11px] font-semibold mt-1">طلباتي</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <div class="relative">
+        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+        <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+      </div>
+      <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
+      <span class="material-symbols-outlined" data-icon="person">person</span>
+      <span class="font-label text-[11px] font-semibold mt-1">حسابي</span>
+    </a>
+  </nav>
+
+  <script>
     (function () {
-        var API_BASE =
-            window.__AL_ARNAB_API_BASE__ ||
-            (function () {
-                try {
-                    return window.localStorage.getItem('al-arnab-api-base') || '';
-                } catch (error) {
-                    return '';
-                }
-            })() ||
-            window.location.origin + '/api';
-        var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
-        var grid = document.querySelector('.grid.grid-cols-2.gap-4');
-        var searchInput = document.querySelector('input[type="text"]');
-        var state = { categories: [] };
+      var API_BASE =
+        window.__AL_ARNAB_API_BASE__ ||
+        (function () {
+          try {
+            return window.localStorage.getItem('al-arnab-api-base') || '';
+          } catch (_error) {
+            return '';
+          }
+        })() ||
+        window.location.origin + '/api';
 
-        function toArabicNumber(value) {
-            var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-            return String(value).replace(/[0-9]/g, function (digit) {
-                return map[Number(digit)] || digit;
-            });
+      var STORAGE_CATEGORY = 'al-arnab-selected-category-id';
+      var gridNode = document.querySelector('[data-categories-grid]');
+      var searchInput = document.querySelector('[data-category-search-input]');
+      var searchButton = document.querySelector('[data-category-search-btn]');
+
+      var state = { categories: [] };
+
+      function toArabicNumber(value) {
+        var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(value).replace(/[0-9]/g, function (digit) {
+          return map[Number(digit)] || digit;
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function send(type, payload) {
+        window.parent.postMessage(
+          Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+          window.location.origin,
+        );
+      }
+
+      function bindLink(link, to) {
+        if (!link) return;
+        link.href = to;
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          send('navigate', { to: to });
+        });
+      }
+
+      function setFooterCartCount(count) {
+        var next = Math.max(0, Number(count) || 0);
+        var badges = document.querySelectorAll('.cart-badge');
+        badges.forEach(function (badge) {
+          badge.textContent = toArabicNumber(next);
+          badge.style.display = next > 0 ? 'flex' : 'none';
+        });
+      }
+
+      function renderCategories() {
+        if (!gridNode) return;
+        if (!state.categories.length) {
+          gridNode.innerHTML = '<div class="col-span-2 bg-white rounded-xl p-6 text-center text-sm text-on-surface-variant border border-primary/10">لا توجد أقسام متاحة الآن.</div>';
+          return;
         }
 
-        function setFooterCartCount(count) {
-            var next = Math.max(0, Number(count) || 0);
-            var badges = document.querySelectorAll('.cart-badge');
-            badges.forEach(function (badge) {
-                badge.textContent = toArabicNumber(next);
-                badge.style.display = next > 0 ? 'flex' : 'none';
-            });
-        }
-
-        function escapeHtml(value) {
-            return String(value || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function send(type, payload) {
-            window.parent.postMessage(
-                Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
-                window.location.origin,
+        gridNode.innerHTML = state.categories
+          .map(function (category) {
+            return (
+              '<article class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm cursor-pointer" data-category-id="' +
+              escapeHtml(category.id) +
+              '">' +
+              '<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30 flex items-center justify-center">' +
+              (category.imageUrl
+                ? '<img class="w-full h-full object-cover" alt="' + escapeHtml(category.nameAr || 'قسم') + '" src="' + escapeHtml(category.imageUrl) + '"/>'
+                : '<span class="material-symbols-outlined text-primary text-3xl">category</span>') +
+              '</div>' +
+              '<h3 class="font-bold text-lg text-on-background line-clamp-2">' +
+              escapeHtml(category.nameAr || 'قسم') +
+              '</h3>' +
+              '</article>'
             );
+          })
+          .join('');
+      }
+
+      function openCategory(categoryId) {
+        if (!categoryId) return;
+        window.localStorage.setItem(STORAGE_CATEGORY, categoryId);
+        send('navigate', { to: '/category-products?categoryId=' + encodeURIComponent(categoryId) });
+      }
+
+      function openSearchPage() {
+        var query = (searchInput && searchInput.value ? searchInput.value : '').trim();
+        if (!query) {
+          showStitchAlert('اكتب اسم المنتج أولاً.');
+          return;
         }
+        send('navigate', { to: '/search?q=' + encodeURIComponent(query) + '&from=categories' });
+      }
 
-        function bindLink(link, to) {
-            if (!link) return;
-            link.href = to;
-            link.addEventListener('click', function (event) {
-                event.preventDefault();
-                send('navigate', { to: to });
-            });
+      var navLinks = document.querySelectorAll('nav a');
+      var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
+      navLinks.forEach(function (link, index) {
+        if (navRoutes[index]) {
+          bindLink(link, navRoutes[index]);
         }
+      });
 
-        function openCategory(id) {
-            if (!id) return;
-            window.localStorage.setItem(STORAGE_CATEGORY, id);
-            send('navigate', {
-                to: '/category-products?categoryId=' + encodeURIComponent(id),
-            });
-        }
+      document.addEventListener('click', function (event) {
+        var categoryCard = event.target.closest('[data-category-id]');
+        if (!categoryCard) return;
+        openCategory(categoryCard.getAttribute('data-category-id'));
+      });
 
-        function renderCategories(categories) {
-            if (!grid) return;
-            if (!categories.length) {
-                grid.innerHTML =
-                    '<div class="col-span-2 bg-white rounded-xl p-6 text-center text-sm text-on-surface-variant border border-primary/10">لا توجد تصنيفات مفعّلة حالياً.</div>';
-                return;
-            }
+      if (searchButton) {
+        searchButton.addEventListener('click', openSearchPage);
+      }
 
-            var cards = categories
-                .map(function (category) {
-                    return (
-                        '<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-transform active:scale-[0.98] shadow-sm cursor-pointer" data-category-id="' +
-                        escapeHtml(category.id) +
-                        '">' +
-                        '<div class="w-20 h-20 rounded-full overflow-hidden bg-secondary-container/30 flex items-center justify-center">' +
-                        (category.imageUrl
-                            ? '<img class="w-full h-full object-cover" alt="' +
-                              escapeHtml(category.nameAr || 'تصنيف') +
-                              '" src="' +
-                              escapeHtml(category.imageUrl) +
-                              '"/>'
-                            : '<span class="material-symbols-outlined text-primary text-3xl">category</span>') +
-                        '</div>' +
-                        '<h3 class="font-tajawal font-bold text-lg text-on-background line-clamp-2">' +
-                        escapeHtml(category.nameAr || 'تصنيف') +
-                        '</h3>' +
-                        '</div>'
-                    );
-                })
-                .join('');
+      if (searchInput) {
+        searchInput.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter') return;
+          event.preventDefault();
+          openSearchPage();
+        });
+      }
 
-            grid.innerHTML = cards;
-        }
+      window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin) return;
+        var payload = event.data;
+        if (!payload || payload.source !== 'react-shell') return;
+        if (payload.type !== 'cart-state') return;
+        setFooterCartCount(payload.itemCount || 0);
+      });
 
-        function applySearch() {
-            var query = (searchInput && searchInput.value ? searchInput.value : '')
-                .trim()
-                .toLowerCase();
-            if (!query) {
-                renderCategories(state.categories);
-                return;
-            }
+      renderCategories();
 
-            var filtered = state.categories.filter(function (category) {
-                var name = String(category.nameAr || '').toLowerCase();
-                var description = String(category.description || '').toLowerCase();
-                return name.indexOf(query) !== -1 || description.indexOf(query) !== -1;
-            });
-
-            renderCategories(filtered);
-        }
-
-        var navLinks = document.querySelectorAll('nav a');
-        var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
-        navLinks.forEach(function (link, index) {
-            if (navRoutes[index]) {
-                bindLink(link, navRoutes[index]);
-            }
+      fetch(API_BASE + '/catalog/categories')
+        .then(function (response) {
+          if (!response.ok) throw new Error('catalog');
+          return response.json();
+        })
+        .then(function (categories) {
+          state.categories = Array.isArray(categories) ? categories : [];
+          renderCategories();
+        })
+        .catch(function () {
+          state.categories = [];
+          renderCategories();
         });
 
-        document.addEventListener('click', function (event) {
-            var categoryCard = event.target.closest('[data-category-id]');
-            if (!categoryCard) return;
-            var categoryId = categoryCard.getAttribute('data-category-id');
-            openCategory(categoryId);
-        });
+      if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
+        window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
+      }
 
-        if (searchInput) {
-            searchInput.addEventListener('input', applySearch);
-        }
-
-        renderCategories([]);
-
-        window.addEventListener('message', function (event) {
-            if (event.origin !== window.location.origin) return;
-            var payload = event.data;
-            if (!payload || payload.source !== 'react-shell') return;
-            if (payload.type !== 'cart-state') return;
-
-            setFooterCartCount(payload.itemCount || 0);
-        });
-
-        fetch(API_BASE + '/catalog/categories')
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('catalog');
-                }
-                return response.json();
-            })
-            .then(function (categories) {
-                state.categories = Array.isArray(categories) ? categories : [];
-                applySearch();
-            })
-            .catch(function () {
-                state.categories = [];
-                renderCategories([]);
-            });
-
-        if (window.AlArnabNotifications && typeof window.AlArnabNotifications.mountHeaderButton === 'function') {
-            window.AlArnabNotifications.mountHeaderButton('[data-notification-button]');
-        }
-
-        send('request-state');
+      send('request-state');
     })();
-</script>
-</body></html>
-
-
-
-
+  </script>
+</body>
+</html>

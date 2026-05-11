@@ -1,6 +1,7 @@
 ﻿import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -23,6 +24,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateProductNewStatusDto } from './dto/update-product-new-status.dto';
 import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
 import { CreateAdminNotificationDto } from '../notifications/dto/create-admin-notification.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
@@ -69,6 +71,16 @@ export class AdminController {
     return this.adminService.createCategory(payload);
   }
 
+  @Patch('categories/:id')
+  updateCategory(@Param('id') id: string, @Body() payload: UpdateCategoryDto) {
+    return this.adminService.updateCategory(id, payload);
+  }
+
+  @Delete('categories/:id')
+  deleteCategory(@Param('id') id: string) {
+    return this.adminService.deleteCategory(id);
+  }
+
   @Get('uploads/cloudinary-signature')
   cloudinaryUploadSignature() {
     return this.adminService.getCloudinaryUploadSignature();
@@ -82,6 +94,11 @@ export class AdminController {
   @Post('products')
   createProduct(@Req() req: RequestWithUser, @Body() payload: CreateProductDto) {
     return this.adminService.createProduct(payload, req.user.sub);
+  }
+
+  @Delete('products/:id')
+  deleteProduct(@Param('id') id: string) {
+    return this.adminService.deleteProduct(id);
   }
 
   @Patch('products/:id/new')
@@ -122,3 +139,4 @@ export class AdminController {
     return this.adminService.salesReport(query);
   }
 }
+

@@ -12,6 +12,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateStoreSettingDto } from './dto/update-store-setting.dto';
 import { CreateAdminNotificationDto } from '../notifications/dto/create-admin-notification.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class AdminService {
@@ -287,6 +288,54 @@ export class AdminService {
     });
   }
 
+  async updateCategory(categoryId: string, payload: UpdateCategoryDto) {
+    const existing = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+    if (!existing) {
+      throw new NotFoundException('التصنيف غير موجود.');
+    }
+
+    return this.prisma.category.update({
+      where: { id: categoryId },
+      data: {
+        ...(payload.slug ? { slug: payload.slug } : {}),
+        ...(payload.nameAr ? { nameAr: payload.nameAr } : {}),
+        ...(payload.nameEn !== undefined ? { nameEn: payload.nameEn || null } : {}),
+        ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl || null } : {}),
+        ...(payload.description !== undefined ? { description: payload.description || null } : {}),
+        ...(payload.sortOrder !== undefined ? { sortOrder: payload.sortOrder } : {}),
+        ...(payload.isActive !== undefined ? { isActive: payload.isActive } : {}),
+      },
+    });
+  }
+
+  async deleteCategory(categoryId: string) {
+    const existing = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { id: true },
+    });
+    if (!existing) {
+      throw new NotFoundException('التصنيف غير موجود.');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.category.update({
+        where: { id: categoryId },
+        data: { isActive: false },
+      }),
+      this.prisma.product.updateMany({
+        where: { categoryId },
+        data: {
+          isActive: false,
+          isNew: false,
+        },
+      }),
+    ]);
+
+    return { success: true, id: categoryId };
+  }
+
   async listProducts() {
     const products = await this.prisma.product.findMany({
       include: { category: true },
@@ -368,6 +417,26 @@ export class AdminService {
     });
 
     return product;
+  }
+
+  async deleteProduct(productId: string) {
+    const existing = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+    if (!existing) {
+      throw new NotFoundException('المنتج غير موجود.');
+    }
+
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        isActive: false,
+        isNew: false,
+      },
+    });
+
+    return { success: true, id: productId };
   }
 
   async updateProductNewStatus(productId: string, isNew: boolean) {

@@ -7,6 +7,7 @@
   var SDK_VERSION = '10.13.2';
 
   var sdkLoadingPromise = null;
+  var pushSyncPromise = null;
   var foregroundBound = false;
 
   function getApiBase() {
@@ -258,6 +259,23 @@
     return { success: true, token: token };
   }
 
+  async function syncPushTokenIfGranted() {
+    if (pushSyncPromise) return pushSyncPromise;
+    if (!window.isSecureContext) return { success: false, reason: 'insecure-context' };
+    if (!('Notification' in window)) return { success: false, reason: 'unsupported' };
+    if (Notification.permission !== 'granted') return { success: false, reason: 'permission-not-granted' };
+
+    pushSyncPromise = registerPushNotifications()
+      .catch(function (_error) {
+        return { success: false, reason: 'sync-failed' };
+      })
+      .finally(function () {
+        pushSyncPromise = null;
+      });
+
+    return pushSyncPromise;
+  }
+
   function bindForegroundMessages(messaging) {
     if (!messaging || foregroundBound) return;
     foregroundBound = true;
@@ -342,6 +360,8 @@
       .catch(function () {
         setUnreadBadge(button, 0);
       });
+
+    void syncPushTokenIfGranted();
   }
 
   window.AlArnabNotifications = {
@@ -351,6 +371,7 @@
     mountHeaderButton: mountHeaderButton,
     registerPushNotifications: registerPushNotifications,
     tryBindForegroundMessages: tryBindForegroundMessages,
+    syncPushTokenIfGranted: syncPushTokenIfGranted,
     fetchMyNotifications: fetchMyNotifications,
     fetchUnreadCount: fetchUnreadCount,
     markNotificationAsRead: markNotificationAsRead,

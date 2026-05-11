@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="utf-8" />
@@ -117,6 +117,7 @@
       var state = {
         cartCount: 0,
         orders: [],
+        isStoreOpen: true,
         currency: 'SYP',
       };
 
@@ -140,6 +141,7 @@
     function applyStore(storePayload) {
       if (!storePayload || typeof storePayload !== 'object') return;
       state.currency = String(storePayload.currency || state.currency || 'SYP').toUpperCase();
+      state.isStoreOpen = Boolean(storePayload.isOpen !== false);
     }
 
     function formatSar(value) {
@@ -440,7 +442,8 @@
             var total = Number(order && order.totals ? order.totals.total : 0) || 0;
             var itemCount = Number(order && order.itemCount ? order.itemCount : 0) || 0;
             return (
-              '<button type="button" class="w-full text-right bg-surface-container-low rounded-xl p-4 flex items-center justify-between gap-3 transition-transform hover:scale-[0.995] active:scale-[0.99]" data-order-id="' + escapeHtml(order.id || '') + '">' +
+              '<div class="bg-surface-container-low rounded-xl p-3 space-y-2">' +
+              '<button type="button" class="w-full text-right p-1 flex items-center justify-between gap-3 transition-transform hover:scale-[0.995] active:scale-[0.99]" data-order-id="' + escapeHtml(order.id || '') + '">' +
               '<div class="min-w-0">' +
               '<h4 class="font-bold text-on-surface truncate">#' + escapeHtml(order.orderNumber || '-') + '</h4>' +
               '<p class="text-on-surface-variant text-xs mt-0.5">' + escapeHtml(formatDate(order.createdAt)) + '</p>' +
@@ -450,7 +453,9 @@
               '<p class="font-black text-on-background">' + escapeHtml(formatSar(total)) + '</p>' +
               '<p class="text-[10px] text-on-surface-variant mt-1">' + escapeHtml(toArabicNumber(itemCount)) + ' صنف</p>' +
               '</div>' +
-              '</button>'
+              '</button>' +
+              '<button type="button" class="w-full bg-white border border-primary/20 text-primary rounded-full py-2 text-xs font-bold" data-reorder-id="' + escapeHtml(order.id || '') + '">طلب مرة ثانية</button>' +
+              '</div>'
             );
           })
           .join('');
@@ -524,6 +529,35 @@
           return;
         }
 
+        var reorderButton = event.target.closest('[data-reorder-id]');
+        if (reorderButton) {
+          event.preventDefault();
+          if (!state.isStoreOpen) {
+            alert('المحل مغلق حالياً ولا يمكن إعادة الطلب.');
+            return;
+          }
+
+          var reorderId = reorderButton.getAttribute('data-reorder-id');
+          var reorderOrder = findOrderById(reorderId);
+          var reorderItems = Array.isArray(reorderOrder && reorderOrder.items) ? reorderOrder.items : [];
+          if (!reorderItems.length) {
+            alert('لا توجد عناصر يمكن إعادة طلبها.');
+            return;
+          }
+
+          reorderItems.forEach(function (item) {
+            var productId = String(item && item.productId ? item.productId : '').trim();
+            var qty = Math.max(0.01, Number(item && item.qty ? item.qty : 1) || 1);
+            if (!productId) return;
+            send('add-item', { id: productId, qty: qty, openCart: false });
+          });
+
+          window.setTimeout(function () {
+            send('navigate', { to: '/cart?sheet=1&from=' + encodeURIComponent('/orders') });
+          }, 260);
+          return;
+        }
+
         var cartButton = event.target.closest('[data-go-cart="true"]');
         if (!cartButton) return;
         event.preventDefault();
@@ -565,7 +599,6 @@
           }
 
           state.orders = Array.isArray(payload.orders) ? payload.orders : [];
-          closeOrderDetails();
           renderOrders();
         }
       });

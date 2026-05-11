@@ -22,7 +22,7 @@
         </button>
         <div class="header-group">
           <div>
-            <h1 class="page-title">إضافة منتج جديد</h1>
+            <h1 id="product-page-title" class="page-title">إضافة منتج جديد</h1>
           </div>
         </div>
         <img
@@ -62,13 +62,21 @@
           </div>
 
           <label>
-            <div class="label">سعر رأس المال (USD)</div>
+            <div class="label">عملة إدخال السعر</div>
+            <select id="product-input-currency" class="select-field">
+              <option value="SYP">ليرة سورية (SYP)</option>
+              <option value="USD">دولار أمريكي (USD)</option>
+            </select>
+          </label>
+
+          <label>
+            <div id="product-cost-price-label" class="label">سعر رأس المال (SYP)</div>
             <input id="product-cost-price" class="input-field" type="number" min="0" step="0.01" placeholder="0.00" />
             <div id="product-cost-price-converted" class="tiny muted mt-8">≈ 0</div>
           </label>
 
           <label>
-            <div class="label">السعر (USD)</div>
+            <div id="product-sell-price-label" class="label">السعر (SYP)</div>
             <input id="product-sell-price" class="input-field" type="number" min="0" step="0.01" placeholder="0.00" />
             <div id="product-sell-price-converted" class="tiny muted mt-8">≈ 0</div>
           </label>
@@ -136,12 +144,16 @@
 
         var categorySelect = document.getElementById('product-category-id');
         var saveButton = document.getElementById('save-product-btn');
+        var pageTitle = document.getElementById('product-page-title');
         var imageInput = document.getElementById('product-image-file');
         var imagePicker = document.getElementById('product-image-picker');
         var imagePreview = document.getElementById('product-image-preview');
         var imageFeedback = document.getElementById('product-image-feedback');
         var costPriceInput = document.getElementById('product-cost-price');
         var sellPriceInput = document.getElementById('product-sell-price');
+        var inputCurrencySelect = document.getElementById('product-input-currency');
+        var costPriceLabel = document.getElementById('product-cost-price-label');
+        var sellPriceLabel = document.getElementById('product-sell-price-label');
         var costPriceConverted = document.getElementById('product-cost-price-converted');
         var sellPriceConverted = document.getElementById('product-sell-price-converted');
         var exchangeRateLabel = document.getElementById('product-exchange-rate-label');
@@ -152,6 +164,10 @@
         var isUploading = false;
         var storeCurrency = 'SYP';
         var usdSarRate = 15000;
+        var editingProductId = '';
+        var editingStockQty = 0;
+        var editingMinStock = 0;
+        var previousInputCurrency = 'SYP';
 
         function makeProductId(name) {
           var base = String(name || '')
@@ -203,6 +219,51 @@
           return formatNumber(value) + ' ' + currencyLabel(currency);
         }
 
+        function inputCurrency() {
+          return String((inputCurrencySelect && inputCurrencySelect.value) || 'SYP').toUpperCase();
+        }
+
+        function parsePriceInput(node) {
+          return Number((node && node.value) || 0);
+        }
+
+        function toLocalPrice(rawValue, currency) {
+          var amount = Number(rawValue);
+          var code = String(currency || 'SYP').toUpperCase();
+          if (!Number.isFinite(amount) || amount <= 0) return 0;
+          if (code === 'USD') {
+            return amount * Math.max(1, Number(usdSarRate) || 1);
+          }
+          return amount;
+        }
+
+        function fromLocalPrice(localValue, currency) {
+          var amount = Number(localValue);
+          var code = String(currency || 'SYP').toUpperCase();
+          if (!Number.isFinite(amount) || amount <= 0) return 0;
+          if (code === 'USD') {
+            var rate = Math.max(1, Number(usdSarRate) || 1);
+            return amount / rate;
+          }
+          return amount;
+        }
+
+        function formatEditable(value) {
+          var numeric = Number(value || 0);
+          if (!Number.isFinite(numeric)) return '0';
+          return (Math.round(numeric * 100) / 100).toString();
+        }
+
+        function updatePriceLabels() {
+          var code = inputCurrency();
+          if (costPriceLabel) {
+            costPriceLabel.textContent = 'سعر رأس المال (' + code + ')';
+          }
+          if (sellPriceLabel) {
+            sellPriceLabel.textContent = 'سعر المبيع (' + code + ')';
+          }
+        }
+
         function renderExchangeRateText() {
           if (!exchangeRateLabel) return;
           exchangeRateLabel.textContent =
@@ -210,17 +271,139 @@
         }
 
         function updateConvertedPrices() {
-          var costUsd = Number((costPriceInput && costPriceInput.value) || 0);
-          var sellUsd = Number((sellPriceInput && sellPriceInput.value) || 0);
-          var costLocal = Math.max(0, Number.isFinite(costUsd) ? costUsd : 0) * usdSarRate;
-          var sellLocal = Math.max(0, Number.isFinite(sellUsd) ? sellUsd : 0) * usdSarRate;
+          var code = inputCurrency();
+          var costRaw = parsePriceInput(costPriceInput);
+          var sellRaw = parsePriceInput(sellPriceInput);
+          var costLocal = toLocalPrice(costRaw, code);
+          var sellLocal = toLocalPrice(sellRaw, code);
 
           if (costPriceConverted) {
-            costPriceConverted.textContent = '≈ ' + formatMoney(costLocal, storeCurrency);
+            costPriceConverted.textContent =
+              code === 'USD'
+                ? 'بالسوري: ' + formatMoney(costLocal, storeCurrency)
+                : 'بالسوري مباشرة: ' + formatMoney(costLocal, storeCurrency);
           }
 
           if (sellPriceConverted) {
-            sellPriceConverted.textContent = '≈ ' + formatMoney(sellLocal, storeCurrency);
+            sellPriceConverted.textContent =
+              code === 'USD'
+                ? 'بالسوري: ' + formatMoney(sellLocal, storeCurrency)
+                : 'بالسوري مباشرة: ' + formatMoney(sellLocal, storeCurrency);
+          }
+        }
+
+        function swapInputCurrency(nextCurrency) {
+          var nextCode = String(nextCurrency || 'SYP').toUpperCase();
+          var previousCode = previousInputCurrency;
+          if (nextCode === previousCode) return;
+
+          var currentCostRaw = parsePriceInput(costPriceInput);
+          var currentSellRaw = parsePriceInput(sellPriceInput);
+          var localCost = toLocalPrice(currentCostRaw, previousCode);
+          var localSell = toLocalPrice(currentSellRaw, previousCode);
+          var nextCostRaw = fromLocalPrice(localCost, nextCode);
+          var nextSellRaw = fromLocalPrice(localSell, nextCode);
+
+          if (costPriceInput) {
+            costPriceInput.value = formatEditable(nextCostRaw);
+          }
+          if (sellPriceInput) {
+            sellPriceInput.value = formatEditable(nextSellRaw);
+          }
+
+          previousInputCurrency = nextCode;
+          updatePriceLabels();
+          updateConvertedPrices();
+        }
+
+        function applyEditingProduct(product) {
+          if (!product || typeof product !== 'object') return;
+          editingProductId = String(product.id || '').trim();
+          if (!editingProductId) return;
+
+          editingStockQty = Math.max(0, Number(product.stockQty || 0) || 0);
+          editingMinStock = Math.max(0, Number(product.minStock || 0) || 0);
+
+          var nameInput = document.getElementById('product-name-ar');
+          var descriptionInput = document.getElementById('product-description');
+          var unitSelect = document.getElementById('product-unit');
+          var isNewInput = document.getElementById('product-is-new');
+
+          if (pageTitle) {
+            pageTitle.textContent = 'تعديل المنتج';
+          }
+
+          if (saveButton) {
+            saveButton.innerHTML =
+              '<span class="material-symbols-outlined" style="vertical-align: middle">edit</span> حفظ التعديل';
+          }
+
+          if (nameInput) {
+            nameInput.value = String(product.nameAr || '');
+          }
+          if (descriptionInput) {
+            descriptionInput.value = String(product.description || '');
+          }
+          if (categorySelect) {
+            categorySelect.value = String(product.categoryId || '');
+          }
+          if (unitSelect) {
+            var unitCode = String(product.unit || 'KG').toUpperCase();
+            if (unitCode === 'PIECE') {
+              unitSelect.value = 'حبة (piece)';
+            } else if (unitCode === 'BUNDLE') {
+              unitSelect.value = 'ربطة';
+            } else {
+              unitSelect.value = 'كيلوجرام (kg)';
+            }
+          }
+          if (isNewInput) {
+            isNewInput.checked = Boolean(product.isNew);
+          }
+
+          var localCost = Math.max(0, Number(product.costPrice || 0) || 0);
+          var localSell = Math.max(0, Number(product.sellPrice || 0) || 0);
+          var code = inputCurrency();
+          if (costPriceInput) {
+            costPriceInput.value = formatEditable(fromLocalPrice(localCost, code));
+          }
+          if (sellPriceInput) {
+            sellPriceInput.value = formatEditable(fromLocalPrice(localSell, code));
+          }
+
+          uploadedImageUrl = product.imageUrl ? String(product.imageUrl) : '';
+          if (imagePreview) {
+            imagePreview.src = uploadedImageUrl;
+            imagePreview.hidden = !uploadedImageUrl;
+          }
+          setImageFeedback(
+            uploadedImageUrl ? 'الصورة الحالية مفعلة. يمكنك رفع صورة جديدة للتغيير.' : 'لم يتم رفع صورة بعد.',
+            false,
+          );
+
+          updatePriceLabels();
+          updateConvertedPrices();
+        }
+
+        async function loadEditingProductIfNeeded() {
+          var params = new URLSearchParams(window.location.search || '');
+          var editId = String(params.get('editId') || '').trim();
+          if (!editId) return;
+
+          try {
+            var products = await window.AdminBridge.apiRequest('/admin/products');
+            var product = (Array.isArray(products) ? products : []).find(function (item) {
+              return String(item && item.id ? item.id : '') === editId;
+            });
+
+            if (!product) {
+              alert('المنتج المطلوب للتعديل غير موجود.');
+              return;
+            }
+
+            applyEditingProduct(product);
+          } catch (_error) {
+            alert('تعذر تحميل بيانات المنتج للتعديل.');
           }
         }
 
@@ -348,14 +531,23 @@
           sellPriceInput.addEventListener('input', updateConvertedPrices);
         }
 
+        if (inputCurrencySelect) {
+          inputCurrencySelect.addEventListener('change', function () {
+            swapInputCurrency(inputCurrencySelect.value);
+          });
+        }
+
         saveButton.addEventListener('click', async function () {
           var nameAr = (document.getElementById('product-name-ar') || {}).value || '';
           var description = (document.getElementById('product-description') || {}).value || '';
-          var costPrice = Number((costPriceInput || {}).value || 0);
-          var sellPrice = Number((sellPriceInput || {}).value || 0);
+          var rawCostPrice = parsePriceInput(costPriceInput);
+          var rawSellPrice = parsePriceInput(sellPriceInput);
           var categoryId = categorySelect.value || '';
           var unitLabel = ((document.getElementById('product-unit') || {}).value || '').trim();
           var isNew = Boolean((document.getElementById('product-is-new') || {}).checked);
+          var currencyCode = inputCurrency();
+          var costPrice = toLocalPrice(rawCostPrice, currencyCode);
+          var sellPrice = toLocalPrice(rawSellPrice, currencyCode);
 
           if (!nameAr.trim()) {
             alert('اسم المنتج مطلوب.');
@@ -380,14 +572,14 @@
             await window.AdminBridge.apiRequest('/admin/products', {
               method: 'POST',
               body: {
-                id: makeProductId(nameAr),
+                id: editingProductId || makeProductId(nameAr),
                 categoryId: categoryId,
                 nameAr: nameAr.trim(),
                 description: description.trim() || undefined,
                 costPrice: Number.isFinite(costPrice) ? Math.max(0, costPrice) : 0,
                 sellPrice: Number.isFinite(sellPrice) ? Math.max(0, sellPrice) : 0,
-                stockQty: 0,
-                minStock: 0,
+                stockQty: editingProductId ? editingStockQty : 0,
+                minStock: editingProductId ? editingMinStock : 0,
                 unit: unitValue(unitLabel),
                 isNew: isNew,
                 imageUrl: uploadedImageUrl || undefined,
@@ -402,8 +594,11 @@
           }
         });
 
-        loadCategories();
-        loadStoreSettings();
+        updatePriceLabels();
+        previousInputCurrency = inputCurrency();
+        Promise.all([loadCategories(), loadStoreSettings()]).then(function () {
+          loadEditingProductIfNeeded();
+        });
       })();
     </script>
   </body>

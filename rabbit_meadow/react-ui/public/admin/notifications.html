@@ -1,232 +1,237 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إشعارات الأدمن</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
-    <link href="/admin/admin.css" rel="stylesheet" />
-  </head>
-  <body>
-    <section class="admin-shell admin-compact">
-      <header class="admin-header">
-        <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
-          <span class="material-symbols-outlined">arrow_forward</span>
-        </button>
-        <div class="header-group">
-          <div>
-            <h1 class="page-title">الإشعارات</h1>
-            <p class="page-subtitle">إرسال ومتابعة التنبيهات</p>
-          </div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إشعارات الأدمن</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="/admin/admin.css" rel="stylesheet" />
+</head>
+<body>
+  <section class="admin-shell admin-compact">
+    <header class="admin-header">
+      <button class="icon-btn" data-route="/admin/dashboard" title="رجوع">
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+      <div class="header-group">
+        <div>
+          <h1 class="page-title">الإشعارات</h1>
+          <p class="page-subtitle">إرسال ومتابعة التنبيهات</p>
         </div>
-        <button id="refresh-notifications" class="icon-btn" type="button" title="تحديث">
-          <span class="material-symbols-outlined">refresh</span>
-        </button>
-      </header>
+      </div>
+      <button id="refresh-notifications" class="icon-btn" type="button" title="تحديث">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+    </header>
 
-      <main class="container stack">
-        <section class="card stack">
-          <h3 class="section-title section-title-inline">إرسال إشعار جديد</h3>
+    <main class="container stack">
+      <section class="card stack">
+        <h3 class="section-title section-title-inline">إرسال إشعار جديد</h3>
 
-          <div>
-            <label class="label" for="notification-title">العنوان</label>
-            <input id="notification-title" class="input-field" maxlength="120" placeholder="مثال: تحديث حالة الطلبات" />
-          </div>
+        <div>
+          <label class="label" for="notification-title">العنوان</label>
+          <input id="notification-title" class="input-field" maxlength="120" placeholder="مثال: تحديث حالة الطلبات" />
+        </div>
 
-          <div>
-            <label class="label" for="notification-body">نص الإشعار</label>
-            <textarea id="notification-body" class="textarea-field" maxlength="500" placeholder="اكتب نص الإشعار الذي سيصل للمستلمين..."></textarea>
-          </div>
+        <div>
+          <label class="label" for="notification-body">نص الإشعار</label>
+          <textarea id="notification-body" class="textarea-field" maxlength="500" placeholder="اكتب نص الإشعار الذي سيصل للمستلمين..."></textarea>
+        </div>
 
-          <div>
-            <label class="label" for="notification-audience">المستلمون</label>
-            <select id="notification-audience" class="select-field">
-              <option value="CUSTOMERS">الزبائن</option>
-              <option value="ADMINS">الأدمن</option>
-              <option value="ALL">الكل</option>
-            </select>
-          </div>
+        <div>
+          <label class="label" for="notification-audience">المستلمون</label>
+          <select id="notification-audience" class="select-field">
+            <option value="CUSTOMERS">الزبائن</option>
+            <option value="ADMINS">الأدمن</option>
+            <option value="ALL">الكل</option>
+          </select>
+        </div>
 
-          <button id="send-notification" class="cta" type="button">إرسال الإشعار</button>
-          <div id="send-feedback" class="tiny muted"></div>
-        </section>
+        <div>
+          <label class="label" for="notification-target-phone">رقم محدد (اختياري)</label>
+          <input id="notification-target-phone" class="input-field" dir="ltr" placeholder="09XXXXXXXX" />
+          <div class="tiny muted">عند تعبئة الرقم سيتم إرسال الإشعار لهذا الرقم فقط.</div>
+        </div>
 
-        <section class="card stack">
-          <div class="row">
-            <h3 class="section-title section-title-inline">إشعاراتي</h3>
-            <button id="mark-all-read" class="pill" type="button">تعيين الكل كمقروء</button>
-          </div>
-          <div id="notifications-list" class="stack">
-            <article class="orders-empty">جاري تحميل الإشعارات...</article>
-          </div>
-        </section>
-      </main>
-    </section>
+        <button id="send-notification" class="cta" type="button">إرسال الإشعار</button>
+        <div id="send-feedback" class="tiny muted"></div>
+      </section>
 
-    <script src="/admin/admin-bridge.js"></script>
-    <script>
-      (function () {
-        if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+      <section class="card stack">
+        <div class="row">
+          <h3 class="section-title section-title-inline">إشعاراتي</h3>
+          <button id="mark-all-read" class="pill" type="button">تعيين الكل كمقروء</button>
+        </div>
+        <div id="notifications-list" class="stack">
+          <article class="orders-empty">جاري تحميل الإشعارات...</article>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script src="/admin/admin-bridge.js"></script>
+  <script>
+    (function () {
+      if (!window.AdminBridge || typeof window.AdminBridge.apiRequest !== 'function') {
+        return;
+      }
+
+      var titleInput = document.getElementById('notification-title');
+      var bodyInput = document.getElementById('notification-body');
+      var audienceInput = document.getElementById('notification-audience');
+      var targetPhoneInput = document.getElementById('notification-target-phone');
+      var sendButton = document.getElementById('send-notification');
+      var refreshButton = document.getElementById('refresh-notifications');
+      var markAllReadButton = document.getElementById('mark-all-read');
+      var notificationsList = document.getElementById('notifications-list');
+      var sendFeedback = document.getElementById('send-feedback');
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function relativeTime(dateValue) {
+        if (!dateValue) return 'الآن';
+        var date = new Date(dateValue);
+        if (Number.isNaN(date.getTime())) return 'الآن';
+
+        var diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+        if (diffMinutes < 1) return 'الآن';
+        if (diffMinutes < 60) return 'منذ ' + diffMinutes + ' دقيقة';
+
+        var hours = Math.floor(diffMinutes / 60);
+        if (hours < 24) return 'منذ ' + hours + ' ساعة';
+
+        var days = Math.floor(hours / 24);
+        return 'منذ ' + days + ' يوم';
+      }
+
+      function setFeedback(message, isError) {
+        if (!sendFeedback) return;
+        sendFeedback.textContent = message || '';
+        sendFeedback.classList.toggle('is-error', Boolean(message) && Boolean(isError));
+        sendFeedback.classList.toggle('is-success', Boolean(message) && !isError);
+      }
+
+      function renderNotifications(items) {
+        var list = Array.isArray(items) ? items : [];
+
+        if (!notificationsList) return;
+        if (!list.length) {
+          notificationsList.innerHTML = '<article class="orders-empty">لا يوجد إشعارات بعد.</article>';
           return;
         }
 
-        var titleInput = document.getElementById('notification-title');
-        var bodyInput = document.getElementById('notification-body');
-        var audienceInput = document.getElementById('notification-audience');
-        var sendButton = document.getElementById('send-notification');
-        var refreshButton = document.getElementById('refresh-notifications');
-        var markAllReadButton = document.getElementById('mark-all-read');
-        var notificationsList = document.getElementById('notifications-list');
-        var sendFeedback = document.getElementById('send-feedback');
+        notificationsList.innerHTML = list
+          .map(function (item) {
+            var isRead = Boolean(item && item.isRead);
+            var tagClass = isRead ? 'success' : 'warning';
+            var tagLabel = isRead ? 'مقروء' : 'غير مقروء';
 
-        function escapeHtml(value) {
-          return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+            return [
+              '<article class="card stack">',
+              '  <div class="row">',
+              '    <span class="tag ' + tagClass + '">' + tagLabel + '</span>',
+              '    <span class="tiny muted">' + escapeHtml(relativeTime(item.createdAt)) + '</span>',
+              '  </div>',
+              '  <h4 class="orders-customer">' + escapeHtml(item.title || 'إشعار') + '</h4>',
+              '  <p class="muted">' + escapeHtml(item.body || '') + '</p>',
+              '</article>',
+            ].join('');
+          })
+          .join('');
+      }
+
+      async function loadMyNotifications() {
+        if (!notificationsList) return;
+        notificationsList.innerHTML = '<article class="orders-empty">جاري تحميل الإشعارات...</article>';
+
+        try {
+          var response = await window.AdminBridge.apiRequest('/notifications?limit=40');
+          renderNotifications(Array.isArray(response) ? response : []);
+        } catch (_error) {
+          notificationsList.innerHTML = '<article class="orders-empty">تعذر تحميل الإشعارات.</article>';
+        }
+      }
+
+      async function sendNotification() {
+        var title = titleInput && titleInput.value ? String(titleInput.value).trim() : '';
+        var body = bodyInput && bodyInput.value ? String(bodyInput.value).trim() : '';
+        var audience = audienceInput && audienceInput.value ? String(audienceInput.value) : 'CUSTOMERS';
+        var targetPhone = targetPhoneInput && targetPhoneInput.value ? String(targetPhoneInput.value).trim() : '';
+
+        if (!title || !body) {
+          setFeedback('أدخل عنوان ونص الإشعار أولاً.', true);
+          return;
         }
 
-        function relativeTime(dateValue) {
-          if (!dateValue) return 'الآن';
-          var date = new Date(dateValue);
-          if (Number.isNaN(date.getTime())) return 'الآن';
+        if (sendButton) sendButton.disabled = true;
+        setFeedback('جاري إرسال الإشعار...', false);
 
-          var diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
-          if (diffMinutes < 1) return 'الآن';
-          if (diffMinutes < 60) return 'منذ ' + diffMinutes + ' دقيقة';
-
-          var hours = Math.floor(diffMinutes / 60);
-          if (hours < 24) return 'منذ ' + hours + ' ساعة';
-
-          var days = Math.floor(hours / 24);
-          return 'منذ ' + days + ' يوم';
-        }
-
-        function setFeedback(message, isError) {
-          if (!sendFeedback) return;
-          sendFeedback.textContent = message || '';
-          sendFeedback.classList.toggle('is-error', Boolean(message) && Boolean(isError));
-          sendFeedback.classList.toggle('is-success', Boolean(message) && !isError);
-        }
-
-        function renderNotifications(items) {
-          var list = Array.isArray(items) ? items : [];
-
-          if (!notificationsList) return;
-          if (!list.length) {
-            notificationsList.innerHTML = '<article class="orders-empty">لا يوجد إشعارات بعد.</article>';
-            return;
-          }
-
-          notificationsList.innerHTML = list
-            .map(function (item) {
-              var isRead = Boolean(item && item.isRead);
-              var tagClass = isRead ? 'success' : 'warning';
-              var tagLabel = isRead ? 'مقروء' : 'غير مقروء';
-
-              return [
-                '<article class="card stack">',
-                '  <div class="row">',
-                '    <span class="tag ' + tagClass + '">' + tagLabel + '</span>',
-                '    <span class="tiny muted">' + escapeHtml(relativeTime(item.createdAt)) + '</span>',
-                '  </div>',
-                '  <h4 class="orders-customer">' + escapeHtml(item.title || 'إشعار') + '</h4>',
-                '  <p class="muted">' + escapeHtml(item.body || '') + '</p>',
-                '</article>',
-              ].join('');
-            })
-            .join('');
-        }
-
-        async function loadMyNotifications() {
-          if (!notificationsList) return;
-          notificationsList.innerHTML = '<article class="orders-empty">جاري تحميل الإشعارات...</article>';
-
-          try {
-            var response = await window.AdminBridge.apiRequest('/notifications?limit=40');
-            renderNotifications(Array.isArray(response) ? response : []);
-          } catch (_error) {
-            notificationsList.innerHTML = '<article class="orders-empty">تعذر تحميل الإشعارات.</article>';
-          }
-        }
-
-        async function sendNotification() {
-          var title = titleInput && titleInput.value ? String(titleInput.value).trim() : '';
-          var body = bodyInput && bodyInput.value ? String(bodyInput.value).trim() : '';
-          var audience = audienceInput && audienceInput.value ? String(audienceInput.value) : 'CUSTOMERS';
-
-          if (!title || !body) {
-            setFeedback('أدخل عنوان ونص الإشعار أولاً.', true);
-            return;
-          }
-
-          if (sendButton) sendButton.disabled = true;
-          setFeedback('جاري إرسال الإشعار...', false);
-
-          try {
-            var result = await window.AdminBridge.apiRequest('/admin/notifications', {
-              method: 'POST',
-              body: {
-                title: title,
-                body: body,
-                audience: audience,
-              },
-            });
-
-            if (titleInput) titleInput.value = '';
-            if (bodyInput) bodyInput.value = '';
-            setFeedback('تم إرسال الإشعار إلى ' + (result && result.recipients ? result.recipients : 0) + ' مستخدم.', false);
-            await loadMyNotifications();
-          } catch (_error) {
-            setFeedback('تعذر إرسال الإشعار. تأكد من صلاحيات الأدمن.', true);
-          } finally {
-            if (sendButton) sendButton.disabled = false;
-          }
-        }
-
-        async function markAllAsRead() {
-          if (markAllReadButton) markAllReadButton.disabled = true;
-          try {
-            await window.AdminBridge.apiRequest('/notifications/read-all', {
-              method: 'PATCH',
-            });
-            await loadMyNotifications();
-          } catch (_error) {
-            setFeedback('تعذر تعيين الإشعارات كمقروءة.', true);
-          } finally {
-            if (markAllReadButton) markAllReadButton.disabled = false;
-          }
-        }
-
-        if (sendButton) {
-          sendButton.addEventListener('click', function () {
-            sendNotification();
+        try {
+          var result = await window.AdminBridge.apiRequest('/admin/notifications', {
+            method: 'POST',
+            body: {
+              title: title,
+              body: body,
+              audience: audience,
+              targetPhone: targetPhone || undefined,
+            },
           });
-        }
 
-        if (refreshButton) {
-          refreshButton.addEventListener('click', function () {
-            loadMyNotifications();
+          if (titleInput) titleInput.value = '';
+          if (bodyInput) bodyInput.value = '';
+          if (targetPhoneInput) targetPhoneInput.value = '';
+
+          setFeedback('تم إرسال الإشعار إلى ' + (result && result.recipients ? result.recipients : 0) + ' مستخدم.', false);
+          await loadMyNotifications();
+        } catch (_error) {
+          setFeedback('تعذر إرسال الإشعار. تأكد من صحة الرقم وصلاحيات الأدمن.', true);
+        } finally {
+          if (sendButton) sendButton.disabled = false;
+        }
+      }
+
+      async function markAllAsRead() {
+        if (markAllReadButton) markAllReadButton.disabled = true;
+        try {
+          await window.AdminBridge.apiRequest('/notifications/read-all', {
+            method: 'PATCH',
           });
+          await loadMyNotifications();
+        } catch (_error) {
+          setFeedback('تعذر تعيين الإشعارات كمقروءة.', true);
+        } finally {
+          if (markAllReadButton) markAllReadButton.disabled = false;
         }
+      }
 
-        if (markAllReadButton) {
-          markAllReadButton.addEventListener('click', function () {
-            markAllAsRead();
-          });
-        }
+      if (sendButton) {
+        sendButton.addEventListener('click', function () {
+          sendNotification();
+        });
+      }
 
-        loadMyNotifications();
-      })();
-    </script>
-  </body>
+      if (refreshButton) {
+        refreshButton.addEventListener('click', function () {
+          loadMyNotifications();
+        });
+      }
+
+      if (markAllReadButton) {
+        markAllReadButton.addEventListener('click', function () {
+          markAllAsRead();
+        });
+      }
+
+      loadMyNotifications();
+    })();
+  </script>
+</body>
 </html>
