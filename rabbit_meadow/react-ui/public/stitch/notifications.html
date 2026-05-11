@@ -92,6 +92,8 @@
       var state = {
         notificationsLoading: false,
       };
+      var notificationsPollingTimer = null;
+      var notificationsPollingInFlight = false;
 
       var notificationsStatus = document.getElementById('notifications-status');
       var notificationsList = document.getElementById('notifications-list');
@@ -216,15 +218,19 @@
           .join('');
       }
 
-      async function loadNotifications() {
+      async function loadNotifications(options) {
+        var silent = Boolean(options && options.silent);
+
         if (!window.AlArnabNotifications) {
           setNotificationsStatus('ميزة الإشعارات غير متاحة حالياً.', true);
           renderNotifications([]);
           return;
         }
 
-        setNotificationsLoading(true);
-        setNotificationsStatus('جاري تحميل الإشعارات...', false);
+        if (!silent) {
+          setNotificationsLoading(true);
+          setNotificationsStatus('جاري تحميل الإشعارات...', false);
+        }
 
         try {
           var items = await window.AlArnabNotifications.fetchMyNotifications(40, false);
@@ -239,11 +245,30 @@
             false,
           );
         } catch (_error) {
-          renderNotifications([]);
-          setNotificationsStatus('تعذر تحميل الإشعارات. تأكد من تسجيل الدخول.', true);
+          if (!silent) {
+            renderNotifications([]);
+            setNotificationsStatus('تعذر تحميل الإشعارات. تأكد من تسجيل الدخول.', true);
+          }
         } finally {
-          setNotificationsLoading(false);
+          if (!silent) {
+            setNotificationsLoading(false);
+          }
         }
+      }
+
+      function startNotificationsPolling() {
+        if (notificationsPollingTimer) return;
+        notificationsPollingTimer = window.setInterval(function () {
+          if (notificationsPollingInFlight || state.notificationsLoading) return;
+          notificationsPollingInFlight = true;
+          loadNotifications({ silent: true })
+            .catch(function () {
+              // ignored intentionally in background polling
+            })
+            .finally(function () {
+              notificationsPollingInFlight = false;
+            });
+        }, 5000);
       }
 
       async function activatePushNotifications() {
@@ -360,6 +385,17 @@
         }
       });
 
+      window.addEventListener('al-arnab-notification-received', function () {
+        loadNotifications({ silent: true });
+      });
+
+      window.addEventListener('beforeunload', function () {
+        if (notificationsPollingTimer) {
+          window.clearInterval(notificationsPollingTimer);
+          notificationsPollingTimer = null;
+        }
+      });
+
       if (
         window.AlArnabNotifications &&
         typeof window.AlArnabNotifications.tryBindForegroundMessages === 'function'
@@ -376,6 +412,7 @@
 
       send('request-state');
       loadNotifications();
+      startNotificationsPolling();
     })();
   </script>
 </body>

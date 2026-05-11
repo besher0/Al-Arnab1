@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   if (window.AlArnabNotifications) return;
 
   var TOKEN_STORAGE_KEY = 'al-arnab-token';
@@ -9,6 +9,12 @@
   var sdkLoadingPromise = null;
   var pushSyncPromise = null;
   var foregroundBound = false;
+  var unreadPollingTimer = null;
+  var unreadFetchInFlight = false;
+  var mountedButtons = [];
+  var notificationAudioContext = null;
+  var notificationAudioUnlocked = false;
+  var audioUnlockBound = false;
 
   function getApiBase() {
     return (
@@ -92,6 +98,93 @@
     } else {
       badge.style.display = 'none';
     }
+  }
+
+  function emitNotificationReceived(payload) {
+    try {
+      if (typeof window.CustomEvent === 'function') {
+        window.dispatchEvent(
+          new CustomEvent('al-arnab-notification-received', {
+            detail: payload || null,
+          }),
+        );
+      }
+    } catch (_error) {
+      // ignore event dispatch errors
+    }
+  }
+
+  function getAudioContext() {
+    if (notificationAudioContext) return notificationAudioContext;
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+    try {
+      notificationAudioContext = new AudioCtx();
+      return notificationAudioContext;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function unlockNotificationAudio() {
+    var context = getAudioContext();
+    if (!context) return;
+
+    if (context.state === 'suspended') {
+      context.resume().catch(function () {
+        // ignore unlock failure
+      });
+    }
+    notificationAudioUnlocked = true;
+  }
+
+  function bindAudioUnlock() {
+    if (audioUnlockBound) return;
+    audioUnlockBound = true;
+
+    var unlockOnce = function () {
+      unlockNotificationAudio();
+      window.removeEventListener('pointerdown', unlockOnce, true);
+      window.removeEventListener('touchstart', unlockOnce, true);
+      window.removeEventListener('keydown', unlockOnce, true);
+    };
+
+    window.addEventListener('pointerdown', unlockOnce, true);
+    window.addEventListener('touchstart', unlockOnce, true);
+    window.addEventListener('keydown', unlockOnce, true);
+  }
+
+  function playTone(context, frequency, startTime, duration, gainValue) {
+    var oscillator = context.createOscillator();
+    var gain = context.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, startTime);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(gainValue, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration + 0.02);
+  }
+
+  function playNotificationSound() {
+    var context = getAudioContext();
+    if (!context) return;
+
+    if (context.state === 'suspended' && !notificationAudioUnlocked) {
+      return;
+    }
+
+    if (context.state === 'suspended') {
+      context.resume().catch(function () {
+        // ignore play failure
+      });
+    }
+
+    var now = context.currentTime + 0.01;
+    playTone(context, 880, now, 0.12, 0.12);
+    playTone(context, 1175, now + 0.16, 0.16, 0.12);
   }
 
   async function request(path, options) {
@@ -281,6 +374,9 @@
     foregroundBound = true;
 
     messaging.onMessage(function (payload) {
+      emitNotificationReceived(payload);
+      void refreshUnreadBadges();
+      playNotificationSound();
       var title = (payload && payload.notification && payload.notification.title) || 'إشعار جديد';
       var body = (payload && payload.notification && payload.notification.body) || '';
       if (typeof window.showStitchAlert === 'function') {
@@ -327,6 +423,30 @@
     return request('/notifications/unread-count');
   }
 
+  async function refreshUnreadBadges() {
+    if (unreadFetchInFlight || !mountedButtons.length) return;
+    unreadFetchInFlight = true;
+
+    try {
+      var payload = await fetchUnreadCount();
+      var unreadCount = payload && payload.unreadCount ? payload.unreadCount : 0;
+      mountedButtons.forEach(function (button) {
+        setUnreadBadge(button, unreadCount);
+      });
+    } catch (_error) {
+      // ignore temporary badge refresh failures
+    } finally {
+      unreadFetchInFlight = false;
+    }
+  }
+
+  function startUnreadPolling() {
+    if (unreadPollingTimer) return;
+    unreadPollingTimer = window.setInterval(function () {
+      void refreshUnreadBadges();
+    }, 5000);
+  }
+
   async function markNotificationAsRead(notificationId) {
     return request('/notifications/' + encodeURIComponent(String(notificationId || '')) + '/read', {
       method: 'PATCH',
@@ -346,6 +466,7 @@
 
     if (button.__notificationBound) return;
     button.__notificationBound = true;
+    mountedButtons.push(button);
     button.setAttribute('type', 'button');
     button.setAttribute('aria-label', 'الإشعارات');
     button.addEventListener('click', function (event) {
@@ -360,7 +481,9 @@
       .catch(function () {
         setUnreadBadge(button, 0);
       });
-
+    startUnreadPolling();
+    bindAudioUnlock();
+    void tryBindForegroundMessages();
     void syncPushTokenIfGranted();
   }
 
@@ -378,3 +501,5 @@
     markAllAsRead: markAllAsRead,
   };
 })();
+
+

@@ -158,7 +158,7 @@ export class FirebasePushService {
       if (!this.warnedMissingConfig) {
         this.warnedMissingConfig = true;
         this.logger.warn(
-          'Firebase push config is incomplete. Set FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY to enable push.',
+          'Firebase push config is incomplete. Set FIREBASE_SERVICE_ACCOUNT_JSON/FIREBASE_SERVICE_ACCOUNT_JSON_BASE64 or FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY to enable push.',
         );
       }
       return null;
@@ -187,6 +187,11 @@ export class FirebasePushService {
   }
 
   private loadServiceAccount(): FirebaseServiceAccount | null {
+    const serviceAccountFromEnv = this.loadServiceAccountFromEnv();
+    if (serviceAccountFromEnv) {
+      return serviceAccountFromEnv;
+    }
+
     const serviceAccountPath = this.configService
       .get<string>('FIREBASE_SERVICE_ACCOUNT_PATH', '')
       .trim();
@@ -211,6 +216,54 @@ export class FirebasePushService {
     } catch (error) {
       this.logger.warn(
         `Failed to read Firebase service account file: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return null;
+    }
+  }
+
+  private loadServiceAccountFromEnv(): FirebaseServiceAccount | null {
+    const rawJson = this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT_JSON', '').trim();
+    if (rawJson) {
+      const parsed = this.tryParseServiceAccount(rawJson, 'FIREBASE_SERVICE_ACCOUNT_JSON');
+      if (parsed) return parsed;
+    }
+
+    const base64Json = this.configService
+      .get<string>('FIREBASE_SERVICE_ACCOUNT_JSON_BASE64', '')
+      .trim();
+    if (!base64Json) {
+      return null;
+    }
+
+    try {
+      const decoded = Buffer.from(base64Json, 'base64').toString('utf8');
+      const parsed = this.tryParseServiceAccount(decoded, 'FIREBASE_SERVICE_ACCOUNT_JSON_BASE64');
+      return parsed;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to decode FIREBASE_SERVICE_ACCOUNT_JSON_BASE64: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return null;
+    }
+  }
+
+  private tryParseServiceAccount(raw: string, sourceName: string): FirebaseServiceAccount | null {
+    try {
+      const parsed = JSON.parse(raw) as FirebaseServiceAccount;
+      if (!parsed?.project_id || !parsed?.client_email || !parsed?.private_key) {
+        this.logger.warn(
+          `Firebase service account from ${sourceName} is missing required keys (project_id, client_email, private_key).`,
+        );
+        return null;
+      }
+      return parsed;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to parse Firebase service account from ${sourceName}: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );

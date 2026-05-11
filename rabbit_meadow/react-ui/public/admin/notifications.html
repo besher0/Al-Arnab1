@@ -189,7 +189,25 @@
           if (bodyInput) bodyInput.value = '';
           if (targetPhoneInput) targetPhoneInput.value = '';
 
-          setFeedback('تم إرسال الإشعار إلى ' + (result && result.recipients ? result.recipients : 0) + ' مستخدم.', false);
+          var recipients = result && result.recipients ? Number(result.recipients) : 0;
+          var push = result && result.push ? result.push : null;
+          var attemptedTokens = push && Number.isFinite(Number(push.attemptedTokens))
+            ? Number(push.attemptedTokens)
+            : 0;
+          var successCount = push && Number.isFinite(Number(push.successCount))
+            ? Number(push.successCount)
+            : 0;
+          var failureCount = push && Number.isFinite(Number(push.failureCount))
+            ? Number(push.failureCount)
+            : 0;
+
+          var feedback = 'تم إرسال الإشعار إلى ' + recipients + ' مستخدم.';
+          feedback += ' | Push tokens: ' + attemptedTokens + ' (نجاح: ' + successCount + '، فشل: ' + failureCount + ')';
+          if (attemptedTokens === 0) {
+            feedback += ' - لا يوجد أجهزة مفعّل عليها إشعارات لهذا الجمهور.';
+          }
+
+          setFeedback(feedback, false);
           await loadMyNotifications();
         } catch (_error) {
           setFeedback('تعذر إرسال الإشعار. تأكد من صحة الرقم وصلاحيات الأدمن.', true);

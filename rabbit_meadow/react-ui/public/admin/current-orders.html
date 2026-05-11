@@ -81,6 +81,12 @@
         var filterButtons = Array.prototype.slice.call(document.querySelectorAll('[data-filter]'));
         var orders = [];
         var activeFilter = 'ALL';
+        var ordersPollingTimer = null;
+        var ordersPollingInFlight = false;
+        var initialOrdersLoaded = false;
+        var previousActiveOrderIds = {};
+        var adminAudioContext = null;
+        var adminAudioUnlocked = false;
 
         var STATUS_LABELS = {
           NEW: 'جديد',
@@ -135,6 +141,95 @@
 
         function digitsOnly(value) {
           return String(value || '').replace(/[^+\d]/g, '');
+        }
+
+        function getAudioContext() {
+          if (adminAudioContext) return adminAudioContext;
+          var AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return null;
+          try {
+            adminAudioContext = new AudioCtx();
+            return adminAudioContext;
+          } catch (_error) {
+            return null;
+          }
+        }
+
+        function unlockAdminAudio() {
+          var context = getAudioContext();
+          if (!context) return;
+          if (context.state === 'suspended') {
+            context.resume().catch(function () {
+              // ignore unlock errors
+            });
+          }
+          adminAudioUnlocked = true;
+        }
+
+        function bindAdminAudioUnlock() {
+          var unlockOnce = function () {
+            unlockAdminAudio();
+            window.removeEventListener('pointerdown', unlockOnce, true);
+            window.removeEventListener('touchstart', unlockOnce, true);
+            window.removeEventListener('keydown', unlockOnce, true);
+          };
+
+          window.addEventListener('pointerdown', unlockOnce, true);
+          window.addEventListener('touchstart', unlockOnce, true);
+          window.addEventListener('keydown', unlockOnce, true);
+        }
+
+        function playTone(context, frequency, startTime, duration, gainValue) {
+          var oscillator = context.createOscillator();
+          var gain = context.createGain();
+          oscillator.type = 'triangle';
+          oscillator.frequency.setValueAtTime(frequency, startTime);
+          gain.gain.setValueAtTime(0.0001, startTime);
+          gain.gain.exponentialRampToValueAtTime(gainValue, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(startTime);
+          oscillator.stop(startTime + duration + 0.02);
+        }
+
+        function playNewOrderSound() {
+          var context = getAudioContext();
+          if (!context) return;
+          if (context.state === 'suspended' && !adminAudioUnlocked) return;
+          if (context.state === 'suspended') {
+            context.resume().catch(function () {
+              // ignore resume failures
+            });
+          }
+
+          var now = context.currentTime + 0.01;
+          playTone(context, 740, now, 0.12, 0.13);
+          playTone(context, 988, now + 0.17, 0.16, 0.13);
+          playTone(context, 740, now + 0.38, 0.12, 0.13);
+        }
+
+        function isActiveOrderStatus(status) {
+          return status === 'NEW' || status === 'PREPARING' || status === 'ON_THE_WAY';
+        }
+
+        function computeActiveOrderIds(nextOrders) {
+          var ids = {};
+          (Array.isArray(nextOrders) ? nextOrders : []).forEach(function (order) {
+            if (!order || !order.id || !isActiveOrderStatus(order.status)) return;
+            ids[String(order.id)] = true;
+          });
+          return ids;
+        }
+
+        function hasNewOrderId(nextIds) {
+          var keys = Object.keys(nextIds || {});
+          for (var i = 0; i < keys.length; i += 1) {
+            if (!previousActiveOrderIds[keys[i]]) {
+              return true;
+            }
+          }
+          return false;
         }
 
         function getOrderCoordinates(order) {
@@ -247,25 +342,63 @@
           });
         }
 
-        async function loadCurrentOrders() {
+        async function loadCurrentOrders(options) {
+          var silent = Boolean(options && options.silent);
           if (!listElement) return;
-          listElement.innerHTML = '<article class="card orders-empty">جاري تحميل الطلبات...</article>';
+          if (!silent) {
+            listElement.innerHTML = '<article class="card orders-empty">جاري تحميل الطلبات...</article>';
+          }
 
           try {
             var response = await window.AdminBridge.apiRequest('/admin/orders/current');
-            orders = Array.isArray(response) ? response : [];
+            var nextOrders = Array.isArray(response) ? response : [];
+            var nextActiveOrderIds = computeActiveOrderIds(nextOrders);
+
+            if (initialOrdersLoaded && hasNewOrderId(nextActiveOrderIds)) {
+              playNewOrderSound();
+            }
+
+            previousActiveOrderIds = nextActiveOrderIds;
+            initialOrdersLoaded = true;
+            orders = nextOrders;
             renderFilters();
             renderOrders();
           } catch (error) {
             orders = [];
             renderFilters();
-            listElement.innerHTML =
-              '<article class="card orders-empty">تعذر تحميل الطلبات. تأكد من تسجيل الدخول بحساب أدمن.</article>';
+            if (!silent) {
+              listElement.innerHTML =
+                '<article class="card orders-empty">تعذر تحميل الطلبات. تأكد من تسجيل الدخول بحساب أدمن.</article>';
+            }
           }
         }
 
+        function startOrdersPolling() {
+          if (ordersPollingTimer) return;
+          ordersPollingTimer = window.setInterval(function () {
+            if (ordersPollingInFlight) return;
+            ordersPollingInFlight = true;
+            loadCurrentOrders({ silent: true })
+              .catch(function () {
+                // ignored in polling
+              })
+              .finally(function () {
+                ordersPollingInFlight = false;
+              });
+          }, 5000);
+        }
+
+        bindAdminAudioUnlock();
         bindFilters();
         loadCurrentOrders();
+        startOrdersPolling();
+
+        window.addEventListener('beforeunload', function () {
+          if (ordersPollingTimer) {
+            window.clearInterval(ordersPollingTimer);
+            ordersPollingTimer = null;
+          }
+        });
       })();
     </script>
   </body>
