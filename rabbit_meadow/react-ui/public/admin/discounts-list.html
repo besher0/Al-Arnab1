@@ -72,6 +72,7 @@
         margin-top: 10px;
         display: flex;
         gap: 8px;
+        flex-wrap: wrap;
       }
 
       .offer-action-btn {
@@ -95,6 +96,28 @@
 
       .offers-feedback.is-success {
         color: var(--admin-success);
+      }
+
+      @media (min-width: 1024px) {
+        .offers-list {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .offer-title {
+          font-size: 16px;
+        }
+
+        .offer-meta {
+          font-size: 11px;
+        }
+
+        .offer-action-btn {
+          width: 100%;
+        }
       }
     </style>
   </head>

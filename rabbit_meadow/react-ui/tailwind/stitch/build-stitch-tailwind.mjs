@@ -8,6 +8,7 @@ const inputFile = 'tailwind/stitch/input.css';
 const builds = [
   { page: 'welcome', config: 'welcome.config.cjs' },
   { page: 'home', config: 'home.config.cjs' },
+  { page: 'home-offers', config: 'home-offers.config.cjs' },
   { page: 'categories', config: 'catalog.config.cjs' },
   { page: 'category-products', config: 'catalog.config.cjs' },
   { page: 'product', config: 'product.config.cjs' },

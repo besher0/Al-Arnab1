@@ -22,13 +22,24 @@
       font-weight: 800;
       font-size: 13px;
     }
-    .offer-card {
-      animation: offer-float 2.8s ease-in-out infinite;
-      animation-delay: var(--delay, 0s);
+    .offer-stage { min-height: 206px; }
+    .offer-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
-    @keyframes offer-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+    .offer-mini {
+      animation: offer-switch 360ms ease;
+    }
+    .offer-mini.offer-mini-secondary {
+      animation-delay: 80ms;
+    }
+    .offer-mini-thumb {
+      height: 82px;
+    }
+    @keyframes offer-switch {
+      0% { opacity: 0; transform: translateY(8px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .disabled-action { opacity: 0.55; pointer-events: none; }
     html, body { scrollbar-width: none; -ms-overflow-style: none; }
@@ -47,7 +58,6 @@
       <button data-notification-button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
         <span class="material-symbols-outlined">notifications</span>
       </button>
-      <button data-home-logout class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-3 py-1.5 hover:bg-red-100 transition-colors" type="button">تسجيل خروج</button>
     </div>
   </header>
 
@@ -64,20 +74,20 @@
     <section>
       <div class="flex justify-between items-end mb-4 px-2">
         <h2 class="text-xl font-black text-on-surface flex items-center gap-2">أفضل العروض</h2>
-        <button type="button" data-offers-toggle class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-          <span data-offers-toggle-label>عرض الكل</span>
-          <span class="material-symbols-outlined text-xs" data-offers-toggle-icon>arrow_back_ios</span>
+        <button type="button" data-open-offers-page class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+          <span>عرض الكل</span>
+          <span class="material-symbols-outlined text-xs">arrow_back_ios</span>
         </button>
       </div>
-      <div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4 offers-animated" data-offers-list></div>
+      <div class="offer-stage" data-offers-list></div>
     </section>
 
     <section>
       <div class="flex justify-between items-end mb-4 px-2">
         <h2 class="text-xl font-black text-on-surface">المنتجات الجديدة</h2>
-        <button type="button" data-new-toggle class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-          <span data-new-toggle-label>عرض الكل</span>
-          <span class="material-symbols-outlined text-xs" data-new-toggle-icon>arrow_back_ios</span>
+        <button type="button" data-open-new-page class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+          <span>عرض الكل</span>
+          <span class="material-symbols-outlined text-xs">arrow_back_ios</span>
         </button>
       </div>
       <div class="flex overflow-x-auto gap-4 no-scrollbar pb-4 -mx-4 px-4" data-new-products-list></div>
@@ -86,9 +96,9 @@
     <section class="pb-8">
       <div class="flex justify-between items-end mb-4 px-2">
         <h2 class="text-xl font-black text-on-surface">الأكثر طلباً</h2>
-        <button type="button" data-popular-toggle class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-          <span data-popular-toggle-label>عرض الكل</span>
-          <span class="material-symbols-outlined text-xs" data-popular-toggle-icon>arrow_back_ios</span>
+        <button type="button" data-open-popular-page class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+          <span>عرض الكل</span>
+          <span class="material-symbols-outlined text-xs">arrow_back_ios</span>
         </button>
       </div>
       <div class="space-y-4" data-popular-list></div>
@@ -142,15 +152,10 @@
       var searchButton = document.querySelector('[data-home-search-btn]');
       var storeClosedBanner = document.querySelector('[data-store-closed-banner]');
       var welcomeNode = document.querySelector('[data-user-welcome]');
-      var logoutButton = document.querySelector('[data-home-logout]');
-
-      var offersToggleButton = document.querySelector('[data-offers-toggle]');
-      var offersToggleLabel = document.querySelector('[data-offers-toggle-label]');
-      var offersToggleIcon = document.querySelector('[data-offers-toggle-icon]');
-      var newToggleLabel = document.querySelector('[data-new-toggle-label]');
-      var newToggleIcon = document.querySelector('[data-new-toggle-icon]');
-      var popularToggleLabel = document.querySelector('[data-popular-toggle-label]');
-      var popularToggleIcon = document.querySelector('[data-popular-toggle-icon]');
+      var offersPageButton = document.querySelector('[data-open-offers-page]');
+      var newPageButton = document.querySelector('[data-open-new-page]');
+      var popularPageButton = document.querySelector('[data-open-popular-page]');
+      var offersRotationTimer = null;
 
       var state = {
         products: [],
@@ -158,9 +163,7 @@
         isStoreOpen: true,
         itemCount: 0,
         userName: '',
-        showAllOffers: false,
-        showAllNew: true,
-        showAllPopular: true,
+        offerIndex: 0,
       };
 
       function toArabicNumber(value) {
@@ -251,15 +254,6 @@
         return 'خصم ' + formatSar(value);
       }
 
-      function toggleLabel(labelNode, iconNode, showAll) {
-        if (labelNode) {
-          labelNode.textContent = showAll ? 'عرض أقل' : 'عرض الكل';
-        }
-        if (iconNode) {
-          iconNode.textContent = showAll ? 'expand_less' : 'arrow_back_ios';
-        }
-      }
-
       function addButtonClass() {
         return state.isStoreOpen ? '' : ' disabled-action';
       }
@@ -273,37 +267,46 @@
           return;
         }
 
-        var visible = offers.slice(0, state.showAllOffers ? offers.length : 8);
-        offersContainer.innerHTML = visible
-          .map(function (product, index) {
-            var finalPrice = Math.max(0, Number(product && product.price ? product.price : 0));
-            var originalPrice = Math.max(0, Number(product && product.originalPrice ? product.originalPrice : 0));
-            var showOriginal = originalPrice > finalPrice && finalPrice > 0;
-            return (
-              '<div class="offer-card min-w-[170px] bg-white rounded-2xl p-3 shadow-sm flex-shrink-0 relative border border-primary/5" style="--delay:' +
-              (index * 0.12).toFixed(2) +
-              's" data-open-product="' +
-              escapeHtml(product.id) +
-              '">' +
-              '<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">' +
-              escapeHtml(offerBadgeLabel(product)) +
-              '</div>' +
-              '<div class="h-32 w-full rounded-xl overflow-hidden mb-3 bg-surface-container">' +
-              (product.imageUrl
-                ? '<img class="w-full h-full object-cover" alt="' + escapeHtml(product.name || 'منتج') + '" src="' + escapeHtml(product.imageUrl) + '"/>'
-                : '<div class="w-full h-full flex items-center justify-center text-primary/60"><span class="material-symbols-outlined">inventory_2</span></div>') +
-              '</div>' +
-              '<h3 class="text-sm font-bold text-on-surface mb-1 truncate">' + escapeHtml(product.name || 'منتج') + '</h3>' +
-              '<div class="flex items-center gap-2 mb-3">' +
-              '<span class="text-primary font-black text-base">' + formatSar(finalPrice) + '</span>' +
-              (showOriginal ? '<span class="text-on-surface-variant text-xs line-through">' + formatSar(originalPrice) + '</span>' : '') +
-              '</div>' +
-              '<button class="w-full bg-primary text-white py-2 rounded-full text-xs font-bold flex items-center justify-center gap-2' + addButtonClass() + '" data-add-product="' + escapeHtml(product.id) + '">' +
-              '<span class="material-symbols-outlined text-sm">shopping_cart</span>أضف للسلة</button>' +
-              '</div>'
-            );
-          })
-          .join('');
+        var activeIndex = state.offerIndex % offers.length;
+        if (activeIndex < 0) activeIndex = 0;
+        var visibleOffers = [offers[activeIndex]];
+        if (offers.length > 1) {
+          visibleOffers.push(offers[(activeIndex + 1) % offers.length]);
+        }
+
+        offersContainer.innerHTML =
+          '<div class="offer-pair">' +
+          visibleOffers
+            .map(function (product, index) {
+              var finalPrice = Math.max(0, Number(product && product.price ? product.price : 0));
+              var originalPrice = Math.max(0, Number(product && product.originalPrice ? product.originalPrice : 0));
+              var showOriginal = originalPrice > finalPrice && finalPrice > 0;
+              return (
+                '<article class="offer-mini ' +
+                (index === 1 ? 'offer-mini-secondary ' : '') +
+                'bg-white rounded-2xl p-2.5 shadow-sm relative border border-primary/5" data-open-product="' +
+                escapeHtml(product.id) +
+                '">' +
+                '<div class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">' +
+                escapeHtml(offerBadgeLabel(product)) +
+                '</div>' +
+                '<div class="offer-mini-thumb w-full rounded-xl overflow-hidden mb-2 bg-surface-container">' +
+                (product.imageUrl
+                  ? '<img class="w-full h-full object-cover" alt="' + escapeHtml(product.name || 'منتج') + '" src="' + escapeHtml(product.imageUrl) + '"/>'
+                  : '<div class="w-full h-full flex items-center justify-center text-primary/60"><span class="material-symbols-outlined">inventory_2</span></div>') +
+                '</div>' +
+                '<h3 class="text-xs font-bold text-on-surface mb-1 truncate">' + escapeHtml(product.name || 'منتج') + '</h3>' +
+                '<div class="flex items-center gap-1.5 mb-2">' +
+                '<span class="text-primary font-black text-sm">' + formatSar(finalPrice) + '</span>' +
+                (showOriginal ? '<span class="text-on-surface-variant text-[10px] line-through">' + formatSar(originalPrice) + '</span>' : '') +
+                '</div>' +
+                '<button class="w-full bg-primary text-white py-1.5 rounded-full text-[11px] font-bold flex items-center justify-center gap-1' + addButtonClass() + '" data-add-product="' + escapeHtml(product.id) + '">' +
+                '<span class="material-symbols-outlined text-sm">shopping_cart</span>أضف</button>' +
+                '</article>'
+              );
+            })
+            .join('') +
+          '</div>';
       }
 
       function renderNewProducts() {
@@ -318,7 +321,7 @@
           return;
         }
 
-        var visible = products.slice(0, state.showAllNew ? products.length : 8);
+        var visible = products.slice(0, 8);
         newProductsContainer.innerHTML = visible
           .map(function (product) {
             return (
@@ -348,7 +351,7 @@
           return;
         }
 
-        var visible = state.products.slice(0, state.showAllPopular ? state.products.length : 8);
+        var visible = state.products.slice(0, 8);
         popularContainer.innerHTML = visible
           .map(function (product) {
             return (
@@ -381,9 +384,11 @@
         renderOffers();
         renderNewProducts();
         renderPopular();
-        toggleLabel(offersToggleLabel, offersToggleIcon, state.showAllOffers);
-        toggleLabel(newToggleLabel, newToggleIcon, state.showAllNew);
-        toggleLabel(popularToggleLabel, popularToggleIcon, state.showAllPopular);
+      }
+
+      function openCollectionsPage(tab) {
+        var safeTab = String(tab || 'offers');
+        send('navigate', { to: '/home-offers?tab=' + encodeURIComponent(safeTab) });
       }
 
       function openSearchPage() {
@@ -421,20 +426,18 @@
         });
       }
 
-      function startOffersAutoScroll() {
-        window.setInterval(function () {
-          if (!offersContainer) return;
-          if (state.showAllOffers) return;
-          if (offersContainer.scrollWidth <= offersContainer.clientWidth + 6) return;
+      function startOffersRotation() {
+        if (offersRotationTimer) {
+          window.clearInterval(offersRotationTimer);
+          offersRotationTimer = null;
+        }
 
-          var maxScroll = Math.max(0, offersContainer.scrollWidth - offersContainer.clientWidth);
-          var next = offersContainer.scrollLeft + 220;
-          if (next >= maxScroll - 6) {
-            offersContainer.scrollTo({ left: 0, behavior: 'smooth' });
-            return;
-          }
-          offersContainer.scrollTo({ left: next, behavior: 'smooth' });
-        }, 2400);
+        offersRotationTimer = window.setInterval(function () {
+          var offers = state.products.filter(hasActiveOffer);
+          if (offers.length <= 1) return;
+          state.offerIndex = (state.offerIndex + 1) % offers.length;
+          renderOffers();
+        }, 2800);
       }
 
       var navLinks = document.querySelectorAll('nav a');
@@ -445,26 +448,21 @@
         }
       });
 
-      if (offersToggleButton) {
-        offersToggleButton.addEventListener('click', function () {
-          state.showAllOffers = !state.showAllOffers;
-          renderAll();
+      if (offersPageButton) {
+        offersPageButton.addEventListener('click', function () {
+          openCollectionsPage('offers');
         });
       }
 
-      var newToggleButton = document.querySelector('[data-new-toggle]');
-      if (newToggleButton) {
-        newToggleButton.addEventListener('click', function () {
-          state.showAllNew = !state.showAllNew;
-          renderAll();
+      if (newPageButton) {
+        newPageButton.addEventListener('click', function () {
+          openCollectionsPage('new');
         });
       }
 
-      var popularToggleButton = document.querySelector('[data-popular-toggle]');
-      if (popularToggleButton) {
-        popularToggleButton.addEventListener('click', function () {
-          state.showAllPopular = !state.showAllPopular;
-          renderAll();
+      if (popularPageButton) {
+        popularPageButton.addEventListener('click', function () {
+          openCollectionsPage('popular');
         });
       }
 
@@ -480,15 +478,9 @@
         });
       }
 
-      if (logoutButton) {
-        logoutButton.addEventListener('click', function () {
-          send('logout');
-        });
-      }
-
       bindDynamicActions();
       renderAll();
-      startOffersAutoScroll();
+      startOffersRotation();
 
       window.addEventListener('message', function (event) {
         if (event.origin !== window.location.origin) return;

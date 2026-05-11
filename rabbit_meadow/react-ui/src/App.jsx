@@ -77,13 +77,46 @@ function AdminRoute({ children }) {
 function FramePage({ src, title, forwardSearch = false }) {
   const location = useLocation()
   const frameSrc = forwardSearch ? `${src}${location.search || ''}` : src
+  const isAdminFrame = typeof src === 'string' && src.startsWith('/admin/')
 
   return (
-    <section className="single-view">
-      <div className="frame-wrap">
+    <section className={`single-view${isAdminFrame ? ' single-view-admin' : ''}`}>
+      <div className={`frame-wrap${isAdminFrame ? ' frame-wrap-admin' : ''}`}>
         <iframe className="screen-frame" src={frameSrc} title={title} />
       </div>
     </section>
+  )
+}
+
+function CartQuickCheckoutButton() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { isAuthenticated, isBootstrapping, itemCount, user } = useShop()
+
+  const hiddenPaths = ['/welcome', '/login', '/signup', '/cart']
+  const isAdminPath = location.pathname.startsWith('/admin')
+  const isHiddenPath = hiddenPaths.includes(location.pathname)
+  const canShow =
+    !isBootstrapping &&
+    isAuthenticated &&
+    user?.role !== 'ADMIN' &&
+    !isAdminPath &&
+    !isHiddenPath &&
+    Number(itemCount || 0) > 0
+
+  if (!canShow) {
+    return null
+  }
+
+  function openCart() {
+    const fromPath = `${location.pathname}${location.search || ''}` || '/home'
+    navigate(`/cart?from=${encodeURIComponent(fromPath)}`)
+  }
+
+  return (
+    <button type="button" className="cart-quick-checkout" onClick={openCart}>
+      اكبس لإكمال الطلب
+    </button>
   )
 }
 
@@ -244,10 +277,6 @@ function BridgeListener() {
         try {
           const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 1
           await addItem(payload.id, Math.max(0.01, qty))
-          if (payload.openCart !== false && location.pathname !== '/cart') {
-            const fromPath = `${location.pathname}${location.search || ''}` || '/home'
-            navigate(`/cart?sheet=1&from=${encodeURIComponent(fromPath)}`)
-          }
         } catch (error) {
           sendAuthError(event.source, error?.message)
         }
@@ -447,6 +476,7 @@ function AppRoutes() {
   return (
     <>
       <BridgeListener />
+      <CartQuickCheckoutButton />
       <Routes>
         <Route path="/" element={<Navigate to="/welcome" replace />} />
 
@@ -496,6 +526,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <FramePage src="/stitch/search.html" title="search" forwardSearch />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/home-offers"
+          element={
+            <ProtectedRoute>
+              <FramePage src="/stitch/home-offers.html" title="home-offers" forwardSearch />
             </ProtectedRoute>
           }
         />

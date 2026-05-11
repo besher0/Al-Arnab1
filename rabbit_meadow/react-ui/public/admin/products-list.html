@@ -133,6 +133,30 @@
     .categories-feedback.is-success {
       color: var(--admin-success);
     }
+
+    @media (max-width: 900px) {
+      .products-table,
+      .categories-table {
+        min-width: 640px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .products-table,
+      .categories-table {
+        min-width: 560px;
+      }
+
+      .thumb-42 {
+        width: 36px;
+        height: 36px;
+      }
+
+      .tiny-action {
+        padding: 6px 9px;
+        font-size: 10px;
+      }
+    }
   </style>
 </head>
 <body>

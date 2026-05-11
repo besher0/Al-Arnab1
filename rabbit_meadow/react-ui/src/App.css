@@ -16,6 +16,17 @@
   box-shadow: 0 20px 45px rgba(26, 54, 93, 0.16);
 }
 
+.single-view-admin {
+  align-items: stretch;
+  justify-items: center;
+}
+
+.frame-wrap-admin {
+  width: min(1240px, 100%);
+  height: min(940px, calc(100dvh - 28px));
+  border-radius: 20px;
+}
+
 .screen-frame {
   width: 100%;
   height: 100%;
@@ -32,6 +43,30 @@
   background: linear-gradient(135deg, #f3fbff, #e7f6ff);
 }
 
+.cart-quick-checkout {
+  position: fixed;
+  left: max(10px, env(safe-area-inset-left));
+  bottom: calc(118px + env(safe-area-inset-bottom));
+  z-index: 90;
+  border: 0;
+  border-radius: 999px;
+  background: #0ea5e9;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.34);
+  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
+}
+
+.cart-quick-checkout:hover {
+  filter: brightness(0.95);
+}
+
+.cart-quick-checkout:active {
+  transform: scale(0.98);
+}
+
 @media (max-width: 520px) {
   .single-view {
     padding: 0;
@@ -43,12 +78,30 @@
     border-radius: 0;
     border-inline: 0;
   }
+
+  .frame-wrap-admin {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    border-inline: 0;
+  }
+
+  .cart-quick-checkout {
+    left: 10px;
+    bottom: calc(108px + env(safe-area-inset-bottom));
+  }
 }
 
 @media (min-width: 521px) and (max-width: 767px) {
   .frame-wrap {
     width: min(500px, 100%);
     height: min(900px, calc(100dvh - 26px));
+  }
+
+  .frame-wrap-admin {
+    width: min(700px, 100%);
+    height: min(930px, calc(100dvh - 26px));
+    border-radius: 18px;
   }
 }
 
@@ -61,6 +114,12 @@
     width: min(640px, 100%);
     height: min(930px, calc(100dvh - 36px));
   }
+
+  .frame-wrap-admin {
+    width: min(920px, 100%);
+    height: min(960px, calc(100dvh - 36px));
+    border-radius: 18px;
+  }
 }
 
 @media (min-width: 1025px) {
@@ -72,10 +131,24 @@
     width: min(460px, 100%);
     height: min(900px, calc(100dvh - 40px));
   }
+
+  .single-view-admin {
+    padding: 12px 16px;
+  }
+
+  .frame-wrap-admin {
+    width: min(1320px, 100%);
+    height: min(980px, calc(100dvh - 24px));
+    border-radius: 18px;
+  }
 }
 
 @media (max-height: 740px) {
   .frame-wrap {
+    height: calc(100dvh - 10px);
+  }
+
+  .frame-wrap-admin {
     height: calc(100dvh - 10px);
   }
 }
