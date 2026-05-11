@@ -42,6 +42,11 @@ export class AdminController {
     return this.adminService.listCurrentOrders();
   }
 
+  @Get('deliveries')
+  deliveries() {
+    return this.adminService.listDeliveryUsers();
+  }
+
   @Get('orders/completed')
   completedOrders() {
     return this.adminService.listCompletedOrders();

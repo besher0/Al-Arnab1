@@ -102,6 +102,17 @@ export class AdminService {
     return orders.map((order) => this.mapOrderSummary(order));
   }
 
+  async listDeliveryUsers() {
+    const deliveryUsers = await this.listActiveDeliveryUsersWithLoad();
+
+    return deliveryUsers.map((deliveryUser) => ({
+      id: deliveryUser.id,
+      name: deliveryUser.name,
+      phone: deliveryUser.phone,
+      activeOrdersCount: deliveryUser.activeOrdersCount,
+    }));
+  }
+
   async listCompletedOrders() {
     const orders = await this.prisma.order.findMany({
       where: {
@@ -230,10 +241,11 @@ export class AdminService {
     }
 
     const statusChanged = existing.status !== payload.status;
-    const assignedDelivery =
-      existing.status === OrderStatus.NEW && payload.status === OrderStatus.PREPARING
-        ? await this.pickDeliveryAssignee()
-        : null;
+    const shouldAssignDelivery =
+      existing.status === OrderStatus.NEW && payload.status === OrderStatus.PREPARING;
+    const assignedDelivery = shouldAssignDelivery
+      ? await this.requireActiveDeliveryAssignee(payload.assignedDeliveryId)
+      : null;
     const logNote =
       payload.note?.trim() ||
       (assignedDelivery ? `تم تعيين الطلب للمندوب ${assignedDelivery.name}.` : null);
@@ -787,7 +799,33 @@ export class AdminService {
     };
   }
 
-  private async pickDeliveryAssignee() {
+  private async requireActiveDeliveryAssignee(assignedDeliveryId?: string) {
+    const deliveryId = String(assignedDeliveryId || '').trim();
+    if (!deliveryId) {
+      throw new BadRequestException('يجب اختيار مندوب التوصيل قبل قبول الطلب.');
+    }
+
+    const selectedDelivery = await this.prisma.user.findFirst({
+      where: {
+        id: deliveryId,
+        role: UserRole.DELIVERY,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+    });
+
+    if (!selectedDelivery) {
+      throw new BadRequestException('المندوب المحدد غير موجود أو غير نشط.');
+    }
+
+    return selectedDelivery;
+  }
+
+  private async listActiveDeliveryUsersWithLoad() {
     const deliveryUsers = await this.prisma.user.findMany({
       where: {
         role: UserRole.DELIVERY,
@@ -805,7 +843,7 @@ export class AdminService {
     });
 
     if (!deliveryUsers.length) {
-      throw new BadRequestException('لا يوجد مندوب توصيل نشط. يرجى إنشاء حسابات ديلفري أولاً.');
+      return [];
     }
 
     const loadRows = await this.prisma.order.groupBy({
@@ -830,21 +868,20 @@ export class AdminService {
       }
     });
 
-    deliveryUsers.sort((a, b) => {
-      const aLoad = loadByDeliveryId.get(a.id) || 0;
-      const bLoad = loadByDeliveryId.get(b.id) || 0;
-      if (aLoad !== bLoad) {
-        return aLoad - bLoad;
-      }
+    return deliveryUsers
+      .map((deliveryUser) => ({
+        id: deliveryUser.id,
+        name: deliveryUser.name,
+        phone: deliveryUser.phone,
+        createdAt: deliveryUser.createdAt,
+        activeOrdersCount: loadByDeliveryId.get(deliveryUser.id) || 0,
+      }))
+      .sort((a, b) => {
+        if (a.activeOrdersCount !== b.activeOrdersCount) {
+          return a.activeOrdersCount - b.activeOrdersCount;
+        }
 
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    });
-
-    const selected = deliveryUsers[0];
-    if (!selected) {
-      throw new BadRequestException('لا يوجد مندوب توصيل متاح حالياً.');
-    }
-
-    return selected;
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      });
   }
 }

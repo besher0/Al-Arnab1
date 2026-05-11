@@ -101,6 +101,13 @@
             <button class="pill active" data-prep-minutes="20" type="button">20 دقيقة</button>
             <button class="pill" data-prep-minutes="30" type="button">30 دقيقة</button>
           </div>
+          <div class="stack" style="gap: 6px">
+            <label class="label" for="delivery-assignee-select">اختر مندوب الدليفري</label>
+            <select id="delivery-assignee-select" class="select-field">
+              <option value="">جاري تحميل المناديب...</option>
+            </select>
+            <div id="delivery-assignee-feedback" class="tiny muted"></div>
+          </div>
           <button id="accept-order" class="cta" type="button">
             <span class="material-symbols-outlined" style="vertical-align: middle">check_circle</span>
             قبول الطلب
@@ -169,6 +176,8 @@
         var rejectButton = document.getElementById('reject-order');
         var acceptSection = document.getElementById('accept-section');
         var rejectSection = document.getElementById('reject-section');
+        var deliverySelectNode = document.getElementById('delivery-assignee-select');
+        var deliveryFeedbackNode = document.getElementById('delivery-assignee-feedback');
 
         var prepButtons = Array.prototype.slice.call(document.querySelectorAll('[data-prep-minutes]'));
         var rejectButtons = Array.prototype.slice.call(document.querySelectorAll('[data-reject-reason]'));
@@ -177,6 +186,8 @@
         var orderId = params.get('id') || '';
         var selectedPrepMinutes = 20;
         var selectedRejectReason = 'المادة غير متوفرة';
+        var selectedDeliveryId = '';
+        var deliveryAssignees = [];
         var isStatusLocked = false;
 
         function escapeHtml(value) {
@@ -200,6 +211,97 @@
           feedbackNode.textContent = message || '';
           feedbackNode.classList.toggle('is-error', Boolean(message) && Boolean(isError));
           feedbackNode.classList.toggle('is-success', Boolean(message) && !isError);
+        }
+
+        function formatErrorMessage(error) {
+          if (!error) return '';
+          var message = '';
+
+          if (typeof error === 'string') {
+            message = error;
+          } else if (error && typeof error.message === 'string') {
+            message = error.message;
+          }
+
+          message = String(message || '').trim();
+          if (!message || message === 'request-failed') return '';
+          if (message === 'missing-token') return 'انتهت الجلسة. يرجى تسجيل الدخول من جديد.';
+          return message;
+        }
+
+        function setDeliveryFeedback(message, isError) {
+          if (!deliveryFeedbackNode) return;
+          deliveryFeedbackNode.textContent = message || '';
+          deliveryFeedbackNode.style.color =
+            Boolean(message) && Boolean(isError) ? 'var(--admin-danger)' : 'var(--admin-muted)';
+        }
+
+        function deliveryOptionLabel(delivery, index) {
+          var fallbackName = 'مندوب #' + String(index + 1);
+          var name = String((delivery && delivery.name) || fallbackName);
+          var phone = String((delivery && delivery.phone) || '').trim();
+          var activeOrdersCount = Number(delivery && delivery.activeOrdersCount);
+          var activeOrdersText = Number.isFinite(activeOrdersCount)
+            ? activeOrdersCount.toLocaleString('ar-SA')
+            : '0';
+
+          return (phone ? name + ' - ' + phone : name) + ' (طلبات حالية: ' + activeOrdersText + ')';
+        }
+
+        function renderDeliveryAssignees() {
+          if (!deliverySelectNode) return;
+
+          if (!Array.isArray(deliveryAssignees) || !deliveryAssignees.length) {
+            selectedDeliveryId = '';
+            deliverySelectNode.innerHTML = '<option value="">لا يوجد مندوب دليفري متاح حالياً</option>';
+            deliverySelectNode.disabled = true;
+            return;
+          }
+
+          var selectedExists = deliveryAssignees.some(function (delivery) {
+            return String((delivery && delivery.id) || '') === selectedDeliveryId;
+          });
+          if (!selectedExists) {
+            selectedDeliveryId = '';
+          }
+
+          var optionsHtml = ['<option value="">-- اختر مندوب الدليفري --</option>']
+            .concat(
+              deliveryAssignees.map(function (delivery, index) {
+                var id = String((delivery && delivery.id) || '');
+                var label = deliveryOptionLabel(delivery, index);
+                return '<option value="' + escapeHtml(id) + '">' + escapeHtml(label) + '</option>';
+              }),
+            )
+            .join('');
+
+          deliverySelectNode.innerHTML = optionsHtml;
+          deliverySelectNode.value = selectedDeliveryId;
+          deliverySelectNode.disabled = isStatusLocked;
+        }
+
+        async function loadDeliveryAssignees() {
+          if (!deliverySelectNode) return;
+
+          deliverySelectNode.disabled = true;
+          deliverySelectNode.innerHTML = '<option value="">جاري تحميل المناديب...</option>';
+          setDeliveryFeedback('', false);
+
+          try {
+            var response = await window.AdminBridge.apiRequest('/admin/deliveries');
+            deliveryAssignees = Array.isArray(response) ? response : [];
+            renderDeliveryAssignees();
+            if (!deliveryAssignees.length) {
+              setDeliveryFeedback('لا يوجد مندوب دليفري نشط حالياً.', true);
+            }
+          } catch (error) {
+            deliveryAssignees = [];
+            renderDeliveryAssignees();
+            setDeliveryFeedback(
+              formatErrorMessage(error) || 'تعذر تحميل قائمة المناديب. حاول مرة ثانية.',
+              true,
+            );
+          }
         }
 
         function renderItems(items) {
@@ -292,6 +394,10 @@
         function setActionsDisabled(isDisabled) {
           if (acceptButton) acceptButton.disabled = isDisabled;
           if (rejectButton) rejectButton.disabled = isDisabled;
+          if (deliverySelectNode) {
+            deliverySelectNode.disabled =
+              Boolean(isDisabled) || isStatusLocked || !Array.isArray(deliveryAssignees) || !deliveryAssignees.length;
+          }
         }
 
         function updateActionsVisibility(status) {
@@ -325,6 +431,10 @@
             addressNode.textContent = formatAddress(order.address);
             updateOrderMapLink(order.address);
             updateAssignedDelivery(order.assignedDelivery);
+            if (order.status === 'NEW' && order.assignedDelivery && order.assignedDelivery.id) {
+              selectedDeliveryId = String(order.assignedDelivery.id);
+            }
+            renderDeliveryAssignees();
             renderItems(order.items || []);
             if (notesCard && notesNode) {
               var notes = String(order.notes || '').trim();
@@ -372,7 +482,10 @@
             setFeedback(successMessage, false);
             await loadOrder();
           } catch (error) {
-            setFeedback('تعذر تحديث حالة الطلب. حاول مرة ثانية.', true);
+            setFeedback(
+              formatErrorMessage(error) || 'تعذر تحديث حالة الطلب. حاول مرة ثانية.',
+              true,
+            );
           } finally {
             setActionsDisabled(false);
           }
@@ -404,12 +517,31 @@
           });
         });
 
+        if (deliverySelectNode) {
+          deliverySelectNode.addEventListener('change', function () {
+            selectedDeliveryId = String(deliverySelectNode.value || '').trim();
+            if (selectedDeliveryId) {
+              setDeliveryFeedback('', false);
+            }
+          });
+        }
+
         acceptButton.addEventListener('click', function () {
+          if (!selectedDeliveryId) {
+            setFeedback('حدّد مندوب الدليفري قبل قبول الطلب.', true);
+            setDeliveryFeedback('اختيار المندوب مطلوب للمتابعة.', true);
+            if (deliverySelectNode) {
+              deliverySelectNode.focus();
+            }
+            return;
+          }
+
           updateStatus(
             {
               status: 'PREPARING',
               prepMinutes: selectedPrepMinutes,
               note: 'تم قبول الطلب',
+              assignedDeliveryId: selectedDeliveryId,
             },
             'تم قبول الطلب وتحديث وقت التجهيز.',
           );
@@ -426,6 +558,7 @@
           );
         });
 
+        loadDeliveryAssignees();
         loadOrder();
       })();
     </script>
