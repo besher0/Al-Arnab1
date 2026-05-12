@@ -5,6 +5,8 @@
   var API_BASE_STORAGE_KEY = 'al-arnab-api-base';
   var FIREBASE_CONFIG_STORAGE_KEY = 'al-arnab-firebase-config';
   var SDK_VERSION = '10.13.2';
+  var REQUEST_TIMEOUT_MS = 12000;
+  var RETRY_DELAY_MS = 800;
 
   var sdkLoadingPromise = null;
   var pushSyncPromise = null;
@@ -187,33 +189,92 @@
     playTone(context, 1175, now + 0.16, 0.16, 0.12);
   }
 
+  function wait(ms) {
+    return new Promise(function (resolve) {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function normalizeMessage(message, fallback) {
+    if (Array.isArray(message)) {
+      return String(message[0] || fallback);
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+    return fallback;
+  }
+
+  function isTransientError(error) {
+    if (!error || typeof error !== 'object') return false;
+    var code = error.code;
+    var status = Number(error.status || 0);
+    if (code === 'NETWORK' || code === 'TIMEOUT') return true;
+    if (status === 502 || status === 503 || status === 504) return true;
+    return false;
+  }
+
   async function request(path, options) {
     var token = getToken();
     if (!token) throw new Error('missing-token');
 
-    var response = await fetch(getApiBase() + path, {
-      method: (options && options.method) || 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token,
-      },
-      body: options && options.body ? JSON.stringify(options.body) : undefined,
-    });
+    var method = String((options && options.method) || 'GET').toUpperCase();
+    var maxAttempts = method === 'GET' ? 2 : 1;
 
-    var data = null;
-    try {
-      data = await response.json();
-    } catch (_error) {
-      data = null;
+    for (var attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      var controller = new AbortController();
+      var timeoutId = window.setTimeout(function () {
+        controller.abort('request-timeout');
+      }, REQUEST_TIMEOUT_MS);
+
+      var response;
+      try {
+        response = await fetch(getApiBase() + path, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token,
+          },
+          body: options && options.body ? JSON.stringify(options.body) : undefined,
+          signal: controller.signal,
+        });
+      } catch (error) {
+        window.clearTimeout(timeoutId);
+        var networkError = new Error(
+          error && error.name === 'AbortError'
+            ? 'انتهت مهلة الاتصال بالخادم. حاول مرة ثانية.'
+            : 'تعذر الاتصال بالخادم.',
+        );
+        networkError.code = error && error.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK';
+        if (attempt < maxAttempts && isTransientError(networkError)) {
+          await wait(RETRY_DELAY_MS);
+          continue;
+        }
+        throw networkError;
+      }
+
+      var data = null;
+      try {
+        data = await response.json();
+      } catch (_error) {
+        data = null;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+
+      if (!response.ok) {
+        var message = normalizeMessage(data && data.message, 'request-failed');
+        var requestError = new Error(String(message));
+        requestError.status = response.status;
+        if (attempt < maxAttempts && isTransientError(requestError)) {
+          await wait(RETRY_DELAY_MS);
+          continue;
+        }
+        throw requestError;
+      }
+
+      return data;
     }
-
-    if (!response.ok) {
-      var message = (data && data.message) || 'request-failed';
-      if (Array.isArray(message)) message = message[0] || 'request-failed';
-      throw new Error(String(message));
-    }
-
-    return data;
   }
 
   function loadScript(src) {

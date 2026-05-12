@@ -415,6 +415,20 @@ function BridgeListener() {
       frame.addEventListener('load', onFrameLoad)
     }
 
+    function onWindowFocus() {
+      syncCurrentFrame()
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        syncCurrentFrame()
+      }
+    }
+
+    window.addEventListener('focus', onWindowFocus)
+    window.addEventListener('online', onWindowFocus)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
     if (!isBootstrapping) {
       syncCurrentFrame()
     }
@@ -426,6 +440,9 @@ function BridgeListener() {
       if (frame) {
         frame.removeEventListener('load', onFrameLoad)
       }
+      window.removeEventListener('focus', onWindowFocus)
+      window.removeEventListener('online', onWindowFocus)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
       window.clearTimeout(delayedSync)
       window.clearTimeout(lateSync)
     }

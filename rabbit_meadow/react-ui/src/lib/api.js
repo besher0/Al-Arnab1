@@ -41,8 +41,37 @@ const runtimeApiBase = readRuntimeApiBase()
 const API_BASE_URL = normalizeApiBase(
   import.meta.env.VITE_API_BASE_URL || runtimeApiBase || fallbackApiBase,
 )
+const DEFAULT_REQUEST_TIMEOUT_MS = 12_000
+const RETRY_DELAY_MS = 800
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
+}
+
+function normalizeMessage(message, fallback) {
+  if (Array.isArray(message)) {
+    return String(message[0] || fallback)
+  }
+  if (typeof message === 'string' && message.trim()) {
+    return message
+  }
+  return fallback
+}
+
+function isTransientRequestError(error) {
+  if (!error || typeof error !== 'object') return false
+  const code = error.code
+  const status = Number(error.status || 0)
+  if (code === 'NETWORK' || code === 'TIMEOUT') return true
+  if (status === 502 || status === 503 || status === 504) return true
+  return false
+}
 
 async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
+  const methodUpper = String(method || 'GET').toUpperCase()
+  const maxAttempts = methodUpper === 'GET' ? 2 : 1
   const headers = {
     'Content-Type': 'application/json',
   }
@@ -51,35 +80,74 @@ async function apiRequest(path, { method = 'GET', token, body, signal } = {}) {
     headers.Authorization = `Bearer ${token}`
   }
 
-  let response
-  try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-      signal,
-    })
-  } catch {
-    throw new Error('تعذر الاتصال بالخادم. تحقق من رابط API و CORS على السيرفر.')
-  }
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => {
+      controller.abort('request-timeout')
+    }, DEFAULT_REQUEST_TIMEOUT_MS)
 
-  let data = null
-  try {
-    data = await response.json()
-  } catch {
-    data = null
-  }
-
-  if (!response.ok) {
-    const message = data?.message
-    if (Array.isArray(message)) {
-      throw new Error(message[0] || 'Request failed')
+    function abortFromCaller() {
+      controller.abort('caller-aborted')
     }
 
-    throw new Error(message || 'Request failed')
-  }
+    if (signal) {
+      if (signal.aborted) {
+        controller.abort('caller-aborted')
+      } else {
+        signal.addEventListener('abort', abortFromCaller, { once: true })
+      }
+    }
 
-  return data
+    let response
+    try {
+      response = await fetch(`${API_BASE_URL}${path}`, {
+        method: methodUpper,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      })
+    } catch (error) {
+      window.clearTimeout(timeoutId)
+      if (signal) signal.removeEventListener('abort', abortFromCaller)
+
+      const requestError = new Error(
+        error?.name === 'AbortError'
+          ? 'انتهت مهلة الاتصال بالخادم. حاول مرة ثانية.'
+          : 'تعذر الاتصال بالخادم. تحقق من رابط API و CORS على السيرفر.',
+      )
+      requestError.code = error?.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK'
+      if (attempt < maxAttempts && isTransientRequestError(requestError)) {
+        await wait(RETRY_DELAY_MS)
+        continue
+      }
+      throw requestError
+    }
+
+    let data = null
+    try {
+      data = await response.json()
+    } catch {
+      data = null
+    } finally {
+      window.clearTimeout(timeoutId)
+      if (signal) signal.removeEventListener('abort', abortFromCaller)
+    }
+
+    if (!response.ok) {
+      const message = normalizeMessage(data?.message, 'Request failed')
+      const requestError = new Error(message)
+      requestError.status = response.status
+
+      if (attempt < maxAttempts && isTransientRequestError(requestError)) {
+        await wait(RETRY_DELAY_MS)
+        continue
+      }
+
+      throw requestError
+    }
+
+    return data
+  }
 }
 
 export const api = {
