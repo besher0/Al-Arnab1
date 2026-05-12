@@ -280,6 +280,43 @@
           deliverySelectNode.disabled = isStatusLocked;
         }
 
+        function isMissingDeliveriesRoute(error) {
+          var message = String(formatErrorMessage(error) || '').toLowerCase();
+          if (!message) return false;
+
+          return (
+            message.indexOf('cannot get /api/admin/deliveries') !== -1 ||
+            message.indexOf('cannot get /admin/deliveries') !== -1
+          );
+        }
+
+        function extractDeliveryAssigneesFromOrders(orders) {
+          var byId = {};
+          var list = [];
+
+          (Array.isArray(orders) ? orders : []).forEach(function (order) {
+            var delivery = order && order.assignedDelivery;
+            var id = String((delivery && delivery.id) || '').trim();
+            if (!id) return;
+
+            if (!byId[id]) {
+              byId[id] = {
+                id: id,
+                name: String((delivery && delivery.name) || 'مندوب'),
+                phone: String((delivery && delivery.phone) || ''),
+                activeOrdersCount: 0,
+              };
+              list.push(byId[id]);
+            }
+
+            byId[id].activeOrdersCount += 1;
+          });
+
+          return list.sort(function (a, b) {
+            return Number(a.activeOrdersCount || 0) - Number(b.activeOrdersCount || 0);
+          });
+        }
+
         async function loadDeliveryAssignees() {
           if (!deliverySelectNode) return;
 
@@ -295,6 +332,36 @@
               setDeliveryFeedback('لا يوجد مندوب دليفري نشط حالياً.', true);
             }
           } catch (error) {
+            if (isMissingDeliveriesRoute(error)) {
+              try {
+                var currentOrders = await window.AdminBridge.apiRequest('/admin/orders/current');
+                deliveryAssignees = extractDeliveryAssigneesFromOrders(currentOrders);
+                renderDeliveryAssignees();
+
+                if (deliveryAssignees.length) {
+                  setDeliveryFeedback(
+                    'تم تحميل المناديب من الطلبات الحالية لأن endpoint /admin/deliveries غير متاح على هذا السيرفر.',
+                    false,
+                  );
+                } else {
+                  setDeliveryFeedback(
+                    'endpoint /admin/deliveries غير متاح على هذا السيرفر، ولا يوجد مناديب ضمن الطلبات الحالية.',
+                    true,
+                  );
+                }
+                return;
+              } catch (fallbackError) {
+                deliveryAssignees = [];
+                renderDeliveryAssignees();
+                setDeliveryFeedback(
+                  formatErrorMessage(fallbackError) ||
+                    'تعذر تحميل المناديب من endpoint الرئيسي أو من fallback.',
+                  true,
+                );
+                return;
+              }
+            }
+
             deliveryAssignees = [];
             renderDeliveryAssignees();
             setDeliveryFeedback(
