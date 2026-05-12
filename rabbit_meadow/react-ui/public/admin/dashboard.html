@@ -58,23 +58,10 @@
 
         <section class="card row">
           <div>
-            <div class="muted">إجمالي مبيعات اليوم</div>
-            <div class="price" data-daily-sales>0 ر.س</div>
-          </div>
-          <span class="material-symbols-outlined" style="font-size: 30px; color: #69bde4">payments</span>
-        </section>
-
-        <section class="grid-2">
-          <article class="metric-card">
-            <span class="tag danger">تنبيه</span>
-            <div class="metric-value" data-low-stock-products>0</div>
-            <div class="muted">أصناف منخفضة المخزون</div>
-          </article>
-          <article class="metric-card">
-            <span class="tag success">نشط</span>
-            <div class="metric-value" data-active-orders>0</div>
             <div class="muted">طلبات نشطة</div>
-          </article>
+            <div class="price" data-active-orders>0</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size: 30px; color: #69bde4">shopping_bag</span>
         </section>
 
         <section>
@@ -398,8 +385,6 @@
 
             var exchangeLabel = document.querySelector('[data-exchange-rate-label]');
             var exchangeInput = document.querySelector('[data-exchange-rate-input]');
-            var dailySales = document.querySelector('[data-daily-sales]');
-            var lowStock = document.querySelector('[data-low-stock-products]');
             var activeOrders = document.querySelector('[data-active-orders]');
 
             if (exchangeLabel) {
@@ -409,14 +394,6 @@
             if (exchangeInput) {
               var currentRate = Number(store.usdSarRate || 0);
               exchangeInput.value = currentRate > 0 ? currentRate.toFixed(2) : '';
-            }
-
-            if (dailySales) {
-              dailySales.textContent = formatMoney(metrics.dailySales || 0, storeCurrency);
-            }
-
-            if (lowStock) {
-              lowStock.textContent = formatNumber(metrics.lowStockProducts || 0);
             }
 
             if (activeOrders) {

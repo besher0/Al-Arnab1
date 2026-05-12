@@ -1,4 +1,8 @@
-﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+﻿import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OrderStatus, UserRole } from '@prisma/client';
 import { createHash } from 'node:crypto';
@@ -27,36 +31,47 @@ export class AdminService {
     const dayStart = new Date(now);
     dayStart.setHours(0, 0, 0, 0);
 
-    const [settings, salesAggregate, activeOrdersCount, productStockRows, latestOrders] =
-      await Promise.all([
-        this.ensureStoreSettings(),
-        this.prisma.order.aggregate({
-          where: {
-            status: OrderStatus.DELIVERED,
-            createdAt: { gte: dayStart },
+    const [
+      settings,
+      salesAggregate,
+      activeOrdersCount,
+      productStockRows,
+      latestOrders,
+    ] = await Promise.all([
+      this.ensureStoreSettings(),
+      this.prisma.order.aggregate({
+        where: {
+          status: OrderStatus.DELIVERED,
+          createdAt: { gte: dayStart },
+        },
+        _sum: { total: true },
+      }),
+      this.prisma.order.count({
+        where: {
+          status: {
+            in: [
+              OrderStatus.NEW,
+              OrderStatus.PREPARING,
+              OrderStatus.ON_THE_WAY,
+            ],
           },
-          _sum: { total: true },
-        }),
-        this.prisma.order.count({
-          where: {
-            status: { in: [OrderStatus.NEW, OrderStatus.PREPARING, OrderStatus.ON_THE_WAY] },
-          },
-        }),
-        this.prisma.product.findMany({
-          where: { isActive: true },
-          select: {
-            stockQty: true,
-            minStock: true,
-          },
-        }),
-        this.prisma.order.findMany({
-          orderBy: { createdAt: 'desc' },
-          take: 5,
-          include: {
-            user: true,
-          },
-        }),
-      ]);
+        },
+      }),
+      this.prisma.product.findMany({
+        where: { isActive: true },
+        select: {
+          stockQty: true,
+          minStock: true,
+        },
+      }),
+      this.prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: {
+          user: true,
+        },
+      }),
+    ]);
 
     const outOfStockCount = productStockRows.filter(
       (row) => decimalToNumber(row.stockQty) <= decimalToNumber(row.minStock),
@@ -205,7 +220,13 @@ export class AdminService {
     };
   }
 
-  async updateOrderStatus(orderId: string, payload: UpdateOrderStatusDto, changedById: string) {
+  async updateOrderStatus(
+    orderId: string,
+    payload: UpdateOrderStatusDto,
+    changedById: string,
+  ) {
+    const rejectReason = payload.rejectReason?.trim() || null;
+
     const existing = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -220,7 +241,7 @@ export class AdminService {
       throw new NotFoundException('الطلب غير موجود.');
     }
 
-    if (payload.status === OrderStatus.REJECTED && !payload.rejectReason?.trim()) {
+    if (payload.status === OrderStatus.REJECTED && !rejectReason) {
       throw new BadRequestException('يجب إرسال سبب الرفض.');
     }
 
@@ -236,19 +257,24 @@ export class AdminService {
     if (existing.status !== payload.status) {
       const nextAllowed = allowedTransitions[existing.status] || [];
       if (!nextAllowed.includes(payload.status)) {
-        throw new BadRequestException('لا يمكن تحديث الطلب لهذه الحالة من وضعه الحالي.');
+        throw new BadRequestException(
+          'لا يمكن تحديث الطلب لهذه الحالة من وضعه الحالي.',
+        );
       }
     }
 
     const statusChanged = existing.status !== payload.status;
     const shouldAssignDelivery =
-      existing.status === OrderStatus.NEW && payload.status === OrderStatus.PREPARING;
+      existing.status === OrderStatus.NEW &&
+      payload.status === OrderStatus.PREPARING;
     const assignedDelivery = shouldAssignDelivery
       ? await this.requireActiveDeliveryAssignee(payload.assignedDeliveryId)
       : null;
     const logNote =
       payload.note?.trim() ||
-      (assignedDelivery ? `تم تعيين الطلب للمندوب ${assignedDelivery.name}.` : null);
+      (assignedDelivery
+        ? `تم تعيين الطلب للمندوب ${assignedDelivery.name}.`
+        : null);
 
     await this.prisma.$transaction(async (tx) => {
       const nextAssignedDeliveryId =
@@ -259,7 +285,8 @@ export class AdminService {
         data: {
           status: payload.status,
           prepMinutes: payload.prepMinutes,
-          rejectReason: payload.status === OrderStatus.REJECTED ? payload.rejectReason?.trim() : null,
+          rejectReason:
+            payload.status === OrderStatus.REJECTED ? rejectReason : null,
           ...(nextAssignedDeliveryId !== undefined
             ? { assignedDeliveryId: nextAssignedDeliveryId }
             : {}),
@@ -277,29 +304,41 @@ export class AdminService {
     });
 
     if (statusChanged) {
-      const note = payload.note?.trim() || payload.rejectReason?.trim() || null;
+      const customerNote =
+        payload.status === OrderStatus.REJECTED
+          ? rejectReason
+          : payload.note?.trim() || null;
 
-      await this.notificationsService.notifyOrderStatusChangedForCustomer(existing.userId, {
-        orderId: existing.id,
-        orderNumber: existing.orderNumber,
-        status: payload.status,
-        note,
-      });
-
-      if (payload.status === OrderStatus.PREPARING && assignedDelivery) {
-        await this.notificationsService.notifyOrderAssignedToDelivery(assignedDelivery.id, {
+      await this.notificationsService.notifyOrderStatusChangedForCustomer(
+        existing.userId,
+        {
           orderId: existing.id,
           orderNumber: existing.orderNumber,
-          customerName: existing.user?.name || null,
-          prepMinutes: payload.prepMinutes ?? null,
-        });
+          status: payload.status,
+          note: customerNote,
+        },
+      );
+
+      if (payload.status === OrderStatus.PREPARING && assignedDelivery) {
+        await this.notificationsService.notifyOrderAssignedToDelivery(
+          assignedDelivery.id,
+          {
+            orderId: existing.id,
+            orderNumber: existing.orderNumber,
+            customerName: existing.user?.name || null,
+            prepMinutes: payload.prepMinutes ?? null,
+          },
+        );
       }
     }
 
     return this.getOrderDetail(orderId);
   }
 
-  async createAdminNotification(payload: CreateAdminNotificationDto, adminId: string) {
+  async createAdminNotification(
+    payload: CreateAdminNotificationDto,
+    adminId: string,
+  ) {
     return this.notificationsService.createAdminBroadcast(adminId, payload);
   }
 
@@ -345,11 +384,21 @@ export class AdminService {
       data: {
         ...(payload.slug ? { slug: payload.slug } : {}),
         ...(payload.nameAr ? { nameAr: payload.nameAr } : {}),
-        ...(payload.nameEn !== undefined ? { nameEn: payload.nameEn || null } : {}),
-        ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl || null } : {}),
-        ...(payload.description !== undefined ? { description: payload.description || null } : {}),
-        ...(payload.sortOrder !== undefined ? { sortOrder: payload.sortOrder } : {}),
-        ...(payload.isActive !== undefined ? { isActive: payload.isActive } : {}),
+        ...(payload.nameEn !== undefined
+          ? { nameEn: payload.nameEn || null }
+          : {}),
+        ...(payload.imageUrl !== undefined
+          ? { imageUrl: payload.imageUrl || null }
+          : {}),
+        ...(payload.description !== undefined
+          ? { description: payload.description || null }
+          : {}),
+        ...(payload.sortOrder !== undefined
+          ? { sortOrder: payload.sortOrder }
+          : {}),
+        ...(payload.isActive !== undefined
+          ? { isActive: payload.isActive }
+          : {}),
       },
     });
   }
@@ -516,8 +565,12 @@ export class AdminService {
   }
 
   async createDiscount(payload: CreateDiscountDto, adminId: string) {
-    if (new Date(payload.endAt).getTime() <= new Date(payload.startAt).getTime()) {
-      throw new BadRequestException('تاريخ النهاية يجب أن يكون بعد تاريخ البداية.');
+    if (
+      new Date(payload.endAt).getTime() <= new Date(payload.startAt).getTime()
+    ) {
+      throw new BadRequestException(
+        'تاريخ النهاية يجب أن يكون بعد تاريخ البداية.',
+      );
     }
 
     const discount = await this.prisma.discount.create({
@@ -610,8 +663,13 @@ export class AdminService {
     };
   }
 
-  async updateStoreSettings(payload: UpdateStoreSettingDto, updatedById: string) {
-    await this.ensureStoreSettings();
+  async updateStoreSettings(
+    payload: UpdateStoreSettingDto,
+    updatedById: string,
+  ) {
+    const existingSettings = await this.ensureStoreSettings();
+    const isClosingStore =
+      payload.isOpen === false && existingSettings.isOpen === true;
 
     if (payload.usdSarRate !== undefined) {
       const nextRate = Number(payload.usdSarRate);
@@ -620,14 +678,28 @@ export class AdminService {
       }
     }
 
-    const settings = await this.prisma.storeSetting.update({
-      where: { id: 1 },
-      data: {
-        ...(payload.isOpen !== undefined ? { isOpen: payload.isOpen } : {}),
-        ...(payload.currency ? { currency: payload.currency } : {}),
-        ...(payload.usdSarRate !== undefined ? { usdSarRate: payload.usdSarRate } : {}),
-        updatedById,
-      },
+    const settings = await this.prisma.$transaction(async (tx) => {
+      const updatedSettings = await tx.storeSetting.update({
+        where: { id: 1 },
+        data: {
+          ...(payload.isOpen !== undefined ? { isOpen: payload.isOpen } : {}),
+          ...(payload.currency ? { currency: payload.currency } : {}),
+          ...(payload.usdSarRate !== undefined
+            ? { usdSarRate: payload.usdSarRate }
+            : {}),
+          updatedById,
+        },
+      });
+
+      if (isClosingStore) {
+        await tx.order.deleteMany({
+          where: {
+            status: OrderStatus.NEW,
+          },
+        });
+      }
+
+      return updatedSettings;
     });
 
     return {
@@ -646,7 +718,9 @@ export class AdminService {
       : new Date(toDate.getFullYear(), toDate.getMonth(), 1);
 
     if (fromDate.getTime() > toDate.getTime()) {
-      throw new BadRequestException('تاريخ البداية يجب أن يكون قبل تاريخ النهاية.');
+      throw new BadRequestException(
+        'تاريخ البداية يجب أن يكون قبل تاريخ النهاية.',
+      );
     }
 
     const orders = await this.prisma.order.findMany({
@@ -707,9 +781,15 @@ export class AdminService {
   }
 
   getCloudinaryUploadSignature() {
-    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME', '').trim();
-    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY', '').trim();
-    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET', '').trim();
+    const cloudName = this.configService
+      .get<string>('CLOUDINARY_CLOUD_NAME', '')
+      .trim();
+    const apiKey = this.configService
+      .get<string>('CLOUDINARY_API_KEY', '')
+      .trim();
+    const apiSecret = this.configService
+      .get<string>('CLOUDINARY_API_SECRET', '')
+      .trim();
     const folder = this.configService
       .get<string>('CLOUDINARY_UPLOAD_FOLDER', 'al-arnab')
       .trim();
@@ -753,6 +833,7 @@ export class AdminService {
     id: string;
     orderNumber: string;
     status: OrderStatus;
+    notes?: string | null;
     total: unknown;
     createdAt: Date;
     user: { id: string; name: string; phone: string };
@@ -771,6 +852,7 @@ export class AdminService {
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
+      notes: order.notes || null,
       total: decimalToNumber(order.total),
       createdAt: order.createdAt,
       customer: {

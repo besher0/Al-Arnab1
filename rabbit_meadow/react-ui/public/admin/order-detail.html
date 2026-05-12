@@ -117,7 +117,7 @@
         <section id="reject-section" class="card stack" style="border-style: dashed">
           <h3 style="color: var(--admin-danger)">رفض الطلب</h3>
           <div class="row orders-filter-row" id="reject-options">
-            <button class="chip active" data-reject-reason="المادة غير متوفرة" type="button" style="background: rgba(239, 78, 79, 0.12); color: #d64040">
+            <button class="chip active" data-reject-reason="المادة غير متوفرة" type="button">
               المادة غير متوفرة
             </button>
             <button class="chip" data-reject-reason="ضغط كبير" type="button">ضغط كبير</button>
@@ -572,14 +572,10 @@
           button.addEventListener('click', function () {
             rejectButtons.forEach(function (item) {
               item.classList.remove('active');
-              if (item.getAttribute('data-reject-reason') === 'المادة غير متوفرة') {
-                item.style.background = 'transparent';
-                item.style.color = '';
-              }
+              item.style.background = '';
+              item.style.color = '';
             });
             button.classList.add('active');
-            button.style.background = 'rgba(239, 78, 79, 0.12)';
-            button.style.color = '#d64040';
             selectedRejectReason = button.getAttribute('data-reject-reason') || 'المادة غير متوفرة';
           });
         });

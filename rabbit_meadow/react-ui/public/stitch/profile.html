@@ -27,6 +27,9 @@
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
   <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-6 py-4 border-b border-primary/10">
     <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+      </div>
       <h1 class="text-on-surface font-['Tajawal'] font-bold text-2xl tracking-tight">حسابي</h1>
     </div>
     <div class="flex items-center gap-2">
@@ -42,9 +45,12 @@
   <main class="pt-24 px-4 max-w-2xl mx-auto space-y-6">
     <section class="bg-surface-card border border-primary/10 rounded-3xl p-6 shadow-[0_14px_36px_rgba(26,54,93,0.08)] relative overflow-hidden">
       <div class="absolute -top-12 -left-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl"></div>
-      <div class="relative">
-        <h2 id="user-name" class="font-headline font-black text-2xl leading-tight">...</h2>
-        <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
+      <div class="relative flex items-center gap-3">
+        <div id="user-avatar" class="w-14 h-14 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-black">؟</div>
+        <div class="min-w-0">
+          <h2 id="user-name" class="font-headline font-black text-2xl leading-tight truncate">...</h2>
+          <p id="user-welcome" class="text-on-surface-variant text-sm mt-1">جاري تحميل بيانات الحساب</p>
+        </div>
       </div>
     </section>
 
@@ -57,6 +63,25 @@
         <p class="text-on-surface-variant text-xs font-bold mb-1">رقم الهاتف</p>
         <p id="field-phone" class="font-bold text-base" dir="ltr">-</p>
       </div>
+    </section>
+
+    <section class="bg-surface-card border border-outline rounded-2xl p-4">
+      <h3 class="font-headline font-black text-lg mb-3">تعديل بيانات الحساب</h3>
+      <form id="profile-edit-form" class="space-y-3">
+        <div>
+          <label for="edit-name" class="text-xs font-bold text-on-surface-variant mb-1 block">الاسم</label>
+          <input id="edit-name" type="text" class="w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35" placeholder="اكتب الاسم" />
+        </div>
+        <div>
+          <label for="edit-phone" class="text-xs font-bold text-on-surface-variant mb-1 block">رقم الهاتف</label>
+          <input id="edit-phone" dir="ltr" type="tel" class="w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35" placeholder="09xxxxxxxx" />
+        </div>
+        <button id="save-profile-btn" type="submit" class="w-full flex items-center justify-center gap-2 rounded-full bg-primary text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]">
+          <span class="material-symbols-outlined">save</span>
+          <span>حفظ التعديلات</span>
+        </button>
+      </form>
+      <p id="profile-save-hint" class="text-xs text-on-surface-variant mt-2"></p>
     </section>
 
     <section class="bg-surface-card border border-outline rounded-2xl p-4">
@@ -83,7 +108,7 @@
     <a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:opacity-80 transition-opacity" href="#">
       <div class="relative">
         <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-        <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">٠</span>
+        <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-[9px] min-w-[16px] h-4 px-1 rounded-full border-2 border-white hidden items-center justify-center leading-none">0</span>
       </div>
       <span class="font-label text-[11px] font-semibold mt-1">السلة</span>
     </a>
@@ -97,12 +122,19 @@
   (function () {
     var state = {
       waitingLogout: false,
+      waitingSave: false,
+      user: null,
+      saveTimeoutId: null,
     };
 
     var notificationsButton = document.querySelector('[data-notification-button]');
+    var editForm = document.getElementById('profile-edit-form');
+    var editNameInput = document.getElementById('edit-name');
+    var editPhoneInput = document.getElementById('edit-phone');
+    var saveHintNode = document.getElementById('profile-save-hint');
 
     function toArabicNumber(value) {
-      var map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      var map = ['\u0660', '\u0661', '\u0662', '\u0663', '\u0664', '\u0665', '\u0666', '\u0667', '\u0668', '\u0669'];
       return String(value).replace(/[0-9]/g, function (digit) {
         return map[Number(digit)] || digit;
       });
@@ -133,19 +165,47 @@
       });
     }
 
+    function userInitial(name) {
+      var clean = String(name || '').trim();
+      if (!clean) return '؟';
+      return clean.charAt(0).toUpperCase();
+    }
+
+    function setSaveHint(message, isError) {
+      if (!saveHintNode) return;
+      saveHintNode.textContent = String(message || '');
+      saveHintNode.classList.toggle('text-danger', Boolean(isError));
+      saveHintNode.classList.toggle('text-on-surface-variant', !isError);
+    }
+
     function setUserData(user) {
-      var name = user && user.name ? String(user.name) : 'مستخدم';
-      var phone = user && user.phone ? String(user.phone) : '-';
+      state.user = user && typeof user === 'object'
+        ? {
+            id: user.id ? String(user.id) : '',
+            name: user.name ? String(user.name) : 'مستخدم',
+            phone: user.phone ? String(user.phone) : '-',
+          }
+        : null;
+
+      var name = state.user ? state.user.name : 'مستخدم';
+      var phone = state.user ? state.user.phone : '-';
 
       var title = document.getElementById('user-name');
       var welcome = document.getElementById('user-welcome');
       var fieldName = document.getElementById('field-name');
       var fieldPhone = document.getElementById('field-phone');
+      var avatarNode = document.getElementById('user-avatar');
 
       if (title) title.textContent = name;
       if (welcome) welcome.textContent = 'مرحباً ' + name + '.';
       if (fieldName) fieldName.textContent = name;
       if (fieldPhone) fieldPhone.textContent = phone;
+      if (avatarNode) avatarNode.textContent = userInitial(name);
+
+      if (!state.waitingSave) {
+        if (editNameInput) editNameInput.value = name === 'مستخدم' ? '' : name;
+        if (editPhoneInput) editPhoneInput.value = phone === '-' ? '' : phone;
+      }
     }
 
     function setLogoutLoading(isLoading) {
@@ -160,6 +220,26 @@
       if (label) {
         label.textContent = state.waitingLogout ? 'جاري تسجيل الخروج...' : 'تسجيل الخروج';
       }
+    }
+
+    function setSaveLoading(isLoading) {
+      state.waitingSave = Boolean(isLoading);
+      var button = document.getElementById('save-profile-btn');
+      if (!button) return;
+
+      button.disabled = state.waitingSave;
+      button.classList.toggle('opacity-70', state.waitingSave);
+      button.classList.toggle('cursor-not-allowed', state.waitingSave);
+      var label = button.querySelector('span:last-child');
+      if (label) {
+        label.textContent = state.waitingSave ? 'جاري الحفظ...' : 'حفظ التعديلات';
+      }
+    }
+
+    function clearPendingSaveTimeout() {
+      if (!state.saveTimeoutId) return;
+      window.clearTimeout(state.saveTimeoutId);
+      state.saveTimeoutId = null;
     }
 
     var navLinks = document.querySelectorAll('nav a');
@@ -197,6 +277,50 @@
       });
     }
 
+    if (editForm) {
+      editForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (state.waitingSave) return;
+        if (!state.user) {
+          showStitchAlert('تعذر قراءة بيانات المستخدم الحالية.');
+          return;
+        }
+
+        var nextName = String(editNameInput && editNameInput.value ? editNameInput.value : '').trim();
+        var nextPhone = String(editPhoneInput && editPhoneInput.value ? editPhoneInput.value : '').trim();
+
+        if (!nextName) {
+          setSaveHint('الاسم مطلوب.', true);
+          showStitchAlert('الاسم مطلوب.');
+          return;
+        }
+
+        if (!nextPhone) {
+          setSaveHint('رقم الهاتف مطلوب.', true);
+          showStitchAlert('رقم الهاتف مطلوب.');
+          return;
+        }
+
+        var currentName = String(state.user.name || '').trim();
+        var currentPhone = String(state.user.phone || '').trim();
+        if (nextName === currentName && nextPhone === currentPhone) {
+          setSaveHint('لا توجد تعديلات جديدة لحفظها.', false);
+          showStitchAlert('لا توجد تعديلات جديدة لحفظها.');
+          return;
+        }
+
+        setSaveLoading(true);
+        setSaveHint('جاري حفظ التعديلات...', false);
+        send('profile-update', { name: nextName, phone: nextPhone });
+
+        clearPendingSaveTimeout();
+        state.saveTimeoutId = window.setTimeout(function () {
+          setSaveLoading(false);
+          setSaveHint('انتهت مهلة الحفظ. حاول مرة أخرى.', true);
+        }, 7000);
+      });
+    }
+
     window.addEventListener('message', function (event) {
       if (event.origin !== window.location.origin) return;
       var payload = event.data;
@@ -209,8 +333,27 @@
         return;
       }
 
+      if (payload.type === 'profile-update-result') {
+        clearPendingSaveTimeout();
+        setSaveLoading(false);
+
+        if (!payload.success) {
+          setSaveHint(payload.message || 'تعذر حفظ التعديلات.', true);
+          showStitchAlert(payload.message || 'تعذر حفظ التعديلات.', { tone: 'error', icon: '!' });
+          return;
+        }
+
+        setUserData(payload.user || state.user);
+        setSaveHint('تم حفظ التعديلات بنجاح.', false);
+        showStitchAlert('تم تحديث بيانات الحساب بنجاح.', { tone: 'success', icon: 'OK' });
+        return;
+      }
+
       if (payload.type === 'auth-error') {
+        clearPendingSaveTimeout();
+        setSaveLoading(false);
         setLogoutLoading(false);
+        setSaveHint(payload.message || 'تعذر إتمام العملية.', true);
         alert(payload.message || 'تعذر إتمام العملية.');
       }
     });
@@ -227,3 +370,5 @@
 </script>
 </body>
 </html>
+
+

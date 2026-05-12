@@ -147,7 +147,7 @@ button:disabled {
 
 .container {
   width: 100%;
-  max-width: 1260px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 18px 16px 0;
 }
@@ -274,6 +274,11 @@ button:disabled {
 .chip.active {
   background: var(--admin-primary);
   color: #fff;
+}
+
+#reject-options .chip.active {
+  background: rgba(239, 78, 79, 0.12);
+  color: #d64040;
 }
 
 .input-field,
@@ -533,7 +538,7 @@ button:disabled {
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  width: min(398px, calc(100vw - 20px));
+  width: min(1220px, calc(100vw - 20px));
   padding: 10px;
   border-radius: 36px;
   background: rgba(255, 255, 255, 0.96);
@@ -807,6 +812,20 @@ button:active,
   font-size: 10px;
 }
 
+.admin-shell.admin-compact .orders-status-tag {
+  font-size: 13px;
+  padding: 7px 12px;
+}
+
+.admin-shell.admin-compact .orders-note-label {
+  font-size: 12px;
+}
+
+.admin-shell.admin-compact .orders-note-text {
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .admin-shell.admin-compact .badge-soft {
   padding: 4px 8px;
   font-size: 11px;
@@ -876,6 +895,36 @@ button:active,
 .orders-customer {
   font-size: 17px;
   line-height: 1.2;
+}
+
+.orders-status-tag {
+  font-size: 14px;
+  font-weight: 900;
+  padding: 8px 14px;
+}
+
+.orders-note {
+  border: 1px solid #e1ebf5;
+  background: #f5f9fd;
+  border-radius: 18px;
+  padding: 10px 12px;
+}
+
+.orders-note-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--admin-primary-deep);
+  margin-bottom: 4px;
+}
+
+.orders-note-text {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.65;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--admin-text);
 }
 
 .report-operations {
@@ -1150,7 +1199,7 @@ button:active,
   }
 
   .bottom-nav {
-    width: min(980px, calc(100vw - 52px));
+    width: min(1360px, calc(100vw - 40px));
     bottom: 16px;
   }
 }

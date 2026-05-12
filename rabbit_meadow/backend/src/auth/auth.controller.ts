@@ -1,8 +1,17 @@
-﻿import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GuestDto } from './dto/guest.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import type { RequestWithUser } from '../common/types/request-with-user';
 
@@ -35,5 +44,14 @@ export class AuthController {
   @Post('logout')
   logout() {
     return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  updateProfile(
+    @Req() req: RequestWithUser,
+    @Body() payload: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(req.user.sub, payload);
   }
 }

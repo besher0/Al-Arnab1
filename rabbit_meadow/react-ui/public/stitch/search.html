@@ -213,6 +213,14 @@
         });
       }
 
+      function getProductNameById(productId) {
+        if (!productId) return 'المنتج';
+        var product = state.products.find(function (item) {
+          return String(item && item.id ? item.id : '') === String(productId);
+        });
+        return product && product.name ? String(product.name) : 'المنتج';
+      }
+
       function render() {
         if (searchInput) {
           searchInput.value = state.query;
@@ -287,6 +295,9 @@
           }
           var addId = addButton.getAttribute('data-add-product');
           if (addId) {
+            if (window.showAddToCartFeedback) {
+              window.showAddToCartFeedback(addButton, getProductNameById(addId));
+            }
             send('add-item', { id: addId, qty: 1 });
           }
           return;

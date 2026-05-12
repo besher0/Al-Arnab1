@@ -384,6 +384,27 @@ export function ShopProvider({ children }) {
     return api.orders.mine(token)
   }, [token])
 
+  const updateProfile = useCallback(
+    async ({ name, phone }) => {
+      if (!token) {
+        throw new Error('يجب تسجيل الدخول أولاً.')
+      }
+
+      const payload = {}
+      if (typeof name === 'string') {
+        payload.name = name.trim()
+      }
+      if (typeof phone === 'string') {
+        payload.phone = phone.trim()
+      }
+
+      const updatedUser = await api.auth.updateProfile(token, payload)
+      setUser(updatedUser || null)
+      return updatedUser
+    },
+    [token],
+  )
+
   const value = useMemo(
     () => ({
       isBootstrapping,
@@ -405,6 +426,7 @@ export function ShopProvider({ children }) {
       clearCart,
       checkoutOrder,
       listOrders,
+      updateProfile,
       token,
     }),
     [
@@ -421,6 +443,7 @@ export function ShopProvider({ children }) {
       login,
       loginGuest,
       logout,
+      updateProfile,
       products,
       store,
       refreshCatalog,

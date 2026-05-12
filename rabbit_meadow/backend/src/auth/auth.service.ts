@@ -1,4 +1,6 @@
 ﻿import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
@@ -11,6 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GuestDto } from './dto/guest.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 type AuthResponse = {
   accessToken: string;
@@ -84,7 +87,9 @@ export class AuthService {
       const timestamp = Date.now();
       const user = await this.prisma.user.create({
         data: {
-          name: payload.name?.trim() || `ضيف الأرنب ${timestamp.toString().slice(-4)}`,
+          name:
+            payload.name?.trim() ||
+            `ضيف الأرنب ${timestamp.toString().slice(-4)}`,
           phone: `guest-${timestamp}`,
           role: UserRole.CUSTOMER,
         },
@@ -112,6 +117,54 @@ export class AuthService {
     });
   }
 
+  async updateProfile(
+    userId: string,
+    payload: UpdateProfileDto,
+  ): Promise<AuthResponse['user']> {
+    return this.withDbRetry(async () => {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user || !user.isActive) {
+        throw new NotFoundException('المستخدم غير موجود.');
+      }
+
+      const nextName = payload.name?.trim();
+      const nextPhone = payload.phone?.trim();
+      const updateData: { name?: string; phone?: string } = {};
+
+      if (nextName && nextName !== user.name) {
+        updateData.name = nextName;
+      }
+
+      if (nextPhone && nextPhone !== user.phone) {
+        const existingUser = await this.prisma.user.findUnique({
+          where: { phone: nextPhone },
+          select: { id: true },
+        });
+
+        if (existingUser && existingUser.id !== user.id) {
+          throw new ConflictException('رقم الهاتف مستخدم بالفعل.');
+        }
+
+        updateData.phone = nextPhone;
+      }
+
+      if (!Object.keys(updateData).length) {
+        throw new BadRequestException('لا يوجد تعديل جديد لحفظه.');
+      }
+
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: updateData,
+      });
+
+      return {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+      };
+    });
+  }
   private async ensureActiveCart(userId: string) {
     await this.prisma.cart.upsert({
       where: {

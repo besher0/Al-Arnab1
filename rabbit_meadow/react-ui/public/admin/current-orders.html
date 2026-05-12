@@ -35,8 +35,7 @@
 
       <main class="container stack">
         <section class="row orders-filter-row" data-filter-group>
-          <button class="pill active" data-filter="ALL">الكل (0)</button>
-          <button class="pill" data-filter="NEW">جديد (0)</button>
+          <button class="pill active" data-filter="NEW">جديد (0)</button>
           <button class="pill" data-filter="PREPARING">جاري التجهيز (0)</button>
           <button class="pill" data-filter="ON_THE_WAY">في الطريق (0)</button>
         </section>
@@ -80,7 +79,7 @@
         var listElement = document.getElementById('current-orders-list');
         var filterButtons = Array.prototype.slice.call(document.querySelectorAll('[data-filter]'));
         var orders = [];
-        var activeFilter = 'ALL';
+        var activeFilter = 'NEW';
         var ordersPollingTimer = null;
         var ordersPollingInFlight = false;
         var initialOrdersLoaded = false;
@@ -141,6 +140,14 @@
 
         function digitsOnly(value) {
           return String(value || '').replace(/[^+\d]/g, '');
+        }
+
+        function whatsappDigits(value) {
+          var digits = String(value || '').replace(/[^\d]/g, '');
+          if (digits.indexOf('00') === 0) {
+            return digits.slice(2);
+          }
+          return digits;
         }
 
         function getAudioContext() {
@@ -250,7 +257,6 @@
 
         function getCounts() {
           return {
-            ALL: orders.length,
             NEW: orders.filter(function (order) { return order.status === 'NEW'; }).length,
             PREPARING: orders.filter(function (order) { return order.status === 'PREPARING'; }).length,
             ON_THE_WAY: orders.filter(function (order) { return order.status === 'ON_THE_WAY'; }).length,
@@ -261,11 +267,8 @@
           var counts = getCounts();
 
           filterButtons.forEach(function (button) {
-            var filter = button.getAttribute('data-filter') || 'ALL';
+            var filter = button.getAttribute('data-filter') || 'NEW';
             var label = statusLabel(filter);
-            if (filter === 'ALL') {
-              label = 'الكل';
-            }
 
             button.textContent = label + ' (' + numberLabel(counts[filter] || 0) + ')';
             button.classList.toggle('active', filter === activeFilter);
@@ -273,7 +276,6 @@
         }
 
         function filteredOrders() {
-          if (activeFilter === 'ALL') return orders;
           return orders.filter(function (order) {
             return order.status === activeFilter;
           });
@@ -291,14 +293,18 @@
           listElement.innerHTML = data
             .map(function (order) {
               var route = '/admin/orders/detail?id=' + encodeURIComponent(order.id || '');
-              var phone = digitsOnly(order.customer && order.customer.phone ? order.customer.phone : '');
+              var customerPhone = order.customer && order.customer.phone ? order.customer.phone : '';
+              var phone = digitsOnly(customerPhone);
+              var whatsappPhone = whatsappDigits(customerPhone);
+              var hasNotes = Boolean(String(order && order.notes ? order.notes : '').trim());
               var coordinates = getOrderCoordinates(order);
               var mapUrl = coordinates ? googleMapsUrl(coordinates.latitude, coordinates.longitude) : '';
+              var whatsappUrl = whatsappPhone ? 'https://wa.me/' + encodeURIComponent(whatsappPhone) : '';
 
               return [
                 '<article class="card stack">',
                 '  <div class="row">',
-                '    <span class="tag ' + statusClass(order.status) + '">' + escapeHtml(statusLabel(order.status)) + '</span>',
+                '    <span class="tag orders-status-tag ' + statusClass(order.status) + '">' + escapeHtml(statusLabel(order.status)) + '</span>',
                 '    <strong class="orders-customer">طلب #' + escapeHtml(order.orderNumber || '-') + '</strong>',
                 '  </div>',
                 '  <div class="row">',
@@ -311,6 +317,9 @@
                 '      <div class="price-sm">' + escapeHtml(formatMoney(order.total)) + '</div>',
                 '    </div>',
                 '  </div>',
+                hasNotes
+                  ? '  <div class="orders-note"><span class="orders-note-label">ملاحظات الطلب:</span><p class="orders-note-text">' + escapeHtml(order.notes) + '</p></div>'
+                  : '',
                 '  <div class="row">',
                 '    <span class="muted tiny">' + escapeHtml(formatDateTime(order.createdAt)) + '</span>',
                 '    <span class="muted tiny">' + escapeHtml(order.customer && order.customer.phone ? order.customer.phone : '-') + '</span>',
@@ -322,6 +331,9 @@
                   : '    <span></span>',
                 phone
                   ? '    <a class="icon-btn" href="tel:' + escapeHtml(phone) + '" title="اتصال"><span class="material-symbols-outlined">call</span></a>'
+                  : '    <span></span>',
+                whatsappUrl
+                  ? '    <a class="icon-btn" href="' + escapeHtml(whatsappUrl) + '" target="_blank" rel="noopener noreferrer" title="واتساب"><span class="material-symbols-outlined">chat</span></a>'
                   : '    <span></span>',
                 '  </div>',
                 '</article>',
@@ -335,7 +347,7 @@
         function bindFilters() {
           filterButtons.forEach(function (button) {
             button.addEventListener('click', function () {
-              activeFilter = button.getAttribute('data-filter') || 'ALL';
+              activeFilter = button.getAttribute('data-filter') || 'NEW';
               renderFilters();
               renderOrders();
             });

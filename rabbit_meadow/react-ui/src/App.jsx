@@ -139,8 +139,16 @@ function CartQuickCheckoutButton() {
   }
 
   return (
-    <button type="button" className="cart-quick-checkout" onClick={openCart}>
-      اكبس لإكمال الطلب
+    <button type="button" className="cart-quick-checkout" onClick={openCart} aria-label="اضغط لاستكمال الطلب">
+      <span className="cart-quick-checkout__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+          <path
+            d="M7 4h-2l-1 2v2h1l2.1 8.4c.2.9 1 1.6 2 1.6h8.6c.9 0 1.7-.6 1.9-1.5l1.1-5.5c.2-1.1-.6-2.1-1.7-2.1h-10.9l-.4-2zm2.3 12-.3-1h9.1l-.2 1zm-.8 6a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6zm8.9 0a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
+      <span>اضغط لاستكمال الطلب</span>
     </button>
   )
 }
@@ -158,6 +166,7 @@ function BridgeListener() {
     logout,
     checkoutOrder,
     listOrders,
+    updateProfile,
     store,
     user,
     cartItems,
@@ -367,6 +376,28 @@ function BridgeListener() {
         return
       }
 
+      if (payload.type === 'profile-update') {
+        try {
+          const updatedUser = await updateProfile({
+            name: typeof payload.name === 'string' ? payload.name : undefined,
+            phone: typeof payload.phone === 'string' ? payload.phone : undefined,
+          })
+
+          sendFrameMessage(event.source, 'profile-update-result', {
+            success: true,
+            user: updatedUser || null,
+          })
+          syncState(event.source)
+        } catch (error) {
+          sendFrameMessage(event.source, 'profile-update-result', {
+            success: false,
+            message: error?.message || 'تعذر تحديث بيانات الحساب.',
+          })
+          sendAuthError(event.source, error?.message)
+        }
+        return
+      }
+
       if (payload.type === 'logout') {
         await logout()
         navigate('/welcome', { replace: true })
@@ -415,6 +446,7 @@ function BridgeListener() {
     navigate,
     register,
     setQty,
+    updateProfile,
     store,
     subtotal,
     user,

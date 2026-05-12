@@ -91,6 +91,12 @@ export const api = {
     guest: (payload) => apiRequest('/auth/guest', { method: 'POST', body: payload }),
     session: (token) => apiRequest('/auth/session', { token }),
     logout: (token) => apiRequest('/auth/logout', { method: 'POST', token }),
+    updateProfile: (token, payload) =>
+      apiRequest('/auth/profile', {
+        method: 'PATCH',
+        token,
+        body: payload,
+      }),
   },
   catalog: {
     bootstrap: () => apiRequest('/catalog/bootstrap'),

@@ -37,8 +37,21 @@
     .offer-mini-thumb {
       height: 82px;
     }
+    .new-product-card {
+      animation: new-product-switch 380ms ease;
+    }
+    .new-product-card.new-product-card-delayed {
+      animation-delay: 70ms;
+    }
+    .new-product-card.new-product-card-delayed-2 {
+      animation-delay: 120ms;
+    }
     @keyframes offer-switch {
       0% { opacity: 0; transform: translateY(8px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes new-product-switch {
+      0% { opacity: 0; transform: translateY(10px) scale(0.98); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .disabled-action { opacity: 0.55; pointer-events: none; }
@@ -156,6 +169,7 @@
       var newPageButton = document.querySelector('[data-open-new-page]');
       var popularPageButton = document.querySelector('[data-open-popular-page]');
       var offersRotationTimer = null;
+      var newRotationTimer = null;
 
       var state = {
         products: [],
@@ -164,6 +178,7 @@
         itemCount: 0,
         userName: '',
         offerIndex: 0,
+        newIndex: 0,
       };
 
       function toArabicNumber(value) {
@@ -258,6 +273,14 @@
         return state.isStoreOpen ? '' : ' disabled-action';
       }
 
+      function getProductNameById(productId) {
+        if (!productId) return 'المنتج';
+        var product = state.products.find(function (item) {
+          return String(item && item.id ? item.id : '') === String(productId);
+        });
+        return product && product.name ? String(product.name) : 'المنتج';
+      }
+
       function renderOffers() {
         if (!offersContainer) return;
         var offers = state.products.filter(hasActiveOffer);
@@ -321,11 +344,20 @@
           return;
         }
 
-        var visible = products.slice(0, 8);
+        var maxVisible = Math.min(8, products.length);
+        var startIndex = products.length ? state.newIndex % products.length : 0;
+        if (startIndex < 0) startIndex = 0;
+        var visible = [];
+        for (var i = 0; i < maxVisible; i += 1) {
+          visible.push(products[(startIndex + i) % products.length]);
+        }
         newProductsContainer.innerHTML = visible
-          .map(function (product) {
+          .map(function (product, index) {
+            var animationClass = 'new-product-card';
+            if (index === 1) animationClass += ' new-product-card-delayed';
+            if (index === 2) animationClass += ' new-product-card-delayed-2';
             return (
-              '<div class="min-w-[170px] bg-white rounded-2xl p-3 shadow-sm flex-shrink-0 relative border border-primary/5" data-open-product="' +
+              '<div class="' + animationClass + ' min-w-[170px] bg-white rounded-2xl p-3 shadow-sm flex-shrink-0 relative border border-primary/5" data-open-product="' +
               escapeHtml(product.id) +
               '">' +
               '<div class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">جديد</div>' +
@@ -412,6 +444,9 @@
             }
             var addId = addButton.getAttribute('data-add-product');
             if (addId) {
+              if (window.showAddToCartFeedback) {
+                window.showAddToCartFeedback(addButton, getProductNameById(addId));
+              }
               send('add-item', { id: addId, qty: 1 });
             }
             return;
@@ -438,6 +473,23 @@
           state.offerIndex = (state.offerIndex + 1) % offers.length;
           renderOffers();
         }, 2800);
+      }
+
+      function startNewProductsRotation() {
+        if (newRotationTimer) {
+          window.clearInterval(newRotationTimer);
+          newRotationTimer = null;
+        }
+
+        newRotationTimer = window.setInterval(function () {
+          var products = state.products.filter(function (product) {
+            var flag = product && product.isNew;
+            return flag === true || flag === 1 || flag === 'true';
+          });
+          if (products.length <= 1) return;
+          state.newIndex = (state.newIndex + 1) % products.length;
+          renderNewProducts();
+        }, 3000);
       }
 
       var navLinks = document.querySelectorAll('nav a');
@@ -481,6 +533,7 @@
       bindDynamicActions();
       renderAll();
       startOffersRotation();
+      startNewProductsRotation();
 
       window.addEventListener('message', function (event) {
         if (event.origin !== window.location.origin) return;
