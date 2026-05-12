@@ -10,6 +10,37 @@
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
+  .inline-edit-btn {
+    min-height: 34px;
+    padding-inline: 12px;
+    border-radius: 9999px;
+    white-space: nowrap;
+    line-height: 1;
+    letter-spacing: 0.1px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+  .inline-edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(14, 46, 82, 0.12);
+  }
+  .inline-edit-btn:active {
+    transform: translateY(0);
+  }
+  .inline-edit-btn:disabled {
+    transform: none;
+    box-shadow: none;
+  }
+  .inline-edit-btn .material-symbols-outlined {
+    font-size: 16px;
+    line-height: 1;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+  }
   html,
   body {
     scrollbar-width: none;
@@ -55,33 +86,54 @@
     </section>
 
     <section class="space-y-3">
-      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
-        <p class="text-on-surface-variant text-xs font-bold mb-1">الاسم</p>
+      <div id="name-card" class="bg-surface-card border border-outline rounded-2xl px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between gap-3 mb-1">
+          <p class="text-on-surface-variant text-xs font-bold">الاسم</p>
+          <button
+            id="edit-name-btn"
+            type="button"
+            class="inline-edit-btn inline-flex items-center justify-center gap-1.5 border border-primary/25 bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10"
+          >
+            <span class="material-symbols-outlined">edit</span>
+            <span>تعديل</span>
+          </button>
+        </div>
         <p id="field-name" class="font-bold text-base">-</p>
+        <input id="edit-name" type="text" class="hidden w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35 mt-2" placeholder="اكتب الاسم" disabled />
       </div>
-      <div class="bg-surface-card border border-outline rounded-2xl px-4 py-3">
-        <p class="text-on-surface-variant text-xs font-bold mb-1">رقم الهاتف</p>
+      <div id="phone-card" class="bg-surface-card border border-outline rounded-2xl px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between gap-3 mb-1">
+          <p class="text-on-surface-variant text-xs font-bold">رقم الهاتف</p>
+          <button
+            id="edit-phone-btn"
+            type="button"
+            class="inline-edit-btn inline-flex items-center justify-center gap-1.5 border border-primary/25 bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10"
+          >
+            <span class="material-symbols-outlined">edit</span>
+            <span>تعديل</span>
+          </button>
+        </div>
         <p id="field-phone" class="font-bold text-base" dir="ltr">-</p>
+        <input id="edit-phone" dir="ltr" type="tel" class="hidden w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35 mt-2" placeholder="09xxxxxxxx" disabled />
       </div>
-    </section>
-
-    <section class="bg-surface-card border border-outline rounded-2xl p-4">
-      <h3 class="font-headline font-black text-lg mb-3">تعديل بيانات الحساب</h3>
-      <form id="profile-edit-form" class="space-y-3">
-        <div>
-          <label for="edit-name" class="text-xs font-bold text-on-surface-variant mb-1 block">الاسم</label>
-          <input id="edit-name" type="text" class="w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35" placeholder="اكتب الاسم" />
-        </div>
-        <div>
-          <label for="edit-phone" class="text-xs font-bold text-on-surface-variant mb-1 block">رقم الهاتف</label>
-          <input id="edit-phone" dir="ltr" type="tel" class="w-full rounded-xl border border-outline px-4 py-3 bg-white text-on-surface focus:ring-2 focus:ring-primary/35" placeholder="09xxxxxxxx" />
-        </div>
-        <button id="save-profile-btn" type="submit" class="w-full flex items-center justify-center gap-2 rounded-full bg-primary text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]">
+      <div id="profile-save-actions" class="hidden bg-surface-card border border-outline rounded-2xl p-4 space-y-2">
+        <button
+          id="save-profile-btn"
+          type="button"
+          class="w-full flex items-center justify-center gap-2 rounded-full bg-primary text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]"
+        >
           <span class="material-symbols-outlined">save</span>
-          <span>حفظ التعديلات</span>
+          <span id="save-profile-label">حفظ التغييرات</span>
         </button>
-      </form>
-      <p id="profile-save-hint" class="text-xs text-on-surface-variant mt-2"></p>
+        <button
+          id="cancel-edit-profile-btn"
+          type="button"
+          class="w-full rounded-full border border-outline text-on-surface-variant font-black py-3 transition hover:opacity-90 active:scale-[0.98]"
+        >
+          إلغاء
+        </button>
+        <p id="profile-save-hint" class="text-xs text-on-surface-variant"></p>
+      </div>
     </section>
 
     <section class="bg-surface-card border border-outline rounded-2xl p-4">
@@ -123,14 +175,24 @@
     var state = {
       waitingLogout: false,
       waitingSave: false,
+      editingField: null,
       user: null,
       saveTimeoutId: null,
     };
 
     var notificationsButton = document.querySelector('[data-notification-button]');
-    var editForm = document.getElementById('profile-edit-form');
+    var nameCard = document.getElementById('name-card');
+    var phoneCard = document.getElementById('phone-card');
+    var fieldNameNode = document.getElementById('field-name');
+    var fieldPhoneNode = document.getElementById('field-phone');
     var editNameInput = document.getElementById('edit-name');
     var editPhoneInput = document.getElementById('edit-phone');
+    var editNameButton = document.getElementById('edit-name-btn');
+    var editPhoneButton = document.getElementById('edit-phone-btn');
+    var saveActionsNode = document.getElementById('profile-save-actions');
+    var saveButton = document.getElementById('save-profile-btn');
+    var saveButtonLabel = document.getElementById('save-profile-label');
+    var cancelEditButton = document.getElementById('cancel-edit-profile-btn');
     var saveHintNode = document.getElementById('profile-save-hint');
 
     function toArabicNumber(value) {
@@ -178,6 +240,116 @@
       saveHintNode.classList.toggle('text-on-surface-variant', !isError);
     }
 
+    function isFieldEditing(field) {
+      return state.editingField === field;
+    }
+
+    function normalizeNameForInput(name) {
+      var clean = String(name || '').trim();
+      return clean === 'مستخدم' ? '' : clean;
+    }
+
+    function normalizePhoneForInput(phone) {
+      var clean = String(phone || '').trim();
+      return clean === '-' ? '' : clean;
+    }
+
+    function syncFieldButtons() {
+      var editingName = isFieldEditing('name');
+      var editingPhone = isFieldEditing('phone');
+
+      if (editNameButton) {
+        editNameButton.disabled = state.waitingSave;
+        editNameButton.classList.toggle('opacity-70', state.waitingSave);
+        editNameButton.classList.toggle('cursor-not-allowed', state.waitingSave);
+        editNameButton.classList.toggle('bg-primary', editingName);
+        editNameButton.classList.toggle('text-white', editingName);
+        editNameButton.classList.toggle('border-primary', editingName);
+        editNameButton.classList.toggle('bg-primary/5', !editingName);
+        editNameButton.classList.toggle('text-primary', !editingName);
+        editNameButton.classList.toggle('border-primary/25', !editingName);
+        var nameLabel = editNameButton.querySelector('span:last-child');
+        if (nameLabel) nameLabel.textContent = editingName ? 'قيد التعديل' : 'تعديل';
+      }
+
+      if (editPhoneButton) {
+        editPhoneButton.disabled = state.waitingSave;
+        editPhoneButton.classList.toggle('opacity-70', state.waitingSave);
+        editPhoneButton.classList.toggle('cursor-not-allowed', state.waitingSave);
+        editPhoneButton.classList.toggle('bg-primary', editingPhone);
+        editPhoneButton.classList.toggle('text-white', editingPhone);
+        editPhoneButton.classList.toggle('border-primary', editingPhone);
+        editPhoneButton.classList.toggle('bg-primary/5', !editingPhone);
+        editPhoneButton.classList.toggle('text-primary', !editingPhone);
+        editPhoneButton.classList.toggle('border-primary/25', !editingPhone);
+        var phoneLabel = editPhoneButton.querySelector('span:last-child');
+        if (phoneLabel) phoneLabel.textContent = editingPhone ? 'قيد التعديل' : 'تعديل';
+      }
+
+      if (nameCard) {
+        nameCard.classList.toggle('border-primary/40', editingName);
+        nameCard.classList.toggle('border-outline', !editingName);
+      }
+
+      if (phoneCard) {
+        phoneCard.classList.toggle('border-primary/40', editingPhone);
+        phoneCard.classList.toggle('border-outline', !editingPhone);
+      }
+
+      if (saveActionsNode) {
+        saveActionsNode.classList.toggle('hidden', !state.editingField);
+      }
+
+      if (saveButton) {
+        saveButton.disabled = state.waitingSave;
+        saveButton.classList.toggle('opacity-70', state.waitingSave);
+        saveButton.classList.toggle('cursor-not-allowed', state.waitingSave);
+      }
+
+      if (cancelEditButton) {
+        cancelEditButton.disabled = state.waitingSave;
+        cancelEditButton.classList.toggle('opacity-70', state.waitingSave);
+        cancelEditButton.classList.toggle('cursor-not-allowed', state.waitingSave);
+      }
+
+      if (saveButtonLabel) {
+        saveButtonLabel.textContent = state.waitingSave ? 'جاري الحفظ...' : 'حفظ التغييرات';
+      }
+    }
+
+    function setEditingField(field) {
+      state.editingField = field === 'name' || field === 'phone' ? field : null;
+      var editingName = isFieldEditing('name');
+      var editingPhone = isFieldEditing('phone');
+
+      if (fieldNameNode) fieldNameNode.classList.toggle('hidden', editingName);
+      if (fieldPhoneNode) fieldPhoneNode.classList.toggle('hidden', editingPhone);
+
+      if (editNameInput) {
+        editNameInput.disabled = !editingName;
+        editNameInput.classList.toggle('hidden', !editingName);
+      }
+
+      if (editPhoneInput) {
+        editPhoneInput.disabled = !editingPhone;
+        editPhoneInput.classList.toggle('hidden', !editingPhone);
+      }
+
+      if (state.user && !state.waitingSave) {
+        var baseName = normalizeNameForInput(state.user.name);
+        var basePhone = normalizePhoneForInput(state.user.phone);
+
+        if (editingName && editNameInput) editNameInput.value = baseName;
+        if (editingPhone && editPhoneInput) editPhoneInput.value = basePhone;
+        if (!state.editingField) {
+          if (editNameInput) editNameInput.value = baseName;
+          if (editPhoneInput) editPhoneInput.value = basePhone;
+        }
+      }
+
+      syncFieldButtons();
+    }
+
     function setUserData(user) {
       state.user = user && typeof user === 'object'
         ? {
@@ -192,19 +364,17 @@
 
       var title = document.getElementById('user-name');
       var welcome = document.getElementById('user-welcome');
-      var fieldName = document.getElementById('field-name');
-      var fieldPhone = document.getElementById('field-phone');
       var avatarNode = document.getElementById('user-avatar');
 
       if (title) title.textContent = name;
       if (welcome) welcome.textContent = 'مرحباً ' + name + '.';
-      if (fieldName) fieldName.textContent = name;
-      if (fieldPhone) fieldPhone.textContent = phone;
+      if (fieldNameNode) fieldNameNode.textContent = name;
+      if (fieldPhoneNode) fieldPhoneNode.textContent = phone;
       if (avatarNode) avatarNode.textContent = userInitial(name);
 
-      if (!state.waitingSave) {
-        if (editNameInput) editNameInput.value = name === 'مستخدم' ? '' : name;
-        if (editPhoneInput) editPhoneInput.value = phone === '-' ? '' : phone;
+      if (!state.waitingSave && !state.editingField) {
+        if (editNameInput) editNameInput.value = normalizeNameForInput(name);
+        if (editPhoneInput) editPhoneInput.value = normalizePhoneForInput(phone);
       }
     }
 
@@ -224,16 +394,7 @@
 
     function setSaveLoading(isLoading) {
       state.waitingSave = Boolean(isLoading);
-      var button = document.getElementById('save-profile-btn');
-      if (!button) return;
-
-      button.disabled = state.waitingSave;
-      button.classList.toggle('opacity-70', state.waitingSave);
-      button.classList.toggle('cursor-not-allowed', state.waitingSave);
-      var label = button.querySelector('span:last-child');
-      if (label) {
-        label.textContent = state.waitingSave ? 'جاري الحفظ...' : 'حفظ التعديلات';
-      }
+      syncFieldButtons();
     }
 
     function clearPendingSaveTimeout() {
@@ -277,47 +438,101 @@
       });
     }
 
-    if (editForm) {
-      editForm.addEventListener('submit', function (event) {
-        event.preventDefault();
+    function submitProfileChanges() {
+      if (!state.editingField) {
+        setSaveHint('اختر الحقل الذي تريد تعديله أولاً.', true);
+        return;
+      }
+      if (state.waitingSave) return;
+      if (!state.user) {
+        showStitchAlert('تعذر قراءة بيانات المستخدم الحالية.');
+        return;
+      }
+
+      var currentName = normalizeNameForInput(state.user.name);
+      var currentPhone = normalizePhoneForInput(state.user.phone);
+      var nextName = currentName;
+      var nextPhone = currentPhone;
+
+      if (state.editingField === 'name') {
+        nextName = String(editNameInput && editNameInput.value ? editNameInput.value : '').trim();
+      }
+
+      if (state.editingField === 'phone') {
+        nextPhone = String(editPhoneInput && editPhoneInput.value ? editPhoneInput.value : '').trim();
+      }
+
+      if (state.editingField === 'name' && !nextName) {
+        setSaveHint('الاسم مطلوب.', true);
+        showStitchAlert('الاسم مطلوب.');
+        return;
+      }
+
+      if (state.editingField === 'phone' && !nextPhone) {
+        setSaveHint('رقم الهاتف مطلوب.', true);
+        showStitchAlert('رقم الهاتف مطلوب.');
+        return;
+      }
+
+      var changedName = nextName !== currentName;
+      var changedPhone = nextPhone !== currentPhone;
+
+      if (!changedName && !changedPhone) {
+        setSaveHint('لا توجد تعديلات جديدة لحفظها.', false);
+        showStitchAlert('لا توجد تعديلات جديدة لحفظها.');
+        return;
+      }
+
+      var updatePayload = {};
+      if (changedName) updatePayload.name = nextName;
+      if (changedPhone) updatePayload.phone = nextPhone;
+
+      setSaveLoading(true);
+      setSaveHint('جاري حفظ التعديلات...', false);
+      send('profile-update', updatePayload);
+
+      clearPendingSaveTimeout();
+      state.saveTimeoutId = window.setTimeout(function () {
+        setSaveLoading(false);
+        setSaveHint('انتهت مهلة الحفظ. حاول مرة أخرى.', true);
+      }, 7000);
+    }
+
+    if (editNameButton) {
+      editNameButton.addEventListener('click', function () {
         if (state.waitingSave) return;
-        if (!state.user) {
-          showStitchAlert('تعذر قراءة بيانات المستخدم الحالية.');
-          return;
+        setEditingField('name');
+        setSaveHint('', false);
+        if (editNameInput) {
+          editNameInput.focus();
+          editNameInput.setSelectionRange(editNameInput.value.length, editNameInput.value.length);
         }
+      });
+    }
 
-        var nextName = String(editNameInput && editNameInput.value ? editNameInput.value : '').trim();
-        var nextPhone = String(editPhoneInput && editPhoneInput.value ? editPhoneInput.value : '').trim();
-
-        if (!nextName) {
-          setSaveHint('الاسم مطلوب.', true);
-          showStitchAlert('الاسم مطلوب.');
-          return;
+    if (editPhoneButton) {
+      editPhoneButton.addEventListener('click', function () {
+        if (state.waitingSave) return;
+        setEditingField('phone');
+        setSaveHint('', false);
+        if (editPhoneInput) {
+          editPhoneInput.focus();
+          editPhoneInput.setSelectionRange(editPhoneInput.value.length, editPhoneInput.value.length);
         }
+      });
+    }
 
-        if (!nextPhone) {
-          setSaveHint('رقم الهاتف مطلوب.', true);
-          showStitchAlert('رقم الهاتف مطلوب.');
-          return;
-        }
+    if (saveButton) {
+      saveButton.addEventListener('click', function () {
+        submitProfileChanges();
+      });
+    }
 
-        var currentName = String(state.user.name || '').trim();
-        var currentPhone = String(state.user.phone || '').trim();
-        if (nextName === currentName && nextPhone === currentPhone) {
-          setSaveHint('لا توجد تعديلات جديدة لحفظها.', false);
-          showStitchAlert('لا توجد تعديلات جديدة لحفظها.');
-          return;
-        }
-
-        setSaveLoading(true);
-        setSaveHint('جاري حفظ التعديلات...', false);
-        send('profile-update', { name: nextName, phone: nextPhone });
-
-        clearPendingSaveTimeout();
-        state.saveTimeoutId = window.setTimeout(function () {
-          setSaveLoading(false);
-          setSaveHint('انتهت مهلة الحفظ. حاول مرة أخرى.', true);
-        }, 7000);
+    if (cancelEditButton) {
+      cancelEditButton.addEventListener('click', function () {
+        if (state.waitingSave) return;
+        setEditingField(null);
+        setSaveHint('تم إلغاء وضع التعديل.', false);
       });
     }
 
@@ -344,6 +559,7 @@
         }
 
         setUserData(payload.user || state.user);
+        setEditingField(null);
         setSaveHint('تم حفظ التعديلات بنجاح.', false);
         showStitchAlert('تم تحديث بيانات الحساب بنجاح.', { tone: 'success', icon: 'OK' });
         return;
@@ -365,6 +581,7 @@
       window.AlArnabNotifications.tryBindForegroundMessages();
     }
 
+    setEditingField(null);
     send('request-state');
   })();
 </script>
