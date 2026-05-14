@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef } from 'react'
+﻿import { useEffect, useRef } from 'react'
 import {
   Navigate,
   Route,
@@ -121,10 +121,12 @@ function CartQuickCheckoutButton() {
   const hiddenPaths = ['/welcome', '/login', '/signup', '/cart']
   const isAdminPath = location.pathname.startsWith('/admin')
   const isHiddenPath = hiddenPaths.includes(location.pathname)
+  const isHomePath = location.pathname === '/home'
   const canShow =
     !isBootstrapping &&
     isAuthenticated &&
     user?.role === 'CUSTOMER' &&
+    isHomePath &&
     !isAdminPath &&
     !isHiddenPath &&
     Number(itemCount || 0) > 0
@@ -176,15 +178,39 @@ function BridgeListener() {
     isBootstrapping,
   } = useShop()
 
-  const cartMap = useMemo(() => {
-    return Object.fromEntries(cartItems.map((item) => [item.id, item.qty]))
-  }, [cartItems])
-
   useEffect(() => {
-    function syncState(targetWindow) {
+    function syncState(targetWindow, cartSnapshot = null) {
       if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
         return
       }
+
+      const snapshotItems = Array.isArray(cartSnapshot?.items)
+        ? cartSnapshot.items
+        : cartItems
+      const safeItems = snapshotItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        total: item.total,
+        imageUrl: item.imageUrl,
+        nameEn: item.nameEn,
+        unit: item.unit,
+      }))
+      const fallbackItemCount = safeItems.reduce(
+        (sum, item) => sum + (Number(item.qty) || 0),
+        0,
+      )
+      const fallbackSubtotal = safeItems.reduce(
+        (sum, item) => sum + (Number(item.total) || 0),
+        0,
+      )
+      const nextItemCount = Number.isFinite(Number(cartSnapshot?.itemCount))
+        ? Number(cartSnapshot.itemCount)
+        : fallbackItemCount
+      const nextSubtotal = Number.isFinite(Number(cartSnapshot?.subtotal))
+        ? Number(cartSnapshot.subtotal)
+        : fallbackSubtotal
 
       targetWindow.postMessage(
         {
@@ -195,19 +221,10 @@ function BridgeListener() {
             search: location.search,
           },
           isAuthenticated,
-          itemCount,
-          subtotal,
-          cart: cartMap,
-          items: cartItems.map((item) => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            qty: item.qty,
-            total: item.total,
-            imageUrl: item.imageUrl,
-            nameEn: item.nameEn,
-            unit: item.unit,
-          })),
+          itemCount: nextItemCount,
+          subtotal: nextSubtotal,
+          cart: Object.fromEntries(safeItems.map((item) => [item.id, item.qty])),
+          items: safeItems,
           store: {
             currency: store?.currency || 'SYP',
             usdSarRate: Number(store?.usdSarRate) >= 100 ? Number(store.usdSarRate) : 15000,
@@ -225,7 +242,6 @@ function BridgeListener() {
         window.location.origin,
       )
     }
-
     function syncCurrentFrame() {
       const frame = document.querySelector('.screen-frame')
       if (frame && frame.contentWindow) {
@@ -250,6 +266,15 @@ function BridgeListener() {
       )
     }
 
+    function resolveTargetWindow(sourceWindow) {
+      if (sourceWindow && typeof sourceWindow.postMessage === 'function') {
+        return sourceWindow
+      }
+
+      const frame = document.querySelector('.screen-frame')
+      return frame?.contentWindow || null
+    }
+
     function postAuthPath(authPayload) {
       return roleHomePath(authPayload?.user?.role)
     }
@@ -263,9 +288,10 @@ function BridgeListener() {
       if (!payload || payload.source !== 'stitch-frame') {
         return
       }
+      const targetWindow = resolveTargetWindow(event.source)
 
       if (payload.type === 'request-state') {
-        syncState(event.source)
+        syncState(targetWindow)
         return
       }
 
@@ -279,7 +305,7 @@ function BridgeListener() {
           const authPayload = await login(payload.phone || '')
           navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
-          sendAuthError(event.source, error?.message)
+          sendAuthError(targetWindow, error?.message)
         }
         return
       }
@@ -292,7 +318,7 @@ function BridgeListener() {
           })
           navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
-          sendAuthError(event.source, error?.message)
+          sendAuthError(targetWindow, error?.message)
         }
         return
       }
@@ -302,7 +328,7 @@ function BridgeListener() {
           const authPayload = await loginGuest(payload.name || 'ضيف الأرنب')
           navigate(postAuthPath(authPayload), { replace: true })
         } catch (error) {
-          sendAuthError(event.source, error?.message)
+          sendAuthError(targetWindow, error?.message)
         }
         return
       }
@@ -310,9 +336,18 @@ function BridgeListener() {
       if (payload.type === 'add-item' && typeof payload.id === 'string') {
         try {
           const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 1
-          await addItem(payload.id, Math.max(0.01, qty))
+          const nextCart = await addItem(payload.id, Math.max(0.01, qty))
+          syncState(targetWindow, nextCart)
+          sendFrameMessage(targetWindow, 'add-item-result', {
+            success: true,
+            itemCount: Number(nextCart?.itemCount || 0),
+          })
         } catch (error) {
-          sendAuthError(event.source, error?.message)
+          const message = error?.message || 'تعذر إضافة المنتج إلى السلة.'
+          sendFrameMessage(targetWindow, 'add-item-result', {
+            success: false,
+            message,
+          })
         }
         return
       }
@@ -320,9 +355,10 @@ function BridgeListener() {
       if (payload.type === 'set-qty' && typeof payload.id === 'string') {
         try {
           const qty = Number.isFinite(Number(payload.qty)) ? Number(payload.qty) : 0
-          await setQty(payload.id, Math.max(0, qty))
+          const nextCart = await setQty(payload.id, Math.max(0, qty))
+          syncState(targetWindow, nextCart)
         } catch (error) {
-          sendAuthError(event.source, error?.message)
+          sendAuthError(targetWindow, error?.message)
         }
         return
       }
@@ -333,17 +369,18 @@ function BridgeListener() {
             latitude: payload.latitude,
             longitude: payload.longitude,
             itemNotes: payload.itemNotes,
+            notes: payload.notes,
             alternatePhone: payload.alternatePhone,
           })
 
-          sendFrameMessage(event.source, 'checkout-result', {
+          sendFrameMessage(targetWindow, 'checkout-result', {
             success: true,
             order: checkoutResponse?.order || null,
           })
 
           syncCurrentFrame()
         } catch (error) {
-          sendFrameMessage(event.source, 'checkout-result', {
+          sendFrameMessage(targetWindow, 'checkout-result', {
             success: false,
             message: error?.message || 'تعذر تأكيد الطلب.',
           })
@@ -383,17 +420,17 @@ function BridgeListener() {
             phone: typeof payload.phone === 'string' ? payload.phone : undefined,
           })
 
-          sendFrameMessage(event.source, 'profile-update-result', {
+          sendFrameMessage(targetWindow, 'profile-update-result', {
             success: true,
             user: updatedUser || null,
           })
-          syncState(event.source)
+          syncState(targetWindow)
         } catch (error) {
-          sendFrameMessage(event.source, 'profile-update-result', {
+          sendFrameMessage(targetWindow, 'profile-update-result', {
             success: false,
             message: error?.message || 'تعذر تحديث بيانات الحساب.',
           })
-          sendAuthError(event.source, error?.message)
+          sendAuthError(targetWindow, error?.message)
         }
         return
       }
@@ -449,7 +486,6 @@ function BridgeListener() {
   }, [
     addItem,
     checkoutOrder,
-    cartMap,
     cartItems,
     isAuthenticated,
     isBootstrapping,
@@ -881,4 +917,3 @@ function App() {
 }
 
 export default App
-

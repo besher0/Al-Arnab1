@@ -308,7 +308,9 @@ export function ShopProvider({ children }) {
         qty: cleanQty,
       })
 
-      setCart(normalizeCartResponse(cartResponse))
+      const normalizedCart = normalizeCartResponse(cartResponse)
+      setCart(normalizedCart)
+      return normalizedCart
     },
     [token],
   )
@@ -327,7 +329,9 @@ export function ShopProvider({ children }) {
       }
 
       const cartResponse = await api.cart.setQty(token, cleanId, cleanQty)
-      setCart(normalizeCartResponse(cartResponse))
+      const normalizedCart = normalizeCartResponse(cartResponse)
+      setCart(normalizedCart)
+      return normalizedCart
     },
     [token],
   )
@@ -342,7 +346,7 @@ export function ShopProvider({ children }) {
   }, [token])
 
   const checkoutOrder = useCallback(
-    async ({ latitude, longitude, itemNotes, alternatePhone }) => {
+    async ({ latitude, longitude, itemNotes, notes, alternatePhone }) => {
       if (!token) {
         throw new Error('يجب تسجيل الدخول أولاً.')
       }
@@ -355,10 +359,12 @@ export function ShopProvider({ children }) {
       }
 
       const cleanAlternatePhone = String(alternatePhone || '').trim()
+      const cleanNotes = String(notes || '').trim()
       const checkoutPayload = {
         latitude: lat,
         longitude: lng,
         ...(itemNotes && typeof itemNotes === 'object' ? { itemNotes } : {}),
+        ...(cleanNotes ? { notes: cleanNotes } : {}),
         ...(cleanAlternatePhone ? { alternatePhone: cleanAlternatePhone } : {}),
       }
 

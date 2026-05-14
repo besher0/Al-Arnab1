@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -19,6 +20,8 @@ import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
 @Injectable()
 export class CartService {
+  private readonly logger = new Logger(CartService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
@@ -329,6 +332,7 @@ export class CartService {
 
       const latitude = this.normalizeCoordinate(payload.latitude, -90, 90, 'خط العرض');
       const longitude = this.normalizeCoordinate(payload.longitude, -180, 180, 'خط الطول');
+      const orderNotes = this.normalizeOrderNotes(payload.notes);
       const itemNotes = this.normalizeItemNotes(payload.itemNotes);
 
       const cart = await this.ensureActiveCart(userId);
@@ -373,7 +377,7 @@ export class CartService {
       const deliveryFee = 0;
       const total = roundTo2(subtotal - discountTotal + deliveryFee);
 
-      const createdOrder = await this.prisma.$transaction(async (tx) => {
+      const createdOrderId = await this.prisma.$transaction(async (tx) => {
         for (const item of cartItems) {
           if (!item.product || !item.product.isActive) {
             throw new NotFoundException('أحد المنتجات في السلة غير متوفر.');
@@ -405,7 +409,7 @@ export class CartService {
           },
         });
 
-        const orderNotes = this.buildOrderNotes(cartItems, itemNotes);
+        const checkoutNotes = this.buildCheckoutNotes(cartItems, itemNotes, orderNotes);
         const order = await this.createOrderWithUniqueNumber(tx, {
           userId,
           addressId: address.id,
@@ -414,7 +418,7 @@ export class CartService {
           discountTotal,
           deliveryFee,
           total,
-          notes: orderNotes,
+          notes: checkoutNotes,
         });
 
         await tx.orderItem.createMany({
@@ -442,20 +446,25 @@ export class CartService {
 
         await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-        return tx.order.findUnique({
-          where: { id: order.id },
-          include: {
-            address: true,
-            items: {
-              include: {
-                product: true,
-              },
-              orderBy: {
-                createdAt: 'asc',
-              },
+        return order.id;
+      }, {
+        maxWait: 10_000,
+        timeout: 20_000,
+      });
+
+      const createdOrder = await this.prisma.order.findUnique({
+        where: { id: createdOrderId },
+        include: {
+          address: true,
+          items: {
+            include: {
+              product: true,
+            },
+            orderBy: {
+              createdAt: 'asc',
             },
           },
-        });
+        },
       });
 
       if (!createdOrder) {
@@ -464,18 +473,37 @@ export class CartService {
 
       const orderTotal = decimalToNumber(createdOrder.total);
 
-      await this.notificationsService.notifyOrderCreatedForCustomer(userId, {
-        orderId: createdOrder.id,
-        orderNumber: createdOrder.orderNumber,
-        total: orderTotal,
-      });
-
-      await this.notificationsService.notifyOrderCreatedForAdmins({
-        orderId: createdOrder.id,
-        orderNumber: createdOrder.orderNumber,
-        userId,
-        total: orderTotal,
-      });
+      void Promise.allSettled([
+        this.notificationsService.notifyOrderCreatedForCustomer(userId, {
+          orderId: createdOrder.id,
+          orderNumber: createdOrder.orderNumber,
+          total: orderTotal,
+        }),
+        this.notificationsService.notifyOrderCreatedForAdmins({
+          orderId: createdOrder.id,
+          orderNumber: createdOrder.orderNumber,
+          userId,
+          total: orderTotal,
+        }),
+      ])
+        .then((notificationResults) => {
+          notificationResults.forEach((result, index) => {
+            if (result.status !== 'rejected') return;
+            const scope = index === 0 ? 'customer' : 'admins';
+            this.logger.warn(
+              `Order ${createdOrder.orderNumber} created but ${scope} notification failed: ${
+                result.reason instanceof Error ? result.reason.message : String(result.reason)
+              }`,
+            );
+          });
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Order ${createdOrder.orderNumber} created but notification job failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        });
 
       return {
         order: this.mapUserOrder(createdOrder),
@@ -543,11 +571,23 @@ export class CartService {
     return maybeCode === 'P1001' || maybeCode === 'P1002';
   }
 
+  private isTransientTransactionError(error: unknown): boolean {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+      return false;
+    }
+
+    return error.code === 'P2028' || error.code === 'P2034';
+  }
+
+  private isRetryableDbError(error: unknown): boolean {
+    return this.isDbConnectionError(error) || this.isTransientTransactionError(error);
+  }
+
   private async withDbRetry<T>(operation: () => Promise<T>): Promise<T> {
     try {
       return await operation();
     } catch (error) {
-      if (!this.isDbConnectionError(error)) {
+      if (!this.isRetryableDbError(error)) {
         throw error;
       }
     }
@@ -557,7 +597,7 @@ export class CartService {
     try {
       return await operation();
     } catch (error) {
-      if (this.isDbConnectionError(error)) {
+      if (this.isRetryableDbError(error)) {
         throw new ServiceUnavailableException(
           'تعذر الاتصال بقاعدة البيانات. حاول مرة ثانية بعد ثوانٍ.',
         );
@@ -654,6 +694,11 @@ export class CartService {
     return Number(parsed.toFixed(7));
   }
 
+  private normalizeOrderNotes(raw: unknown): string | null {
+    const normalized = String(raw ?? '').trim();
+    return normalized ? normalized.slice(0, 400) : null;
+  }
+
   private normalizeItemNotes(raw: unknown): Record<string, string> {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
       return {};
@@ -675,34 +720,49 @@ export class CartService {
     return normalized;
   }
 
-  private normalizeOptionalPhone(raw: unknown): string | null {
-    const normalized = String(raw ?? '').trim();
-    return normalized || null;
-  }
-
-  private buildOrderNotes(
+  private buildCheckoutNotes(
     cartItems: Array<{
       productId: string;
       product: { nameAr: string } | null;
     }>,
     itemNotes: Record<string, string>,
-  ) {
-    const baseNote = 'تم إنشاء الطلب من واجهة العميل.';
-    const noteLines: string[] = [];
+    orderNote: string | null,
+  ): string | null {
+    const sections: string[] = [];
 
+    if (orderNote) {
+      sections.push('ملاحظة الطلب:');
+      sections.push(orderNote);
+    }
+
+    const productNoteLines: string[] = [];
     cartItems.forEach((item) => {
       const note = itemNotes[item.productId];
       if (!note) return;
 
       const productName = item.product?.nameAr || 'منتج';
-      noteLines.push(`- ${productName}: ${note}`);
+      productNoteLines.push(`- ${productName}: ${note}`);
     });
 
-    if (!noteLines.length) {
-      return baseNote;
+    if (productNoteLines.length) {
+      if (sections.length) {
+        sections.push('');
+      }
+      sections.push('ملاحظات المنتجات:');
+      sections.push(...productNoteLines);
     }
 
-    return [baseNote, 'ملاحظات المنتجات:', ...noteLines].join('\n');
+    if (!sections.length) {
+      return null;
+    }
+
+    const merged = sections.join('\n');
+    return merged.length > 1200 ? merged.slice(0, 1200) : merged;
+  }
+
+  private normalizeOptionalPhone(raw: unknown): string | null {
+    const normalized = String(raw ?? '').trim();
+    return normalized || null;
   }
 
   private mapUserOrder(order: {

@@ -316,16 +316,22 @@
     }
 
     if (!sdkLoadingPromise) {
-      sdkLoadingPromise = Promise.all([
-        loadScript('https://www.gstatic.com/firebasejs/' + SDK_VERSION + '/firebase-app-compat.js'),
-        loadScript(
+      sdkLoadingPromise = (async function () {
+        // Load in strict order to avoid "Cannot read properties of undefined (reading 'INTERNAL')"
+        // when messaging compat executes before app compat is initialized.
+        await loadScript('https://www.gstatic.com/firebasejs/' + SDK_VERSION + '/firebase-app-compat.js');
+        await loadScript(
           'https://www.gstatic.com/firebasejs/' + SDK_VERSION + '/firebase-messaging-compat.js',
-        ),
-      ]).then(function () {
+        );
+
         if (!window.firebase || !window.firebase.messaging) {
           throw new Error('firebase-sdk-unavailable');
         }
         return window.firebase;
+      })().catch(function (error) {
+        // Allow retry on next attempt.
+        sdkLoadingPromise = null;
+        throw error;
       });
     }
 

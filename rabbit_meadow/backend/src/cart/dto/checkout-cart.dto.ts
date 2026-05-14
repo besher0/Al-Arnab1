@@ -24,6 +24,15 @@ export class CheckoutCartDto {
   longitude!: number;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    const normalized = String(value ?? '').trim();
+    return normalized || undefined;
+  })
+  @IsString()
+  @Length(1, 400)
+  notes?: string;
+
+  @IsOptional()
   @IsObject()
   itemNotes?: Record<string, string>;
 }
