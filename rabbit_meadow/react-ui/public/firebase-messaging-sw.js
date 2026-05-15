@@ -1,7 +1,108 @@
 /* global importScripts, firebase, self */
 
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
+var SHELL_CACHE_NAME = 'al-arnab-shell-v1';
+var SHELL_ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
+var FIREBASE_SDK_READY = false;
+
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches
+      .open(SHELL_CACHE_NAME)
+      .then(function (cache) {
+        return cache.addAll(SHELL_ASSETS);
+      })
+      .catch(function () {
+        return undefined;
+      }),
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches
+      .keys()
+      .then(function (keys) {
+        return Promise.all(
+          keys.map(function (key) {
+            if (key !== SHELL_CACHE_NAME) {
+              return caches.delete(key);
+            }
+            return Promise.resolve(false);
+          }),
+        );
+      })
+      .then(function () {
+        return self.clients.claim();
+      }),
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  if (!event.request || event.request.method !== 'GET') {
+    return;
+  }
+
+  var requestUrl;
+  try {
+    requestUrl = new URL(event.request.url);
+  } catch (_error) {
+    return;
+  }
+
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(function () {
+        return caches.match('/index.html');
+      }),
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then(function (cachedResponse) {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request)
+        .then(function (networkResponse) {
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            networkResponse.type === 'basic'
+          ) {
+            var clonedResponse = networkResponse.clone();
+            caches
+              .open(SHELL_CACHE_NAME)
+              .then(function (cache) {
+                cache.put(event.request, clonedResponse);
+              })
+              .catch(function () {
+                return undefined;
+              });
+          }
+
+          return networkResponse;
+        })
+        .catch(function () {
+          return caches.match('/index.html');
+        });
+    }),
+  );
+});
+
+try {
+  importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
+  FIREBASE_SDK_READY = Boolean(self.firebase && self.firebase.messaging);
+} catch (_error) {
+  FIREBASE_SDK_READY = false;
+}
 
 var configFromEnv = self.FIREBASE_WEB_CONFIG || null;
 
@@ -25,20 +126,20 @@ if (!configFromEnv || !configFromEnv.apiKey) {
   }
 }
 
-if (configFromEnv && configFromEnv.apiKey) {
+if (FIREBASE_SDK_READY && configFromEnv && configFromEnv.apiKey) {
   firebase.initializeApp(configFromEnv);
 }
 
-if (firebase.apps && firebase.apps.length) {
+if (FIREBASE_SDK_READY && firebase.apps && firebase.apps.length) {
   var messaging = firebase.messaging();
   messaging.onBackgroundMessage(function (payload) {
-    var title = (payload && payload.notification && payload.notification.title) || 'إشعار جديد';
+    var title =
+      (payload && payload.notification && payload.notification.title) ||
+      'إشعار جديد';
     var body = (payload && payload.notification && payload.notification.body) || '';
     var icon =
-      (payload &&
-        payload.notification &&
-        payload.notification.icon) ||
-      '/favicon.svg';
+      (payload && payload.notification && payload.notification.icon) ||
+      '/icons/icon-192.png';
 
     self.registration.showNotification(title, {
       body: body,
@@ -47,3 +148,25 @@ if (firebase.apps && firebase.apps.length) {
     });
   });
 }
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clients) {
+      for (var i = 0; i < clients.length; i += 1) {
+        var client = clients[i];
+        if (client && 'focus' in client) {
+          client.postMessage({ source: 'service-worker', type: 'notification-clicked' });
+          return client.focus();
+        }
+      }
+
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('/#/notifications');
+      }
+
+      return undefined;
+    }),
+  );
+});

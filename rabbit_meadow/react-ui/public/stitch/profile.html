@@ -136,6 +136,18 @@
       </div>
     </section>
 
+    <section id="install-app-card" class="bg-surface-card border border-outline rounded-2xl p-4 space-y-2">
+      <button
+        id="install-app-btn"
+        type="button"
+        class="w-full flex items-center justify-center gap-2 rounded-full bg-primary text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]"
+      >
+        <span class="material-symbols-outlined">download</span>
+        <span id="install-app-label">إضافة للشاشة الرئيسية</span>
+      </button>
+      <p id="install-app-hint" class="text-xs text-on-surface-variant"></p>
+    </section>
+
     <section class="bg-surface-card border border-outline rounded-2xl p-4">
       <button id="logout-btn" class="w-full flex items-center justify-center gap-2 rounded-full bg-danger text-white font-black py-3 transition hover:opacity-90 active:scale-[0.98]">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">logout</span>
@@ -175,9 +187,13 @@
     var state = {
       waitingLogout: false,
       waitingSave: false,
+      waitingInstall: false,
       editingField: null,
       user: null,
       saveTimeoutId: null,
+      installStatusTimeoutId: null,
+      canInstallPwa: false,
+      isPwaInstalled: false,
     };
 
     var notificationsButton = document.querySelector('[data-notification-button]');
@@ -194,6 +210,10 @@
     var saveButtonLabel = document.getElementById('save-profile-label');
     var cancelEditButton = document.getElementById('cancel-edit-profile-btn');
     var saveHintNode = document.getElementById('profile-save-hint');
+    var installAppCard = document.getElementById('install-app-card');
+    var installAppButton = document.getElementById('install-app-btn');
+    var installAppLabel = document.getElementById('install-app-label');
+    var installAppHintNode = document.getElementById('install-app-hint');
 
     function toArabicNumber(value) {
       var map = ['\u0660', '\u0661', '\u0662', '\u0663', '\u0664', '\u0665', '\u0666', '\u0667', '\u0668', '\u0669'];
@@ -238,6 +258,13 @@
       saveHintNode.textContent = String(message || '');
       saveHintNode.classList.toggle('text-danger', Boolean(isError));
       saveHintNode.classList.toggle('text-on-surface-variant', !isError);
+    }
+
+    function setInstallHint(message, isError) {
+      if (!installAppHintNode) return;
+      installAppHintNode.textContent = String(message || '');
+      installAppHintNode.classList.toggle('text-danger', Boolean(isError));
+      installAppHintNode.classList.toggle('text-on-surface-variant', !isError);
     }
 
     function isFieldEditing(field) {
@@ -403,6 +430,51 @@
       state.saveTimeoutId = null;
     }
 
+    function clearPendingInstallStatusTimeout() {
+      if (!state.installStatusTimeoutId) return;
+      window.clearTimeout(state.installStatusTimeoutId);
+      state.installStatusTimeoutId = null;
+    }
+
+    function syncInstallUi() {
+      if (!installAppCard || !installAppButton) return;
+
+      var isDisabled =
+        state.waitingInstall || state.isPwaInstalled || !state.canInstallPwa;
+      installAppButton.disabled = isDisabled;
+      installAppButton.classList.toggle('opacity-70', isDisabled);
+      installAppButton.classList.toggle('cursor-not-allowed', isDisabled);
+
+      if (installAppLabel) {
+        if (state.waitingInstall) {
+          installAppLabel.textContent = 'جاري فتح نافذة التثبيت...';
+        } else if (state.isPwaInstalled) {
+          installAppLabel.textContent = 'التطبيق مثبت على جهازك';
+        } else if (!state.canInstallPwa) {
+          installAppLabel.textContent = 'إضافة للشاشة الرئيسية (غير متاح حالياً)';
+        } else {
+          installAppLabel.textContent = 'إضافة للشاشة الرئيسية';
+        }
+      }
+
+      if (state.isPwaInstalled) {
+        setInstallHint('التطبيق مثبت مسبقاً على جهازك.', false);
+      } else if (!state.canInstallPwa) {
+        setInstallHint('إن لم يكن الزر متاحاً، استخدم قائمة المتصفح ثم "إضافة إلى الشاشة الرئيسية".', false);
+      }
+    }
+
+    function setInstallLoading(isLoading) {
+      state.waitingInstall = Boolean(isLoading);
+      syncInstallUi();
+    }
+
+    function applyInstallAvailability(payload) {
+      state.canInstallPwa = Boolean(payload && payload.canInstall);
+      state.isPwaInstalled = Boolean(payload && payload.isInstalled);
+      syncInstallUi();
+    }
+
     var navLinks = document.querySelectorAll('nav a');
     var navRoutes = ['/home', '/categories', '/orders', '/cart', '/profile'];
     navLinks.forEach(function (link, index) {
@@ -536,6 +608,27 @@
       });
     }
 
+    if (installAppButton) {
+      installAppButton.addEventListener('click', function () {
+        if (state.waitingInstall || state.isPwaInstalled) return;
+        if (!state.canInstallPwa) {
+          setInstallHint('خيار التثبيت غير متاح حالياً على هذا المتصفح.', true);
+          send('pwa-install-query');
+          return;
+        }
+
+        setInstallLoading(true);
+        setInstallHint('بانتظار تأكيد التثبيت...', false);
+        send('pwa-install-trigger');
+
+        clearPendingInstallStatusTimeout();
+        state.installStatusTimeoutId = window.setTimeout(function () {
+          setInstallLoading(false);
+          setInstallHint('تعذر فتح نافذة التثبيت الآن. حاول مجدداً.', true);
+        }, 9000);
+      });
+    }
+
     window.addEventListener('message', function (event) {
       if (event.origin !== window.location.origin) return;
       var payload = event.data;
@@ -567,10 +660,52 @@
 
       if (payload.type === 'auth-error') {
         clearPendingSaveTimeout();
+        clearPendingInstallStatusTimeout();
         setSaveLoading(false);
+        setInstallLoading(false);
         setLogoutLoading(false);
         setSaveHint(payload.message || 'تعذر إتمام العملية.', true);
         alert(payload.message || 'تعذر إتمام العملية.');
+        return;
+      }
+
+      if (payload.type === 'pwa-install-availability') {
+        applyInstallAvailability(payload);
+        if (state.canInstallPwa) {
+          setInstallHint('يمكنك تثبيت التطبيق من هذا الزر.', false);
+        } else if (!state.isPwaInstalled) {
+          setInstallHint('إن لم يكن الزر متاحاً، استخدم قائمة المتصفح ثم "إضافة إلى الشاشة الرئيسية".', false);
+        }
+        return;
+      }
+
+      if (payload.type === 'pwa-install-result') {
+        clearPendingInstallStatusTimeout();
+        setInstallLoading(false);
+        applyInstallAvailability(payload);
+
+        if (payload.installed) {
+          setInstallHint('تم تثبيت التطبيق بنجاح.', false);
+          showStitchAlert('تمت إضافة التطبيق إلى الشاشة الرئيسية.', { tone: 'success', icon: 'OK' });
+          return;
+        }
+
+        if (payload.accepted) {
+          setInstallHint('تم قبول التثبيت.', false);
+          return;
+        }
+
+        if (payload.reason === 'not-available') {
+          setInstallHint('خيار التثبيت غير متاح حالياً على هذا الجهاز.', true);
+          return;
+        }
+
+        if (payload.reason === 'dismissed') {
+          setInstallHint('تم إغلاق نافذة التثبيت بدون إكمال.', false);
+          return;
+        }
+
+        setInstallHint(payload.message || 'تعذر إكمال عملية التثبيت.', true);
       }
     });
 
@@ -582,10 +717,10 @@
     }
 
     setEditingField(null);
+    syncInstallUi();
     send('request-state');
+    send('pwa-install-query');
   })();
 </script>
 </body>
 </html>
-
-

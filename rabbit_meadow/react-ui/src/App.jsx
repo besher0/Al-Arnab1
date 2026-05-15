@@ -159,6 +159,8 @@ function BridgeListener() {
   const navigate = useNavigate()
   const location = useLocation()
   const lastOrdersSignatureRef = useRef('')
+  const deferredInstallPromptRef = useRef(null)
+  const isPwaInstalledRef = useRef(false)
   const {
     login,
     register,
@@ -179,6 +181,15 @@ function BridgeListener() {
   } = useShop()
 
   useEffect(() => {
+    function detectStandaloneMode() {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+      )
+    }
+
+    isPwaInstalledRef.current = detectStandaloneMode()
+
     function syncState(targetWindow, cartSnapshot = null) {
       if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
         return
@@ -275,6 +286,14 @@ function BridgeListener() {
       return frame?.contentWindow || null
     }
 
+    function sendPwaAvailability(targetWindow, extraPayload = {}) {
+      sendFrameMessage(targetWindow, 'pwa-install-availability', {
+        canInstall: Boolean(deferredInstallPromptRef.current),
+        isInstalled: Boolean(isPwaInstalledRef.current),
+        ...extraPayload,
+      })
+    }
+
     function postAuthPath(authPayload) {
       return roleHomePath(authPayload?.user?.role)
     }
@@ -292,6 +311,55 @@ function BridgeListener() {
 
       if (payload.type === 'request-state') {
         syncState(targetWindow)
+        return
+      }
+
+      if (payload.type === 'pwa-install-query') {
+        sendPwaAvailability(targetWindow)
+        return
+      }
+
+      if (payload.type === 'pwa-install-trigger') {
+        const promptEvent = deferredInstallPromptRef.current
+
+        if (!promptEvent || isPwaInstalledRef.current) {
+          sendFrameMessage(targetWindow, 'pwa-install-result', {
+            accepted: false,
+            installed: Boolean(isPwaInstalledRef.current),
+            canInstall: false,
+            isInstalled: Boolean(isPwaInstalledRef.current),
+            reason: 'not-available',
+          })
+          return
+        }
+
+        try {
+          await promptEvent.prompt()
+          const choice = await promptEvent.userChoice
+          const accepted = choice?.outcome === 'accepted'
+
+          deferredInstallPromptRef.current = null
+          if (accepted && detectStandaloneMode()) {
+            isPwaInstalledRef.current = true
+          }
+
+          sendFrameMessage(targetWindow, 'pwa-install-result', {
+            accepted,
+            installed: Boolean(isPwaInstalledRef.current),
+            canInstall: false,
+            isInstalled: Boolean(isPwaInstalledRef.current),
+            reason: accepted ? 'accepted' : 'dismissed',
+          })
+        } catch (_error) {
+          sendFrameMessage(targetWindow, 'pwa-install-result', {
+            accepted: false,
+            installed: Boolean(isPwaInstalledRef.current),
+            canInstall: Boolean(deferredInstallPromptRef.current),
+            isInstalled: Boolean(isPwaInstalledRef.current),
+            reason: 'prompt-failed',
+            message: 'تعذر فتح نافذة التثبيت من المتصفح.',
+          })
+        }
         return
       }
 
@@ -441,11 +509,33 @@ function BridgeListener() {
       }
     }
 
+    function onBeforeInstallPrompt(event) {
+      event.preventDefault()
+      deferredInstallPromptRef.current = event
+      sendPwaAvailability(resolveTargetWindow(null))
+    }
+
+    function onAppInstalled() {
+      deferredInstallPromptRef.current = null
+      isPwaInstalledRef.current = true
+      sendPwaAvailability(resolveTargetWindow(null), { installed: true })
+      sendFrameMessage(resolveTargetWindow(null), 'pwa-install-result', {
+        accepted: true,
+        installed: true,
+        canInstall: false,
+        isInstalled: true,
+        reason: 'installed',
+      })
+    }
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+    window.addEventListener('appinstalled', onAppInstalled)
     window.addEventListener('message', onMessage)
 
     const frame = document.querySelector('.screen-frame')
     function onFrameLoad() {
       syncCurrentFrame()
+      sendPwaAvailability(resolveTargetWindow(null))
     }
 
     if (frame) {
@@ -468,11 +558,17 @@ function BridgeListener() {
 
     if (!isBootstrapping) {
       syncCurrentFrame()
+      sendPwaAvailability(resolveTargetWindow(null))
     }
     const delayedSync = window.setTimeout(syncCurrentFrame, 120)
     const lateSync = window.setTimeout(syncCurrentFrame, 420)
+    const delayedInstallSync = window.setTimeout(() => {
+      sendPwaAvailability(resolveTargetWindow(null))
+    }, 800)
 
     return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', onAppInstalled)
       window.removeEventListener('message', onMessage)
       if (frame) {
         frame.removeEventListener('load', onFrameLoad)
@@ -482,6 +578,7 @@ function BridgeListener() {
       document.removeEventListener('visibilitychange', onVisibilityChange)
       window.clearTimeout(delayedSync)
       window.clearTimeout(lateSync)
+      window.clearTimeout(delayedInstallSync)
     }
   }, [
     addItem,
