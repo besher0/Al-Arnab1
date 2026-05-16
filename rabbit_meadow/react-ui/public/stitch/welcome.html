@@ -1,150 +1,173 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&amp;family=Almarai:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/stitch/tailwind/welcome.css" />
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Almarai', sans-serif;
-            background-color: #FFFFFF;
-        }
-        .organic-shape {
-            border-radius: 3rem 1rem 3rem 1rem;
-        }
-        .signature-glow {
-            background: linear-gradient(135deg, #87CEEB 0%, #1A365D 100%);
-        }
-    </style>
-<style>
-    body {
-      min-height: 100dvh;
-    }
-  </style>
-<style>
-    html,
-    body {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    html::-webkit-scrollbar,
-    body::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-    }
-  </style>
-  <script src="/stitch/stitch-alert.js"></script>
-</head>
-<body class="bg-background text-on-background h-screen flex flex-col overflow-hidden">
-<!-- Top App Bar -->
-<header class="w-full bg-white/80 backdrop-blur-3xl flex justify-between items-center px-6 py-4">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[#87CEEB] text-2xl">pets</span>
-<span class="text-2xl font-bold text-[#1A365D] font-tajawal">الأرنب</span>
-</div>
-</header>
-<main class="flex-1 flex flex-col items-center justify-center px-6 py-3">
-<!-- Hero Visual Section -->
-<div class="relative w-full max-w-52 md:max-w-60 aspect-square mb-5">
-<!-- Organic Background Layers -->
-<div class="absolute inset-0 bg-[#87CEEB]/10 organic-shape opacity-40"></div>
-<div class="absolute inset-0 bg-[#F0F8FF] organic-shape opacity-60"></div>
-<!-- Main Illustration -->
-<div class="relative z-10 w-full h-full organic-shape overflow-hidden shadow-xl shadow-[#1A365D]/5">
-<img alt="Festive shopping" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFu8s5BD-CgakpDGa6xBwK6oXKxb6MaaBpQoBTeQgda82RawnWdvbeHwZgR3Tpj-d8VbsyEBPeh7sZyrUzlglxG-G6z5uuod8IotDkw6Tkd7MPQgy5B2cv02ucmYxVnrHRMStaMA7DsR4u6DGk1drVmJdWeHYJzyZMQTvMdPCI_FIIFe1rc3-3dacz4qZwwz9CWzS8shj9uWD5AUiIMewNVRcG33lWhky-1IXS5MbKZo5akVOvfhiHrxCqdmdWWV0GseN1KUL8AwVT"/>
-</div>
-</div>
-<!-- Content Section -->
-<div class="text-center space-y-3 max-w-md">
-<h1 class="text-2xl md:text-3xl font-extrabold font-tajawal text-[#1A365D] tracking-tight">
-                بضغطة زر بوصل طلبك لباب بيتك ! 
-            </h1>
-<p class="text-sm md:text-base font-almarai text-[#718096] leading-relaxed">
-                انشئ حساب جديد الآن وأبدا الطلب
-            </p>
-</div>
-</main>
-<!-- Bottom Action Section -->
-<div class="w-full px-6 pb-4 pt-2 space-y-3 bg-gradient-to-t from-white via-white to-transparent">
-<!-- Primary Actions -->
-<div id="welcome-action-buttons" class="flex flex-col gap-2 w-full max-w-sm mx-auto">
-<button class="signature-glow text-white py-3 px-8 rounded-full text-base font-bold font-tajawal shadow-lg hover:opacity-90 active:scale-95 transition-all">
-                إنشاء حساب
-            </button>
-<button class="bg-white border-2 border-[#87CEEB] text-[#1A365D] py-3 px-8 rounded-full text-base font-bold font-tajawal hover:bg-[#F0F8FF] transition-colors">
-                تسجيل الدخول
-            </button>
-<button class="text-[#718096] py-2 px-8 rounded-full text-base font-medium font-tajawal hover:text-[#1A365D] transition-colors">
-                التصفح كزائر
-            </button>
-</div>
-</div>
-<script>
-  (function () {
-    function send(type, payload) {
-      window.parent.postMessage(
-        Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
-        window.location.origin,
-      );
-    }
-
-    var guestButtons = [];
-    var isGuestPending = false;
-
-    function setGuestPending(nextPending) {
-      isGuestPending = Boolean(nextPending);
-      guestButtons.forEach(function (button) {
-        button.disabled = isGuestPending;
-        button.style.opacity = isGuestPending ? '0.6' : '';
-        button.style.pointerEvents = isGuestPending ? 'none' : '';
-      });
-    }
-
-    function loginAsGuest() {
-      if (isGuestPending) {
-        return;
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Almarai:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/stitch/tailwind/welcome.css" />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
 
-      setGuestPending(true);
-      send('auth-guest', { name: 'ضيف الأرنب' });
-    }
+      body {
+        font-family: 'Almarai', sans-serif;
+        background-color: #ffffff;
+        min-height: 100dvh;
+      }
 
-    var actionButtons = document.querySelectorAll('#welcome-action-buttons button');
-    if (actionButtons[0]) {
-      actionButtons[0].addEventListener('click', function () {
-        send('navigate', { to: '/signup' });
-      });
-    }
-    if (actionButtons[1]) {
-      actionButtons[1].addEventListener('click', function () {
-        send('navigate', { to: '/login' });
-      });
-    }
-    if (actionButtons[2]) {
-      guestButtons.push(actionButtons[2]);
-      actionButtons[2].addEventListener('click', function () {
-        loginAsGuest();
-      });
-    }
+      html,
+      body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
 
-    window.addEventListener('message', function (event) {
-      if (event.origin !== window.location.origin) return;
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
 
-      var payload = event.data;
-      if (!payload || payload.source !== 'react-shell') return;
-      if (payload.type !== 'auth-error') return;
+      .signature-glow {
+        background: linear-gradient(135deg, #87ceeb 0%, #1a365d 100%);
+      }
 
-      setGuestPending(false);
-      alert(payload.message || 'تعذر تسجيل الدخول كزائر.');
-    });
-  })();
-</script>
-</body></html>
+      .brand-logo {
+        object-fit: cover;
+        object-position: 22% 34%;
+      }
 
+      .welcome-hero {
+        width: min(100%, 17.2rem);
+        aspect-ratio: 4 / 3;
+      }
 
+      .organic-shape {
+        border-radius: 2.2rem 1rem 2.2rem 1rem;
+      }
+
+      .welcome-actions {
+        width: min(100%, 22rem);
+      }
+    </style>
+    <script src="/stitch/stitch-alert.js"></script>
+  </head>
+  <body class="bg-background text-on-background min-h-screen flex flex-col overflow-hidden">
+    <header class="w-full bg-white/80 backdrop-blur-3xl flex justify-between items-center px-4 py-3 border-b border-[#87CEEB]/20">
+      <div class="flex items-center gap-2.5">
+        <img
+          alt="الأرنب للتسوق"
+          class="brand-logo w-8 h-8 rounded-lg shadow-sm border border-[#87CEEB]/35"
+          src="/stitch/assets/arnab-logo.jpg"
+        />
+        <span class="text-xl font-bold text-[#1A365D] font-tajawal">الأرنب</span>
+      </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-5 pt-3 pb-2">
+      <div class="welcome-hero relative mb-4">
+        <div class="absolute inset-0 bg-[#87CEEB]/10 organic-shape opacity-40"></div>
+        <div class="absolute inset-0 bg-[#F0F8FF] organic-shape opacity-60"></div>
+        <div class="relative z-10 w-full h-full organic-shape overflow-hidden shadow-xl shadow-[#1A365D]/5">
+          <img
+            alt="توصيل سريع"
+            class="w-full h-full object-cover select-none pointer-events-none"
+            draggable="false"
+            src="/stitch/assets/delivery-promo-v3.png?v=1"
+          />
+        </div>
+      </div>
+
+      <div class="text-center space-y-2.5 max-w-md">
+        <h1 class="text-2xl md:text-3xl font-extrabold font-tajawal text-[#1A365D] tracking-tight leading-snug">
+          طلبك يوصل لباب بيتك بسرعة
+        </h1>
+        <p class="text-sm md:text-base font-almarai text-[#718096] leading-relaxed">
+          عروض يومية، توصيل مضمون، وتجربة شراء مريحة.
+        </p>
+      </div>
+    </main>
+
+    <div class="w-full px-5 pb-4 pt-2 space-y-3 bg-gradient-to-t from-white via-white to-transparent">
+      <div id="welcome-action-buttons" class="welcome-actions flex flex-col gap-2.5 mx-auto">
+        <button class="signature-glow text-white py-3 px-8 rounded-full text-base font-bold font-tajawal shadow-lg hover:opacity-90 active:scale-95 transition-all">
+          إنشاء حساب
+        </button>
+        <button class="bg-white border-2 border-[#87CEEB] text-[#1A365D] py-3 px-8 rounded-full text-base font-bold font-tajawal hover:bg-[#F0F8FF] transition-colors">
+          تسجيل الدخول
+        </button>
+        <button class="text-[#718096] py-2 px-8 rounded-full text-base font-medium font-tajawal hover:text-[#1A365D] transition-colors">
+          التصفح كزائر
+        </button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        function send(type, payload) {
+          window.parent.postMessage(
+            Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+            window.location.origin,
+          )
+        }
+
+        var guestButtons = []
+        var isGuestPending = false
+
+        function setGuestPending(nextPending) {
+          isGuestPending = Boolean(nextPending)
+          guestButtons.forEach(function (button) {
+            button.disabled = isGuestPending
+            button.style.opacity = isGuestPending ? '0.6' : ''
+            button.style.pointerEvents = isGuestPending ? 'none' : ''
+          })
+        }
+
+        function loginAsGuest() {
+          if (isGuestPending) {
+            return
+          }
+
+          setGuestPending(true)
+          send('auth-guest', { name: 'ضيف الأرنب' })
+        }
+
+        var actionButtons = document.querySelectorAll('#welcome-action-buttons button')
+        if (actionButtons[0]) {
+          actionButtons[0].addEventListener('click', function () {
+            send('navigate', { to: '/signup' })
+          })
+        }
+        if (actionButtons[1]) {
+          actionButtons[1].addEventListener('click', function () {
+            send('navigate', { to: '/login' })
+          })
+        }
+        if (actionButtons[2]) {
+          guestButtons.push(actionButtons[2])
+          actionButtons[2].addEventListener('click', function () {
+            loginAsGuest()
+          })
+        }
+
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return
+
+          var payload = event.data
+          if (!payload || payload.source !== 'react-shell') return
+          if (payload.type !== 'auth-error') return
+
+          setGuestPending(false)
+          alert(payload.message || 'تعذر تسجيل الدخول كزائر.')
+        })
+      })()
+    </script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 /* global importScripts, firebase, self */
 
-var SHELL_CACHE_NAME = 'al-arnab-shell-v1';
-var SHELL_ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
+var SHELL_CACHE_NAME = 'al-arnab-shell-v2';
+var SHELL_ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png'];
 var FIREBASE_SDK_READY = false;
 
 self.addEventListener('install', function (event) {

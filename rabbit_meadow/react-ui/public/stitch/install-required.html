@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تثبيت التطبيق</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Almarai:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --brand: #0096d6;
+        --brand-dark: #0f4f87;
+        --bg: #f4fbff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top right, #d6eeff, var(--bg));
+        font-family: 'Almarai', sans-serif;
+        color: #0f2f58;
+        padding: 20px;
+      }
+
+      main {
+        width: min(100%, 420px);
+        border-radius: 26px;
+        background: #ffffff;
+        border: 1px solid #cde7f8;
+        box-shadow: 0 26px 56px rgba(15, 47, 88, 0.18);
+        padding: 20px 18px 22px;
+        text-align: center;
+      }
+
+      .logo {
+        width: min(100%, 240px);
+        border-radius: 18px;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.2);
+        margin-bottom: 14px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-family: 'Tajawal', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 900;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.7;
+        font-size: 0.95rem;
+      }
+
+      .actions {
+        margin-top: 16px;
+        display: grid;
+        gap: 10px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        height: 48px;
+        font-family: 'Tajawal', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      #install-button {
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #ffffff;
+      }
+
+      #refresh-button {
+        background: #ffffff;
+        border: 1px solid #b9dff3;
+        color: var(--brand-dark);
+      }
+
+      #install-button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      #status {
+        margin-top: 11px;
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: #386185;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/stitch/assets/arnab-logo.jpg" alt="الأرنب للتسوق" class="logo" />
+      <h1>نزّل الموقع على موبايلك قبل المتابعة</h1>
+      <p>
+        إنشاء الحساب تم بنجاح. الآن لازم تثبّت الموقع على الشاشة الرئيسية، وبعدها افتح
+        الاختصار حتى يكمل الدخول.
+      </p>
+      <div class="actions">
+        <button id="install-button" type="button">نزّل الموقع على موبايلك</button>
+        <button id="refresh-button" type="button">تحقق من التثبيت</button>
+      </div>
+      <p id="status">بانتظار بدء التثبيت...</p>
+    </main>
+
+    <script>
+      ;(function () {
+        var installButton = document.getElementById('install-button')
+        var refreshButton = document.getElementById('refresh-button')
+        var statusNode = document.getElementById('status')
+        var state = {
+          waiting: false,
+          canInstall: false,
+          isInstalled: false,
+        }
+
+        function send(type, payload) {
+          window.parent.postMessage(
+            Object.assign({ source: 'stitch-frame', type: type }, payload || {}),
+            window.location.origin,
+          )
+        }
+
+        function setStatus(message, isError) {
+          if (!statusNode) return
+          statusNode.textContent = String(message || '')
+          statusNode.style.color = isError ? '#b91c1c' : '#386185'
+        }
+
+        function syncUi() {
+          if (!installButton) return
+
+          if (state.isInstalled) {
+            installButton.disabled = true
+            installButton.textContent = 'التطبيق مثبت على جهازك'
+            setStatus('تم التثبيت. لحظات ويتم فتح الصفحة الرئيسية...', false)
+            return
+          }
+
+          installButton.disabled = state.waiting
+          installButton.textContent = state.waiting
+            ? 'جاري فتح نافذة التثبيت...'
+            : 'نزّل الموقع على موبايلك'
+        }
+
+        function handleInstallCheck(payload) {
+          state.canInstall = Boolean(payload && payload.canInstall)
+          state.isInstalled = Boolean(payload && payload.isInstalled)
+          state.waiting = false
+          syncUi()
+
+          if (state.isInstalled) {
+            window.setTimeout(function () {
+              send('navigate', { to: '/home' })
+            }, 420)
+            return
+          }
+
+          if (!state.canInstall) {
+            setStatus(
+              'إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر "إضافة إلى الشاشة الرئيسية".',
+              false,
+            )
+            return
+          }
+
+          setStatus('التثبيت متاح. اضغط زر التثبيت للمتابعة.', false)
+        }
+
+        if (installButton) {
+          installButton.addEventListener('click', function () {
+            if (state.waiting || state.isInstalled) return
+            if (!state.canInstall) {
+              setStatus(
+                'خيار التثبيت غير متاح الآن. جرّب من قائمة المتصفح > إضافة إلى الشاشة الرئيسية.',
+                true,
+              )
+              send('pwa-install-query')
+              return
+            }
+
+            state.waiting = true
+            syncUi()
+            setStatus('بانتظار تأكيدك من نافذة التثبيت...', false)
+            send('pwa-install-trigger')
+          })
+        }
+
+        if (refreshButton) {
+          refreshButton.addEventListener('click', function () {
+            send('pwa-install-query')
+          })
+        }
+
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return
+
+          var payload = event.data
+          if (!payload || payload.source !== 'react-shell') return
+
+          if (payload.type === 'pwa-install-availability') {
+            handleInstallCheck(payload)
+            return
+          }
+
+          if (payload.type === 'pwa-install-result') {
+            state.waiting = false
+            state.canInstall = Boolean(payload.canInstall)
+            state.isInstalled = Boolean(payload.installed || payload.isInstalled)
+            syncUi()
+
+            if (state.isInstalled) {
+              setStatus('تم تثبيت التطبيق بنجاح.', false)
+              window.setTimeout(function () {
+                send('navigate', { to: '/home' })
+              }, 420)
+              return
+            }
+
+            if (payload.reason === 'dismissed') {
+              setStatus('تم إغلاق نافذة التثبيت بدون إكمال العملية.', false)
+              return
+            }
+
+            if (payload.reason === 'not-available') {
+              setStatus(
+                'التثبيت غير متاح الآن. استخدم قائمة المتصفح لإضافة الموقع للشاشة الرئيسية.',
+                true,
+              )
+              return
+            }
+
+            setStatus(payload.message || 'تعذر إكمال التثبيت. أعد المحاولة.', true)
+          }
+        })
+
+        syncUi()
+        send('pwa-install-query')
+      })()
+    </script>
+  </body>
+</html>

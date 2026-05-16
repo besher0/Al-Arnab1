@@ -2,14 +2,53 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png?v=20260516b" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#87CEEB" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png?v=20260516b" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الارنب</title>
   </head>
   <body>
+    <script>
+      ;(function () {
+        var host = window.location.hostname || ''
+        var isLocalHost = host === 'localhost' || host === '127.0.0.1'
+        if (!isLocalHost) return
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (registrations) {
+              return Promise.all(
+                registrations.map(function (registration) {
+                  return registration.unregister().catch(function () {
+                    return false
+                  })
+                }),
+              )
+            })
+            .catch(function () {
+              return undefined
+            })
+        }
+
+        if ('caches' in window) {
+          window.caches
+            .keys()
+            .then(function (keys) {
+              return Promise.all(
+                keys.map(function (key) {
+                  return window.caches.delete(key)
+                }),
+              )
+            })
+            .catch(function () {
+              return undefined
+            })
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

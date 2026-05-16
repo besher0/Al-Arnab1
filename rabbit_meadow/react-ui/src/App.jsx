@@ -9,10 +9,112 @@ import {
 import { ShopProvider, useShop } from './store/ShopContext'
 import './App.css'
 
+const INSTALL_GATE_REQUIRED_KEY_PREFIX = 'al-arnab-install-required:'
+
+function getInstallGateStorageKey(user) {
+  const userId = String(user?.id || '').trim()
+  if (!userId) {
+    return ''
+  }
+
+  return `${INSTALL_GATE_REQUIRED_KEY_PREFIX}${userId}`
+}
+
+function isPwaStandaloneMode() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const mediaMatch =
+    typeof window.matchMedia === 'function'
+      ? window.matchMedia('(display-mode: standalone)').matches
+      : false
+
+  return Boolean(mediaMatch || window.navigator?.standalone === true)
+}
+
+function hasInstallGateRequired(user) {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const key = getInstallGateStorageKey(user)
+  if (!key) {
+    return false
+  }
+
+  try {
+    return window.localStorage.getItem(key) === '1'
+  } catch {
+    return false
+  }
+}
+
+function markInstallGateRequired(user) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const key = getInstallGateStorageKey(user)
+  if (!key) {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(key, '1')
+  } catch {
+    // Ignore storage restrictions.
+  }
+}
+
+function clearInstallGateRequired(user) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const key = getInstallGateStorageKey(user)
+  if (!key) {
+    return
+  }
+
+  try {
+    window.localStorage.removeItem(key)
+  } catch {
+    // Ignore storage restrictions.
+  }
+}
+
+function shouldShowInstallRequired(user) {
+  return (
+    user?.role === 'CUSTOMER' &&
+    hasInstallGateRequired(user) &&
+    !isPwaStandaloneMode()
+  )
+}
+
+function clearInstallGateIfStandalone(user) {
+  if (user?.role !== 'CUSTOMER') {
+    return
+  }
+
+  if (!isPwaStandaloneMode()) {
+    return
+  }
+
+  clearInstallGateRequired(user)
+}
+
 function LoadingShell() {
   return (
     <section className="single-view">
-      <div className="frame-wrap loading-shell">جاري تحميل البيانات...</div>
+      <div className="frame-wrap loading-shell loading-shell--brand">
+        <img
+          src="/stitch/assets/arnab-logo.jpg"
+          alt="الأرنب للتسوق"
+          className="loading-shell__logo"
+        />
+        <p className="loading-shell__message">يتم الاتصال بالانترنت يرجى الانتظار قليلا</p>
+      </div>
     </section>
   )
 }
@@ -33,6 +135,10 @@ function ProtectedRoute({ children }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
+  }
+
+  if (shouldShowInstallRequired(user)) {
+    return <Navigate to="/install-required" replace />
   }
 
   if (user?.role !== 'CUSTOMER') {
@@ -56,7 +162,32 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
+    if (shouldShowInstallRequired(user)) {
+      return <Navigate to="/install-required" replace />
+    }
     return <Navigate to={roleHomePath(user?.role)} replace />
+  }
+
+  return children
+}
+
+function InstallRequiredRoute({ children }) {
+  const { isAuthenticated, isBootstrapping, user } = useShop()
+
+  if (isBootstrapping) {
+    return <LoadingShell />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/welcome" replace />
+  }
+
+  if (user?.role !== 'CUSTOMER') {
+    return <Navigate to={roleHomePath(user?.role)} replace />
+  }
+
+  if (!shouldShowInstallRequired(user)) {
+    return <Navigate to="/home" replace />
   }
 
   return children
@@ -118,7 +249,7 @@ function CartQuickCheckoutButton() {
   const location = useLocation()
   const { isAuthenticated, isBootstrapping, itemCount, user } = useShop()
 
-  const hiddenPaths = ['/welcome', '/login', '/signup', '/cart']
+  const hiddenPaths = ['/welcome', '/login', '/signup', '/cart', '/install-required']
   const isAdminPath = location.pathname.startsWith('/admin')
   const isHiddenPath = hiddenPaths.includes(location.pathname)
   const isHomePath = location.pathname === '/home'
@@ -181,14 +312,7 @@ function BridgeListener() {
   } = useShop()
 
   useEffect(() => {
-    function detectStandaloneMode() {
-      return (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true
-      )
-    }
-
-    isPwaInstalledRef.current = detectStandaloneMode()
+    isPwaInstalledRef.current = isPwaStandaloneMode()
 
     function syncState(targetWindow, cartSnapshot = null) {
       if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
@@ -294,8 +418,35 @@ function BridgeListener() {
       })
     }
 
-    function postAuthPath(authPayload) {
-      return roleHomePath(authPayload?.user?.role)
+    function releaseInstallGateIfInstalled() {
+      if (!user || user.role !== 'CUSTOMER') {
+        return
+      }
+
+      isPwaInstalledRef.current = isPwaStandaloneMode()
+      if (!isPwaInstalledRef.current) {
+        return
+      }
+
+      const hadGate = hasInstallGateRequired(user)
+      clearInstallGateRequired(user)
+      if (hadGate && location.pathname === '/install-required') {
+        navigate('/home', { replace: true })
+      }
+    }
+
+    function postAuthPath(authPayload, source = 'login') {
+      const authUser = authPayload?.user
+      if (authUser?.role !== 'CUSTOMER') {
+        return roleHomePath(authUser?.role)
+      }
+
+      if (source === 'register' && !isPwaStandaloneMode()) {
+        markInstallGateRequired(authUser)
+      }
+
+      clearInstallGateIfStandalone(authUser)
+      return shouldShowInstallRequired(authUser) ? '/install-required' : '/home'
     }
 
     async function onMessage(event) {
@@ -339,7 +490,7 @@ function BridgeListener() {
           const accepted = choice?.outcome === 'accepted'
 
           deferredInstallPromptRef.current = null
-          if (accepted && detectStandaloneMode()) {
+          if (accepted && isPwaStandaloneMode()) {
             isPwaInstalledRef.current = true
           }
 
@@ -371,7 +522,7 @@ function BridgeListener() {
       if (payload.type === 'auth-login') {
         try {
           const authPayload = await login(payload.phone || '')
-          navigate(postAuthPath(authPayload), { replace: true })
+          navigate(postAuthPath(authPayload, 'login'), { replace: true })
         } catch (error) {
           sendAuthError(targetWindow, error?.message)
         }
@@ -384,7 +535,7 @@ function BridgeListener() {
             name: payload.name || '',
             phone: payload.phone || '',
           })
-          navigate(postAuthPath(authPayload), { replace: true })
+          navigate(postAuthPath(authPayload, 'register'), { replace: true })
         } catch (error) {
           sendAuthError(targetWindow, error?.message)
         }
@@ -394,7 +545,7 @@ function BridgeListener() {
       if (payload.type === 'auth-guest') {
         try {
           const authPayload = await loginGuest(payload.name || 'ضيف الأرنب')
-          navigate(postAuthPath(authPayload), { replace: true })
+          navigate(postAuthPath(authPayload, 'guest'), { replace: true })
         } catch (error) {
           sendAuthError(targetWindow, error?.message)
         }
@@ -518,6 +669,7 @@ function BridgeListener() {
     function onAppInstalled() {
       deferredInstallPromptRef.current = null
       isPwaInstalledRef.current = true
+      clearInstallGateRequired(user)
       sendPwaAvailability(resolveTargetWindow(null), { installed: true })
       sendFrameMessage(resolveTargetWindow(null), 'pwa-install-result', {
         accepted: true,
@@ -526,6 +678,9 @@ function BridgeListener() {
         isInstalled: true,
         reason: 'installed',
       })
+      if (location.pathname === '/install-required') {
+        navigate('/home', { replace: true })
+      }
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
@@ -534,6 +689,7 @@ function BridgeListener() {
 
     const frame = document.querySelector('.screen-frame')
     function onFrameLoad() {
+      releaseInstallGateIfInstalled()
       syncCurrentFrame()
       sendPwaAvailability(resolveTargetWindow(null))
     }
@@ -543,11 +699,13 @@ function BridgeListener() {
     }
 
     function onWindowFocus() {
+      releaseInstallGateIfInstalled()
       syncCurrentFrame()
     }
 
     function onVisibilityChange() {
       if (document.visibilityState === 'visible') {
+        releaseInstallGateIfInstalled()
         syncCurrentFrame()
       }
     }
@@ -557,6 +715,7 @@ function BridgeListener() {
     document.addEventListener('visibilitychange', onVisibilityChange)
 
     if (!isBootstrapping) {
+      releaseInstallGateIfInstalled()
       syncCurrentFrame()
       sendPwaAvailability(resolveTargetWindow(null))
     }
@@ -678,7 +837,7 @@ function BridgeListener() {
 }
 
 function AppRoutes() {
-  const authUiVersion = '20260502-1'
+  const authUiVersion = '20260516-3'
 
   return (
     <>
@@ -709,6 +868,17 @@ function AppRoutes() {
             <PublicOnlyRoute>
               <FramePage src={`/stitch/signup.html?v=${authUiVersion}`} title="signup" />
             </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/install-required"
+          element={
+            <InstallRequiredRoute>
+              <FramePage
+                src={`/stitch/install-required.html?v=${authUiVersion}`}
+                title="install-required"
+              />
+            </InstallRequiredRoute>
           }
         />
 

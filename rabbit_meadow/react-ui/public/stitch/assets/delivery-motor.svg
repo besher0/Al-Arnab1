@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Delivery Scooter</title>
+  <desc id="desc">Friendly delivery scooter with promo message encouraging orders.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7fcff" />
+      <stop offset="55%" stop-color="#e2f4ff" />
+      <stop offset="100%" stop-color="#cdeeff" />
+    </linearGradient>
+    <linearGradient id="road" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b7def3" />
+      <stop offset="50%" stop-color="#9fd2ee" />
+      <stop offset="100%" stop-color="#b7def3" />
+    </linearGradient>
+    <linearGradient id="scooterMain" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00a7ef" />
+      <stop offset="100%" stop-color="#0971b8" />
+    </linearGradient>
+    <linearGradient id="scooterDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#124b81" />
+      <stop offset="100%" stop-color="#0a3257" />
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0c3d65" flood-opacity="0.22" />
+    </filter>
+  </defs>
+
+  <rect width="960" height="720" rx="54" fill="url(#bg)" />
+  <ellipse cx="480" cy="618" rx="386" ry="34" fill="url(#road)" />
+
+  <g opacity="0.28" stroke="#7bc5ec" stroke-width="12" stroke-linecap="round">
+    <path d="M112 206h120" />
+    <path d="M78 258h88" />
+    <path d="M150 304h68" />
+  </g>
+
+  <g transform="translate(180 128)" filter="url(#softShadow)">
+    <circle cx="168" cy="384" r="86" fill="#163c63" />
+    <circle cx="168" cy="384" r="52" fill="#f8fdff" />
+    <circle cx="566" cy="384" r="86" fill="#163c63" />
+    <circle cx="566" cy="384" r="52" fill="#f8fdff" />
+
+    <path d="M138 218h196l96 108h136" fill="none" stroke="url(#scooterMain)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M194 246 262 384m190-90-44 90m58-146h80" fill="none" stroke="url(#scooterDark)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+
+    <path d="M300 286h252c28 0 50 22 50 50v20h-362z" fill="url(#scooterDark)" />
+    <path d="M236 326h344c16 0 30 14 30 30v26H230v-26c0-16 13-30 30-30z" fill="url(#scooterMain)" />
+    <path d="M238 334h346" stroke="#d9f4ff" stroke-opacity="0.6" stroke-width="6" />
+
+    <rect x="358" y="108" width="176" height="142" rx="18" fill="#22aeea" />
+    <rect x="378" y="80" width="136" height="40" rx="12" fill="#0f4e86" />
+    <path d="M382 100h128" stroke="#f6fdff" stroke-width="8" stroke-linecap="round" />
+
+    <circle cx="260" cy="190" r="30" fill="#1aa8e8" />
+    <path d="M260 162v-42m0 0h78" fill="none" stroke="#0f4e86" stroke-width="12" stroke-linecap="round" />
+    <circle cx="260" cy="190" r="11" fill="#f5fbff" />
+
+    <circle cx="334" cy="130" r="34" fill="#ffd8b6" />
+    <path d="M304 127c10-22 48-34 72-8l-6 20h-64z" fill="#0f4e86" />
+    <path d="M332 170h50l26 52" fill="none" stroke="#0f4e86" stroke-width="14" stroke-linecap="round" />
+
+    <rect x="520" y="286" width="102" height="32" rx="12" fill="#00a6ef" />
+    <rect x="444" y="154" width="40" height="26" rx="8" fill="#ffffff" fill-opacity="0.8" />
+    <rect x="494" y="154" width="24" height="26" rx="8" fill="#ffffff" fill-opacity="0.8" />
+  </g>
+
+  <g transform="translate(610 90)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="278" height="166" rx="28" fill="#ffffff" stroke="#8fceef" stroke-width="4" />
+    <text x="139" y="72" text-anchor="middle" fill="#0f4f87" font-size="44" font-weight="800" font-family="Tajawal, Almarai, sans-serif">توصيل سريع</text>
+    <text x="139" y="122" text-anchor="middle" fill="#00a7ef" font-size="42" font-weight="900" font-family="Tajawal, Almarai, sans-serif">اطلب الآن</text>
+  </g>
+
+  <g opacity="0.35" stroke="#6cbce7" stroke-width="10" stroke-linecap="round">
+    <path d="M126 496h86" />
+    <path d="M90 548h124" />
+  </g>
+</svg>
