@@ -10,6 +10,7 @@ import { ShopProvider, useShop } from './store/ShopContext'
 import './App.css'
 
 const INSTALL_GATE_REQUIRED_KEY_PREFIX = 'al-arnab-install-required:'
+const PWA_INSTALLED_HINT_KEY = 'al-arnab-pwa-installed-hint'
 
 function getInstallGateStorageKey(user) {
   const userId = String(user?.id || '').trim()
@@ -31,6 +32,38 @@ function isPwaStandaloneMode() {
       : false
 
   return Boolean(mediaMatch || window.navigator?.standalone === true)
+}
+
+function readPwaInstalledHint() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    return window.localStorage.getItem(PWA_INSTALLED_HINT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writePwaInstalledHint(isInstalled) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    if (isInstalled) {
+      window.localStorage.setItem(PWA_INSTALLED_HINT_KEY, '1')
+    } else {
+      window.localStorage.removeItem(PWA_INSTALLED_HINT_KEY)
+    }
+  } catch {
+    // Ignore storage restrictions.
+  }
+}
+
+function isPwaInstalledForGate() {
+  return isPwaStandaloneMode() || readPwaInstalledHint()
 }
 
 function hasInstallGateRequired(user) {
@@ -88,16 +121,16 @@ function shouldShowInstallRequired(user) {
   return (
     user?.role === 'CUSTOMER' &&
     hasInstallGateRequired(user) &&
-    !isPwaStandaloneMode()
+    !isPwaInstalledForGate()
   )
 }
 
-function clearInstallGateIfStandalone(user) {
+function clearInstallGateIfInstalled(user) {
   if (user?.role !== 'CUSTOMER') {
     return
   }
 
-  if (!isPwaStandaloneMode()) {
+  if (!isPwaInstalledForGate()) {
     return
   }
 
@@ -312,7 +345,10 @@ function BridgeListener() {
   } = useShop()
 
   useEffect(() => {
-    isPwaInstalledRef.current = isPwaStandaloneMode()
+    if (isPwaStandaloneMode()) {
+      writePwaInstalledHint(true)
+    }
+    isPwaInstalledRef.current = isPwaInstalledForGate()
 
     function syncState(targetWindow, cartSnapshot = null) {
       if (!targetWindow || typeof targetWindow.postMessage !== 'function') {
@@ -411,8 +447,12 @@ function BridgeListener() {
     }
 
     function sendPwaAvailability(targetWindow, extraPayload = {}) {
+      const hasDeferredPrompt = Boolean(deferredInstallPromptRef.current)
+      const knownInstalled = isPwaInstalledForGate()
+      isPwaInstalledRef.current = hasDeferredPrompt ? false : knownInstalled
+
       sendFrameMessage(targetWindow, 'pwa-install-availability', {
-        canInstall: Boolean(deferredInstallPromptRef.current),
+        canInstall: hasDeferredPrompt,
         isInstalled: Boolean(isPwaInstalledRef.current),
         ...extraPayload,
       })
@@ -423,7 +463,7 @@ function BridgeListener() {
         return
       }
 
-      isPwaInstalledRef.current = isPwaStandaloneMode()
+      isPwaInstalledRef.current = isPwaInstalledForGate()
       if (!isPwaInstalledRef.current) {
         return
       }
@@ -441,11 +481,16 @@ function BridgeListener() {
         return roleHomePath(authUser?.role)
       }
 
-      if (source === 'register' && !isPwaStandaloneMode()) {
-        markInstallGateRequired(authUser)
+      if (source === 'register') {
+        const canPromptInstall = Boolean(deferredInstallPromptRef.current)
+        if (!isPwaInstalledForGate() && canPromptInstall) {
+          markInstallGateRequired(authUser)
+        } else {
+          clearInstallGateRequired(authUser)
+        }
       }
 
-      clearInstallGateIfStandalone(authUser)
+      clearInstallGateIfInstalled(authUser)
       return shouldShowInstallRequired(authUser) ? '/install-required' : '/home'
     }
 
@@ -492,6 +537,7 @@ function BridgeListener() {
           deferredInstallPromptRef.current = null
           if (accepted && isPwaStandaloneMode()) {
             isPwaInstalledRef.current = true
+            writePwaInstalledHint(true)
           }
 
           sendFrameMessage(targetWindow, 'pwa-install-result', {
@@ -663,12 +709,15 @@ function BridgeListener() {
     function onBeforeInstallPrompt(event) {
       event.preventDefault()
       deferredInstallPromptRef.current = event
+      isPwaInstalledRef.current = false
+      writePwaInstalledHint(false)
       sendPwaAvailability(resolveTargetWindow(null))
     }
 
     function onAppInstalled() {
       deferredInstallPromptRef.current = null
       isPwaInstalledRef.current = true
+      writePwaInstalledHint(true)
       clearInstallGateRequired(user)
       sendPwaAvailability(resolveTargetWindow(null), { installed: true })
       sendFrameMessage(resolveTargetWindow(null), 'pwa-install-result', {
@@ -837,7 +886,7 @@ function BridgeListener() {
 }
 
 function AppRoutes() {
-  const authUiVersion = '20260516-3'
+  const authUiVersion = '20260517-4'
 
   return (
     <>

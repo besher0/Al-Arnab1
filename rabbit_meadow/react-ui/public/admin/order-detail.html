@@ -102,7 +102,14 @@
             <button class="pill" data-prep-minutes="30" type="button">30 دقيقة</button>
           </div>
           <div class="stack" style="gap: 6px">
-            <label class="label" for="delivery-assignee-select">اختر مندوب الدليفري</label>
+            <div class="row" style="align-items: center">
+              <label class="label" for="delivery-assignee-select" style="margin: 0">اختر مندوب الدليفري</label>
+              <span
+                class="material-symbols-outlined"
+                style="color: #67bbde; font-size: 31px; line-height: 1"
+                title="اختيار مندوب التوصيل"
+              >local_shipping</span>
+            </div>
             <select id="delivery-assignee-select" class="select-field">
               <option value="">جاري تحميل المناديب...</option>
             </select>
@@ -248,6 +255,65 @@
           return (phone ? name + ' - ' + phone : name) + ' (طلبات حالية: ' + activeOrdersText + ')';
         }
 
+        function extractDeliveryRank(delivery, fallbackIndex) {
+          var nameText = String((delivery && delivery.name) || '');
+          var nameMatch = nameText.match(/\d+/);
+          if (nameMatch) {
+            var rankFromName = Number(nameMatch[0]);
+            if (Number.isFinite(rankFromName)) {
+              return rankFromName;
+            }
+          }
+
+          var phoneText = String((delivery && delivery.phone) || '');
+          var phoneMatch = phoneText.match(/(\d+)$/);
+          if (phoneMatch) {
+            var rankFromPhone = Number(phoneMatch[1]);
+            if (Number.isFinite(rankFromPhone)) {
+              return rankFromPhone;
+            }
+          }
+
+          return 1000 + Number(fallbackIndex || 0);
+        }
+
+        function normalizeDeliveryAssignees(entries) {
+          return (Array.isArray(entries) ? entries : [])
+            .map(function (delivery, index) {
+              return {
+                id: String((delivery && delivery.id) || ''),
+                name: String((delivery && delivery.name) || ''),
+                phone: String((delivery && delivery.phone) || ''),
+                activeOrdersCount: Number((delivery && delivery.activeOrdersCount) || 0),
+                __rank: extractDeliveryRank(delivery, index),
+                __index: index,
+              };
+            })
+            .filter(function (delivery) {
+              return Boolean(delivery.id);
+            })
+            .sort(function (a, b) {
+              if (a.__rank !== b.__rank) {
+                return a.__rank - b.__rank;
+              }
+
+              var byName = a.name.localeCompare(b.name, 'ar');
+              if (byName !== 0) {
+                return byName;
+              }
+
+              return a.__index - b.__index;
+            })
+            .map(function (delivery) {
+              return {
+                id: delivery.id,
+                name: delivery.name,
+                phone: delivery.phone,
+                activeOrdersCount: delivery.activeOrdersCount,
+              };
+            });
+        }
+
         function renderDeliveryAssignees() {
           if (!deliverySelectNode) return;
 
@@ -312,9 +378,7 @@
             byId[id].activeOrdersCount += 1;
           });
 
-          return list.sort(function (a, b) {
-            return Number(a.activeOrdersCount || 0) - Number(b.activeOrdersCount || 0);
-          });
+          return normalizeDeliveryAssignees(list);
         }
 
         async function loadDeliveryAssignees() {
@@ -326,7 +390,7 @@
 
           try {
             var response = await window.AdminBridge.apiRequest('/admin/deliveries');
-            deliveryAssignees = Array.isArray(response) ? response : [];
+            deliveryAssignees = normalizeDeliveryAssignees(response);
             renderDeliveryAssignees();
             if (!deliveryAssignees.length) {
               setDeliveryFeedback('لا يوجد مندوب دليفري نشط حالياً.', true);

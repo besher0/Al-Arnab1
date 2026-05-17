@@ -62,8 +62,6 @@
 
       .actions {
         margin-top: 16px;
-        display: grid;
-        gap: 10px;
       }
 
       button {
@@ -81,12 +79,6 @@
         color: #ffffff;
       }
 
-      #refresh-button {
-        background: #ffffff;
-        border: 1px solid #b9dff3;
-        color: var(--brand-dark);
-      }
-
       #install-button:disabled {
         opacity: 0.65;
         cursor: not-allowed;
@@ -97,33 +89,30 @@
         font-size: 0.86rem;
         font-weight: 700;
         color: #386185;
+        min-height: 22px;
       }
     </style>
   </head>
   <body>
     <main>
       <img src="/stitch/assets/arnab-logo.jpg" alt="الأرنب للتسوق" class="logo" />
-      <h1>نزّل الموقع على موبايلك قبل المتابعة</h1>
-      <p>
-        إنشاء الحساب تم بنجاح. الآن لازم تثبّت الموقع على الشاشة الرئيسية، وبعدها افتح
-        الاختصار حتى يكمل الدخول.
-      </p>
+      <h1>تم انشاء الحساب بنجاح ! 🙂</h1>
+      <p>الرجاء إضافة التطبيق إلى شاشتك الرئيسية الآن لتتمكن من استعراض المنتجات والطلب بكل سهولة وسرعة في المرة القادمة .</p>
       <div class="actions">
-        <button id="install-button" type="button">نزّل الموقع على موبايلك</button>
-        <button id="refresh-button" type="button">تحقق من التثبيت</button>
+        <button id="install-button" type="button">إضافة للشاشة الرئيسية</button>
       </div>
-      <p id="status">بانتظار بدء التثبيت...</p>
+      <p id="status"></p>
     </main>
 
     <script>
       ;(function () {
         var installButton = document.getElementById('install-button')
-        var refreshButton = document.getElementById('refresh-button')
         var statusNode = document.getElementById('status')
         var state = {
           waiting: false,
           canInstall: false,
           isInstalled: false,
+          installFallbackTimeoutId: null,
         }
 
         function send(type, payload) {
@@ -139,6 +128,22 @@
           statusNode.style.color = isError ? '#b91c1c' : '#386185'
         }
 
+        function clearInstallFallbackTimeout() {
+          if (!state.installFallbackTimeoutId) return
+          window.clearTimeout(state.installFallbackTimeoutId)
+          state.installFallbackTimeoutId = null
+        }
+
+        function requestInstallAvailability() {
+          send('pwa-install-query')
+        }
+
+        function queueInstallAutoCheck() {
+          window.setTimeout(requestInstallAvailability, 1000)
+          window.setTimeout(requestInstallAvailability, 2300)
+          window.setTimeout(requestInstallAvailability, 3600)
+        }
+
         function syncUi() {
           if (!installButton) return
 
@@ -152,7 +157,7 @@
           installButton.disabled = state.waiting
           installButton.textContent = state.waiting
             ? 'جاري فتح نافذة التثبيت...'
-            : 'نزّل الموقع على موبايلك'
+            : 'إضافة للشاشة الرئيسية'
         }
 
         function handleInstallCheck(payload) {
@@ -176,7 +181,7 @@
             return
           }
 
-          setStatus('التثبيت متاح. اضغط زر التثبيت للمتابعة.', false)
+          setStatus('', false)
         }
 
         if (installButton) {
@@ -187,7 +192,7 @@
                 'خيار التثبيت غير متاح الآن. جرّب من قائمة المتصفح > إضافة إلى الشاشة الرئيسية.',
                 true,
               )
-              send('pwa-install-query')
+              requestInstallAvailability()
               return
             }
 
@@ -195,12 +200,12 @@
             syncUi()
             setStatus('بانتظار تأكيدك من نافذة التثبيت...', false)
             send('pwa-install-trigger')
-          })
-        }
-
-        if (refreshButton) {
-          refreshButton.addEventListener('click', function () {
-            send('pwa-install-query')
+            clearInstallFallbackTimeout()
+            state.installFallbackTimeoutId = window.setTimeout(function () {
+              state.waiting = false
+              syncUi()
+              queueInstallAutoCheck()
+            }, 10000)
           })
         }
 
@@ -216,6 +221,7 @@
           }
 
           if (payload.type === 'pwa-install-result') {
+            clearInstallFallbackTimeout()
             state.waiting = false
             state.canInstall = Boolean(payload.canInstall)
             state.isInstalled = Boolean(payload.installed || payload.isInstalled)
@@ -227,6 +233,10 @@
                 send('navigate', { to: '/home' })
               }, 420)
               return
+            }
+
+            if (payload.accepted) {
+              queueInstallAutoCheck()
             }
 
             if (payload.reason === 'dismissed') {
@@ -247,7 +257,14 @@
         })
 
         syncUi()
-        send('pwa-install-query')
+        requestInstallAvailability()
+        window.addEventListener('focus', requestInstallAvailability)
+        window.addEventListener('pageshow', requestInstallAvailability)
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') {
+            requestInstallAvailability()
+          }
+        })
       })()
     </script>
   </body>

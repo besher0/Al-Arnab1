@@ -959,11 +959,39 @@ export class AdminService {
         activeOrdersCount: loadByDeliveryId.get(deliveryUser.id) || 0,
       }))
       .sort((a, b) => {
-        if (a.activeOrdersCount !== b.activeOrdersCount) {
-          return a.activeOrdersCount - b.activeOrdersCount;
+        const rankA = this.resolveDeliverySortRank(a.name, a.phone);
+        const rankB = this.resolveDeliverySortRank(b.name, b.phone);
+
+        if (rankA !== rankB) {
+          return rankA - rankB;
+        }
+
+        const byName = a.name.localeCompare(b.name, 'ar');
+        if (byName !== 0) {
+          return byName;
         }
 
         return a.createdAt.getTime() - b.createdAt.getTime();
       });
+  }
+
+  private resolveDeliverySortRank(name: string, phone: string): number {
+    const nameMatch = String(name || '').match(/\d+/);
+    if (nameMatch) {
+      const parsedNameRank = Number(nameMatch[0]);
+      if (Number.isFinite(parsedNameRank)) {
+        return parsedNameRank;
+      }
+    }
+
+    const phoneMatch = String(phone || '').match(/(\d+)$/);
+    if (phoneMatch) {
+      const parsedPhoneRank = Number(phoneMatch[1]);
+      if (Number.isFinite(parsedPhoneRank)) {
+        return parsedPhoneRank;
+      }
+    }
+
+    return Number.MAX_SAFE_INTEGER;
   }
 }

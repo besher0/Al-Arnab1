@@ -120,6 +120,14 @@
 
         var guestButtons = []
         var isGuestPending = false
+        var guestPendingTimeoutId = null
+        var defaultGuestLabel = 'التصفح كزائر'
+
+        function clearGuestPendingTimeout() {
+          if (!guestPendingTimeoutId) return
+          window.clearTimeout(guestPendingTimeoutId)
+          guestPendingTimeoutId = null
+        }
 
         function setGuestPending(nextPending) {
           isGuestPending = Boolean(nextPending)
@@ -127,6 +135,7 @@
             button.disabled = isGuestPending
             button.style.opacity = isGuestPending ? '0.6' : ''
             button.style.pointerEvents = isGuestPending ? 'none' : ''
+            button.textContent = isGuestPending ? 'جاري الدخول كزائر...' : defaultGuestLabel
           })
         }
 
@@ -136,6 +145,11 @@
           }
 
           setGuestPending(true)
+          clearGuestPendingTimeout()
+          guestPendingTimeoutId = window.setTimeout(function () {
+            setGuestPending(false)
+            alert('تأخر تسجيل الدخول كزائر. تحقق من اتصال السيرفر ثم أعد المحاولة.')
+          }, 10000)
           send('auth-guest', { name: 'ضيف الأرنب' })
         }
 
@@ -164,6 +178,7 @@
           if (!payload || payload.source !== 'react-shell') return
           if (payload.type !== 'auth-error') return
 
+          clearGuestPendingTimeout()
           setGuestPending(false)
           alert(payload.message || 'تعذر تسجيل الدخول كزائر.')
         })
