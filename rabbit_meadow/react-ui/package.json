@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "tw:stitch": "node ./tailwind/stitch/build-stitch-tailwind.mjs",
     "predev": "npm run tw:stitch",
-    "prebuild": "npm run tw:stitch"
+    "prebuild": "npm run tw:stitch",
+    "postbuild": "node ./scripts/generate-seo.mjs"
   },
   "dependencies": {
     "react": "^19.2.4",
