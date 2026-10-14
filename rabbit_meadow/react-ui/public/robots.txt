@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-# Add a Sitemap directive once the production canonical domain is confirmed.
+Sitemap: https://al-arnab1.onrender.com/sitemap.xml
