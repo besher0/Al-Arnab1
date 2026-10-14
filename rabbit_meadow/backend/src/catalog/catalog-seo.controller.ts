@@ -51,8 +51,7 @@ export class CatalogSeoController {
     const structured = JSON.stringify({
       '@context': 'https://schema.org', '@type': 'Product', name: product.nameAr,
       description, ...(image ? { image: [image] } : {}),
-      sku: product.sku || product.id, url: canonical,
-      offers: { '@type': 'Offer', url: canonical, priceCurrency: 'SYP', price: String(product.sellPrice), availability: Number(product.stockQty) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' },
+      sku: product.sku || product.id, url: canonical
     }).replace(/</g, '\\u003c');
     return this.page(res, product.nameAr, description, canonical, image, structured,
       '<h1>' + escapeHtml(product.nameAr) + '</h1><p>' + escapeHtml(description) + '</p>' +
