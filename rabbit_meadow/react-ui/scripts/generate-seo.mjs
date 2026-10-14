@@ -30,7 +30,7 @@ const save = async (path, content) => {
 }
 async function getCatalog() {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 45000)
+  const timeout = setTimeout(() => controller.abort(), 90000)
   try {
     const response = await fetch(API + '/api/catalog/bootstrap', { signal: controller.signal })
     if (!response.ok) throw new Error('Catalog HTTP ' + response.status)
