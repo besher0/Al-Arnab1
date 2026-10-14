@@ -62,7 +62,7 @@ async function main() {
     const price = Number(p.price)
     const currency = store?.currency || 'SYP'
     const offer = Number.isFinite(price) && price >= 0 && /^[A-Z]{3}$/.test(currency)
-      ? { offers: { '@type': 'Offer', price, priceCurrency: currency, availability: 'https://schema.org/InStock', url: link(path) } } : {}
+      ? { offers: { '@type': 'Offer', price, priceCurrency: currency, url: link(path) } } : {}
     const data = { '@context': 'https://schema.org', '@type': 'Product', name: p.name, description, url: link(path), ...(image ? { image: [image] } : {}), ...offer }
     const body = `<h1>${esc(p.name)}</h1>${image ? `<img src="${esc(image)}" alt="${esc(p.name)}" width="420">` : ''}<p>${esc(description)}</p>${Number.isFinite(price) ? `<p>السعر: ${esc(price)} ${esc(currency)}</p>` : ''}<p><a href="/#/product/${slug(p.id)}">فتح المنتج والطلب من المتجر</a></p>`
     await save('products/' + slug(p.id) + '/index.html', page({ title: p.name, description, url: link(path), image, body, data }))
