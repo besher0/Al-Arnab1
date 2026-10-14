@@ -2,7 +2,8 @@ import { Controller, Get, Param, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 
-const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://al-arnab1.onrender.com').replace(/\/$/, '');
+const SITE_URL = (process.env.SEO_PUBLIC_ORIGIN || 'https://al-arnab-backend.onrender.com').replace(/\/$/, '');
+const STOREFRONT_URL = (process.env.PUBLIC_SITE_URL || 'https://al-arnab1.onrender.com').replace(/\/$/, '');
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 })[char] || char);
@@ -29,7 +30,7 @@ export class CatalogSeoController {
       (date ? '<lastmod>' + date.toISOString() + '</lastmod>' : '') + '</url>';
     const xml = '<?xml version="1.0" encoding="UTF-8"?>' +
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-      entry('/') +
+      '' +
       categories.map((c) => entry('/api/seo/category/' + encodeURIComponent(c.slug), c.updatedAt)).join('') +
       products.map((p) => entry('/api/seo/product/' + encodeURIComponent(p.id), p.updatedAt)).join('') +
       '</urlset>';
@@ -56,7 +57,7 @@ export class CatalogSeoController {
     return this.page(res, product.nameAr, description, canonical, image, structured,
       '<h1>' + escapeHtml(product.nameAr) + '</h1><p>' + escapeHtml(description) + '</p>' +
       (image ? '<img width="320" loading="lazy" alt="' + escapeHtml(product.nameAr) + '" src="' + escapeHtml(image) + '">' : '') +
-      '<p><a href="' + escapeHtml(SITE_URL + '/#/product/' + encodeURIComponent(product.id)) + '">عرض المنتج في المتجر</a></p>');
+      '<p><a href="' + escapeHtml(STOREFRONT_URL + '/#/product/' + encodeURIComponent(product.id)) + '">عرض المنتج في المتجر</a></p>');
   }
 
   @Get('category/:slug')
